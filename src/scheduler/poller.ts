@@ -85,6 +85,14 @@ export class Poller {
     return this.runCycle(true)
   }
 
+  /** Polls one account right away; skips rejected tokens and accounts already being fetched. */
+  refreshOne(id: string): Promise<void> {
+    const target = this.opts.targets().find((t) => t.id === id)
+    const status = this.getState(id).status
+    if (!target || status === 'disabled' || status === 'fetching') return Promise.resolve()
+    return this.pollOne(target)
+  }
+
   private scheduleNext() {
     if (!this._running) return
     this.timer = setTimeout(() => void this.runCycle(false), this.intervalMs)

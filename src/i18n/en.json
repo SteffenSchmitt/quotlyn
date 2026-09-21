@@ -56,7 +56,8 @@
     "claim": {
       "seven_day_overage_included": "7 d incl. overage"
     },
-    "binding": "binding: {window}"
+    "binding": "binding: {window}",
+    "refreshAccount": "Poll this account now"
   },
   "lang": {
     "de": "Deutsch",

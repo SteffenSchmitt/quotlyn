@@ -139,6 +139,33 @@ describe('Poller', () => {
     p.stop()
   })
 
+  it('refreshOne polls a single account immediately, ignoring its pause', async () => {
+    responder = (t) => (t.id === 'a' ? { ok: false, status: 429, error: 'rate_limited' } : ok)
+    const p = make(10_000)
+    p.start()
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(p.getState('a').status).toBe('paused')
+    responder = () => ok
+    await p.refreshOne('a')
+    expect(calls.filter((c) => c.id === 'a')).toHaveLength(2)
+    expect(calls.filter((c) => c.id === 'b')).toHaveLength(1)
+    expect(p.getState('a').status).toBe('ok')
+    p.stop()
+  })
+
+  it('refreshOne skips disabled accounts and accounts already being fetched', async () => {
+    responder = (t) => (t.id === 'b' ? { ok: false, status: 401, error: 'unauthorized' } : ok)
+    const p = make(10_000)
+    p.start()
+    await vi.advanceTimersByTimeAsync(2000)
+    await p.refreshOne('b')
+    expect(calls.filter((c) => c.id === 'b')).toHaveLength(1)
+    responder = () => ok
+    await Promise.all([p.refreshOne('a'), p.refreshOne('a')])
+    expect(calls.filter((c) => c.id === 'a')).toHaveLength(2)
+    p.stop()
+  })
+
   it('setIntervalMs reschedules the next cycle', async () => {
     const p = make(10_000)
     p.start()

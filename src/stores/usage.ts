@@ -153,6 +153,10 @@ export const useUsageStore = defineStore('usage', () => {
     }
   }
 
+  function refreshAccount(id: string): Promise<void> {
+    return ensurePoller().refreshOne(id)
+  }
+
   async function removeAccountData(id: string) {
     watcher.forget(id)
     delete latest[id]
@@ -190,6 +194,7 @@ export const useUsageStore = defineStore('usage', () => {
     start,
     stop,
     refreshNow,
+    refreshAccount,
     removeAccountData,
     resetAccount,
     history,

@@ -26,6 +26,7 @@ const props = withDefaults(
   defineProps<{ account: Account; parsed?: ParsedUsage; state?: AccountPollState; thresholds?: Thresholds; now: number }>(),
   { thresholds: () => DEFAULT_THRESHOLDS },
 )
+const emit = defineEmits<{ refresh: [] }>()
 const { t, te, d } = useI18n()
 const { oneLine } = useWindowLabels()
 
@@ -158,6 +159,19 @@ const bindingWindow = computed(() => {
             : t('dashboard.never')
         }}
       </span>
+      <button
+        type="button"
+        class="mr-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+        :disabled="state?.status === 'fetching' || state?.status === 'disabled'"
+        :aria-label="t('dashboard.refreshAccount')"
+        :title="t('dashboard.refreshAccount')"
+        @click="emit('refresh')"
+      >
+        <svg viewBox="0 0 20 20" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M16.5 8.5A6.5 6.5 0 0 0 4.9 6.1M3.5 11.5a6.5 6.5 0 0 0 11.6 2.4" />
+          <path d="M16.5 3.5v5h-5M3.5 16.5v-5h5" />
+        </svg>
+      </button>
       <StatusDot :status="state?.status" />
       <span class="ml-1.5" :class="state?.status === 'limited' ? 'font-bold text-red-600' : 'text-slate-500'">
         {{ t(`dashboard.state.${state?.status ?? 'idle'}`) }}
