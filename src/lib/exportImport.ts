@@ -58,3 +58,35 @@ export function downloadText(filename: string, text: string, mime = 'text/plain'
   a.remove()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
+
+export interface HistoryImport {
+  snapshots: Array<Omit<UsageSnapshot, 'id'>>
+  /** Account names in the file that match none of the configured accounts; their snapshots are skipped. */
+  unknownAccounts: string[]
+}
+
+/**
+ * Reads a history export (the JSON produced by snapshotsToJson) back into snapshots, mapping the
+ * exported account names onto the configured accounts' ids. Throws on anything that is not such a file.
+ */
+export function parseHistoryExport(text: string, idsByName: Record<string, string>): HistoryImport {
+  const data = JSON.parse(text) as unknown
+  if (!Array.isArray(data)) throw new Error('not_a_history_export')
+  const snapshots: Array<Omit<UsageSnapshot, 'id'>> = []
+  const unknown = new Set<string>()
+  for (const item of data) {
+    const row = item as Record<string, unknown>
+    if (!row || typeof row !== 'object' || typeof row.account !== 'string' || typeof row.fetchedAt !== 'string' || typeof row.ok !== 'boolean') {
+      throw new Error('not_a_history_export')
+    }
+    const accountId = idsByName[row.account]
+    if (!accountId) {
+      unknown.add(row.account)
+      continue
+    }
+    const parsed = row.parsed && typeof row.parsed === 'object' ? (row.parsed as UsageSnapshot['parsed']) : null
+    const error = row.error && typeof row.error === 'object' ? (row.error as UsageSnapshot['error']) : null
+    snapshots.push({ accountId, fetchedAt: row.fetchedAt, ok: row.ok, parsed, error })
+  }
+  return { snapshots, unknownAccounts: [...unknown] }
+}

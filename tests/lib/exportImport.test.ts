@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { UsageSnapshot } from '../../src/storage/historyDb'
-import { snapshotsToCsv, snapshotsToJson } from '../../src/lib/exportImport'
+import { parseHistoryExport, snapshotsToCsv, snapshotsToJson } from '../../src/lib/exportImport'
 
 const okSnap: UsageSnapshot = {
   id: 1,
@@ -51,5 +51,30 @@ describe('snapshotsToJson', () => {
     expect(plain[0].id).toBeUndefined()
     const full = JSON.parse(snapshotsToJson([okSnap], names, true))
     expect(full[0].parsed.raw['anthropic-organization-id']).toBe('org-secret')
+  })
+})
+
+describe('parseHistoryExport', () => {
+  const names = { a: 'Work', b: 'Home' }
+  const exported = snapshotsToJson([okSnap, errSnap], names, false)
+
+  it('maps exported snapshots back onto accounts by name and drops the export-only fields', () => {
+    const r = parseHistoryExport(exported, { Work: 'a', Home: 'b' })
+    expect(r.snapshots).toHaveLength(2)
+    expect(r.snapshots[0]).toMatchObject({ accountId: 'a', fetchedAt: okSnap.fetchedAt, ok: true })
+    expect((r.snapshots[0] as unknown as Record<string, unknown>).account).toBeUndefined()
+    expect(r.snapshots[0]!.parsed?.windows).toEqual(okSnap.parsed!.windows)
+    expect(r.unknownAccounts).toEqual([])
+  })
+
+  it('reports accounts it cannot map and skips their snapshots', () => {
+    const r = parseHistoryExport(exported, { Home: 'b' })
+    expect(r.snapshots).toHaveLength(0)
+    expect(r.unknownAccounts).toEqual(['Work'])
+  })
+
+  it('rejects anything that is not a Quotlyn history export', () => {
+    expect(() => parseHistoryExport('{"foo":1}', {})).toThrow()
+    expect(() => parseHistoryExport('[{"account":"x"}]', {})).toThrow()
   })
 })

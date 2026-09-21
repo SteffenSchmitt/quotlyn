@@ -207,7 +207,15 @@
       "minPoints": "Minimum data points",
       "notify": "Notify when a window is expected to run out within the hour (once per cycle)"
     },
-    "notificationsMacHint": "If macOS shows only “Notification” instead of the text, set “Show previews: Always” for Google Chrome under System Settings › Notifications."
+    "notificationsMacHint": "If macOS shows only “Notification” instead of the text, set “Show previews: Always” for Google Chrome under System Settings › Notifications.",
+    "importHistory": {
+      "title": "Import history",
+      "run": "Import history",
+      "hint": "Takes a JSON history file from the export. Snapshots are matched to accounts by name; timestamps already present are skipped.",
+      "done": "Imported {added} snapshot(s), {skipped} already present.",
+      "unknown": "Unknown accounts skipped: {names}.",
+      "malformed": "This is not a Quotlyn history file."
+    }
   },
   "windows": {
     "session": {

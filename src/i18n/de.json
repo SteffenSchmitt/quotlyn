@@ -207,7 +207,15 @@
       "minPoints": "Mindestens Datenpunkte",
       "notify": "Benachrichtigen, wenn ein Fenster voraussichtlich in unter einer Stunde erschöpft ist (einmal pro Zyklus)"
     },
-    "notificationsMacHint": "Zeigt macOS nur „Mitteilung“ statt des Textes, hilft in den Systemeinstellungen unter Mitteilungen › Google Chrome die Option „Vorschauen einblenden: Immer“."
+    "notificationsMacHint": "Zeigt macOS nur „Mitteilung“ statt des Textes, hilft in den Systemeinstellungen unter Mitteilungen › Google Chrome die Option „Vorschauen einblenden: Immer“.",
+    "importHistory": {
+      "title": "Verlauf importieren",
+      "run": "Verlauf importieren",
+      "hint": "Nimmt eine JSON-Verlaufsdatei aus dem Export. Snapshots werden den Accounts über den Namen zugeordnet; bereits vorhandene Zeitpunkte werden übersprungen.",
+      "done": "{added} Snapshot(s) importiert, {skipped} bereits vorhanden.",
+      "unknown": "Unbekannte Accounts übersprungen: {names}.",
+      "malformed": "Das ist keine Verlaufsdatei von Quotlyn."
+    }
   },
   "windows": {
     "session": {

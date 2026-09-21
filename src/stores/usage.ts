@@ -161,16 +161,28 @@ export const useUsageStore = defineStore('usage', () => {
     await db.pruneOlderThan(cutoff)
   }
 
+  /** Latest values, last snapshot and forecast cycle of one account from the database. */
+  async function loadAccount(accountId: string) {
+    if (!db) return
+    const snap = await db.latestOk(accountId)
+    if (snap?.parsed) latest[accountId] = snap.parsed
+    const last = await db.latest(accountId)
+    if (last) lastSnapshot[accountId] = last
+    const since = new Date(Date.now() - CYCLE_MS).toISOString()
+    cycle[accountId] = (await db.list(accountId, since)).filter((s) => s.ok)
+  }
+
+  /** Adds exported snapshots that are not there yet and refreshes the affected accounts. */
+  async function importHistory(snapshots: Array<Omit<UsageSnapshot, 'id'>>): Promise<{ added: number; skipped: number }> {
+    if (!db) db = await HistoryDb.open()
+    const result = await db.importSnapshots(snapshots)
+    for (const id of new Set(snapshots.map((s) => s.accountId))) await loadAccount(id)
+    return result
+  }
+
   async function start() {
     if (!db) db = await HistoryDb.open()
-    for (const a of accounts.accounts) {
-      const snap = await db.latestOk(a.id)
-      if (snap?.parsed) latest[a.id] = snap.parsed
-      const last = await db.latest(a.id)
-      if (last) lastSnapshot[a.id] = last
-      const since = new Date(Date.now() - CYCLE_MS).toISOString()
-      cycle[a.id] = (await db.list(a.id, since)).filter((s) => s.ok)
-    }
+    for (const a of accounts.accounts) await loadAccount(a.id)
     await prune()
     if (pruneTimer) clearInterval(pruneTimer)
     pruneTimer = setInterval(() => void prune(), DAY_MS)
@@ -245,6 +257,7 @@ export const useUsageStore = defineStore('usage', () => {
     stop,
     refreshNow,
     refreshAccount,
+    importHistory,
     removeAccountData,
     resetAccount,
     history,

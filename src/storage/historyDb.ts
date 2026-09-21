@@ -42,6 +42,29 @@ export class HistoryDb {
     return this.db.add('snapshots', snapshot as UsageSnapshot)
   }
 
+  /** Adds snapshots that are not there yet (same account and fetchedAt counts as present). */
+  async importSnapshots(snapshots: Array<Omit<UsageSnapshot, 'id'>>): Promise<{ added: number; skipped: number }> {
+    const present = new Map<string, Set<string>>()
+    for (const accountId of new Set(snapshots.map((s) => s.accountId))) {
+      present.set(accountId, new Set((await this.list(accountId)).map((s) => s.fetchedAt)))
+    }
+    const tx = this.db.transaction('snapshots', 'readwrite')
+    let added = 0
+    let skipped = 0
+    for (const s of snapshots) {
+      const seen = present.get(s.accountId)!
+      if (seen.has(s.fetchedAt)) {
+        skipped++
+        continue
+      }
+      seen.add(s.fetchedAt)
+      void tx.store.add(s as UsageSnapshot)
+      added++
+    }
+    await tx.done
+    return { added, skipped }
+  }
+
   list(accountId: string, sinceIso = ''): Promise<UsageSnapshot[]> {
     const range = IDBKeyRange.bound([accountId, sinceIso], [accountId, HI])
     return this.db.getAllFromIndex('snapshots', 'byAccountTime', range)

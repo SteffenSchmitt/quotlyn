@@ -2,7 +2,7 @@
 import InfoTip from '../components/InfoTip.vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { downloadText, snapshotsToCsv, snapshotsToJson } from '../lib/exportImport'
+import { downloadText, parseHistoryExport, snapshotsToCsv, snapshotsToJson } from '../lib/exportImport'
 import { permissionState, requestPermission, type NotifyPermission } from '../notify/webNotify'
 import { VAULT_KEY, readJson } from '../storage/localStore'
 import { useAccountsStore } from '../stores/accounts'
@@ -71,6 +71,32 @@ const importPassphrase = ref('')
 const importMode = ref<'merge' | 'replace'>('merge')
 const importResult = ref<string | null>(null)
 const importError = ref<string | null>(null)
+
+const historyFile = ref<File | null>(null)
+const historyResult = ref<string | null>(null)
+const historyError = ref<string | null>(null)
+
+function onHistoryFile(e: Event) {
+  historyFile.value = (e.target as HTMLInputElement).files?.[0] ?? null
+  historyResult.value = null
+  historyError.value = null
+}
+
+async function runHistoryImport() {
+  historyResult.value = null
+  historyError.value = null
+  if (!historyFile.value) return
+  try {
+    const idsByName = Object.fromEntries(accounts.accounts.map((a) => [a.name, a.id]))
+    const parsed = parseHistoryExport(await historyFile.value.text(), idsByName)
+    const r = await usage.importHistory(parsed.snapshots)
+    historyResult.value =
+      t('settings.importHistory.done', { added: r.added, skipped: r.skipped }) +
+      (parsed.unknownAccounts.length ? ' ' + t('settings.importHistory.unknown', { names: parsed.unknownAccounts.join(', ') }) : '')
+  } catch {
+    historyError.value = t('settings.importHistory.malformed')
+  }
+}
 
 function onFile(e: Event) {
   importFile.value = (e.target as HTMLInputElement).files?.[0] ?? null
@@ -238,6 +264,15 @@ async function runImport() {
         </button>
         <p v-if="importResult" class="text-green-600">{{ importResult }}</p>
         <p v-if="importError" class="text-red-600">{{ importError }}</p>
+      </div>
+
+      <h4 class="mb-2 mt-5 text-xs font-bold uppercase tracking-wide text-slate-500">{{ t('settings.importHistory.title') }}</h4>
+      <div class="space-y-3 text-sm">
+        <input type="file" accept="application/json,.json" class="field-file block" @change="onHistoryFile" />
+        <button class="btn-primary" :disabled="!historyFile" @click="runHistoryImport">{{ t('settings.importHistory.run') }}</button>
+        <p class="text-xs text-slate-500">{{ t('settings.importHistory.hint') }}</p>
+        <p v-if="historyResult" class="text-green-600">{{ historyResult }}</p>
+        <p v-if="historyError" class="text-red-600">{{ historyError }}</p>
       </div>
     </fieldset>
   </section>
