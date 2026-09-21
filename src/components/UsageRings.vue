@@ -8,14 +8,21 @@ import { CanvasRenderer } from 'echarts/renderers'
 import type { ParsedUsage } from '../api/usageParser'
 import { useChartTheme } from '../lib/chartTheme'
 import { ringStyle, windowColor, withAlpha } from '../lib/palette'
-import { DEFAULT_THRESHOLDS, criticalWindow, formatCountdown, levelFor, type Thresholds } from '../lib/usageView'
+import {
+  DEFAULT_THRESHOLDS,
+  formatCountdown,
+  levelFor,
+  primaryWindowFor,
+  type PrimaryWindow,
+  type Thresholds,
+} from '../lib/usageView'
 import { useWindowLabels } from '../lib/windowLabels'
 
 use([GaugeChart, CanvasRenderer])
 
 const props = withDefaults(
-  defineProps<{ parsed: ParsedUsage; now: number; limited?: boolean; thresholds?: Thresholds }>(),
-  { limited: false, thresholds: () => DEFAULT_THRESHOLDS },
+  defineProps<{ parsed: ParsedUsage; now: number; limited?: boolean; thresholds?: Thresholds; primaryWindow?: PrimaryWindow }>(),
+  { limited: false, thresholds: () => DEFAULT_THRESHOLDS, primaryWindow: 'critical' },
 )
 const { t } = useI18n()
 const { lines } = useWindowLabels()
@@ -46,8 +53,8 @@ const rings = computed(() => {
 })
 
 const headline = computed(() => {
-  const w = criticalWindow(props.parsed)
-  return w ? Math.round(w.utilization * 100) : null
+  const w = primaryWindowFor(props.parsed, props.primaryWindow)
+  return w ? { key: w.key, percent: Math.round(w.utilization * 100) } : null
 })
 
 const option = computed(() => ({
@@ -90,11 +97,12 @@ const option = computed(() => ({
     detail: i === 0 && headline.value !== null
       ? {
           valueAnimation: true,
-          formatter: () => `${headline.value} %`,
+          formatter: () => `${headline.value!.percent} %`,
           fontSize: 22,
           fontWeight: 600,
           color: theme.value.text,
-          offsetCenter: [0, '0%'],
+          offsetCenter: [0, '-6%'],
+          rich: {},
         }
       : { show: false },
     data: [{ value: r.percent }],
@@ -117,7 +125,7 @@ const option = computed(() => ({
           <span class="font-medium">{{ r.short }}</span>
           <span v-if="r.scope" class="text-slate-500"> {{ r.scope }}</span>
         </span>
-        <span class="tabular-nums">{{ r.percent }} %</span>
+        <span class="tabular-nums" :class="headline && headline.key === r.key ? 'font-semibold' : ''">{{ r.percent }} %</span>
         <span class="w-16 text-right text-xs text-slate-500 tabular-nums" :title="t('dashboard.resetsIn', { t: r.countdown })">
           {{ r.countdown }}
         </span>

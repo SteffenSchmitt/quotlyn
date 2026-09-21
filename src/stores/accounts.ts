@@ -12,6 +12,7 @@ import {
   type VaultBlob,
 } from '../crypto/vault'
 import { SESSION_KEY_KEY, VAULT_KEY, readJson, remove, writeJson } from '../storage/localStore'
+import type { PrimaryWindow } from '../lib/usageView'
 
 export interface Account {
   id: string
@@ -19,11 +20,15 @@ export interface Account {
   color: string
   token: string
   notificationsEnabled: boolean
+  primaryWindow: PrimaryWindow
   order: number
 }
 
-export type NewAccount = Pick<Account, 'name' | 'color' | 'token'> & { notificationsEnabled?: boolean }
-export type AccountPatch = Partial<Pick<Account, 'name' | 'color' | 'token' | 'notificationsEnabled'>>
+export type NewAccount = Pick<Account, 'name' | 'color' | 'token'> & {
+  notificationsEnabled?: boolean
+  primaryWindow?: PrimaryWindow
+}
+export type AccountPatch = Partial<Pick<Account, 'name' | 'color' | 'token' | 'notificationsEnabled' | 'primaryWindow'>>
 
 interface VaultData {
   accounts: Account[]
@@ -50,9 +55,13 @@ export const useAccountsStore = defineStore('accounts', () => {
     return readJson<VaultBlob>(accountsDeps.storage(), VAULT_KEY)
   }
 
+  function normalize(a: Account): Account {
+    return { ...a, notificationsEnabled: a.notificationsEnabled ?? true, primaryWindow: a.primaryWindow ?? 'critical' }
+  }
+
   function applyData(data: unknown) {
     const parsed = (data as Partial<VaultData>) ?? {}
-    list.value = Array.isArray(parsed.accounts) ? parsed.accounts : []
+    list.value = Array.isArray(parsed.accounts) ? parsed.accounts.map(normalize) : []
   }
 
   async function persist() {
@@ -130,6 +139,7 @@ export const useAccountsStore = defineStore('accounts', () => {
       color: input.color,
       token: input.token,
       notificationsEnabled: input.notificationsEnabled ?? true,
+      primaryWindow: input.primaryWindow ?? 'critical',
       order: list.value.length,
     }
     list.value = [...list.value, account]
@@ -173,10 +183,7 @@ export const useAccountsStore = defineStore('accounts', () => {
     if (!data || !Array.isArray(data.accounts) || !data.accounts.every(isAccount)) {
       throw new Error('invalid_vault_data')
     }
-    const imported: Account[] = data.accounts.map((a) => ({
-      ...a,
-      notificationsEnabled: a.notificationsEnabled ?? true,
-    }))
+    const imported: Account[] = data.accounts.map(normalize)
     let merged: Account[]
     if (mode === 'replace') {
       merged = [...imported].sort((a, b) => a.order - b.order)

@@ -4,7 +4,7 @@ import type { Account } from '../stores/accounts'
 import type { ParsedUsage } from '../api/usageParser'
 import type { AccountPollState } from '../scheduler/poller'
 import { computed } from 'vue'
-import { criticalWindow, formatCountdown } from '../lib/usageView'
+import { formatCountdown, primaryWindowFor } from '../lib/usageView'
 import { windowColor } from '../lib/palette'
 import { isDark } from '../lib/theme'
 import { useWindowLabels } from '../lib/windowLabels'
@@ -16,7 +16,7 @@ const { t, d } = useI18n()
 const { oneLine } = useWindowLabels()
 
 const summary = computed(() => {
-  const w = criticalWindow(props.parsed)
+  const w = primaryWindowFor(props.parsed, props.account.primaryWindow)
   if (!w) return null
   const keys = props.parsed!.windows.map((x) => x.key)
   return {
@@ -48,7 +48,12 @@ const summary = computed(() => {
         {{ t('dashboard.fallback', { status: parsed.probe.primaryStatus ?? '?' }) }}
       </p>
       <div class="mt-3">
-        <UsageRings :parsed="parsed" :now="now" :limited="state?.status === 'limited'" />
+        <UsageRings
+          :parsed="parsed"
+          :now="now"
+          :limited="state?.status === 'limited'"
+          :primary-window="account.primaryWindow"
+        />
       </div>
       <p class="mt-2 text-xs text-slate-500">
         {{

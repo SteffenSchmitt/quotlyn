@@ -76,3 +76,16 @@ export const WINDOW_LABEL_KEYS: Record<string, string> = {
   '7d': 'weekAll',
   '7d_oi': 'weekFable',
 }
+
+export type PrimaryWindow = 'critical' | '5h' | '7d' | '7d_oi'
+export const PRIMARY_WINDOWS: PrimaryWindow[] = ['critical', '5h', '7d', '7d_oi']
+
+/** The window an account wants to lead with; falls back to the most used one when missing. */
+export function primaryWindowFor(parsed: ParsedUsage | undefined, setting: PrimaryWindow = 'critical'): UsageWindow | null {
+  if (!parsed) return null
+  if (setting !== 'critical') {
+    const w = parsed.windows.find((x) => x.key === setting)
+    if (w) return w
+  }
+  return criticalWindow(parsed)
+}

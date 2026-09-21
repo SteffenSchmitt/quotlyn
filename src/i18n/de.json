@@ -86,7 +86,14 @@
     "empty": "Noch keine Accounts. Lege den ersten an.",
     "invalidToken": "Der Token sollte mit sk-ant-oat beginnen.",
     "yes": "Ja, löschen",
-    "no": "Nein"
+    "no": "Nein",
+    "primaryWindow": "Hauptmetrik",
+    "primary": {
+      "critical": "Kritischstes Fenster",
+      "5h": "5 h Sitzung",
+      "7d": "7 d alle Modelle",
+      "7d_oi": "7 d Fable"
+    }
   },
   "history": {
     "title": "Verlauf",

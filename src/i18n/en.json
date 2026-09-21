@@ -86,7 +86,14 @@
     "empty": "No accounts yet. Add your first one.",
     "invalidToken": "Token should start with sk-ant-oat.",
     "yes": "Yes, delete",
-    "no": "No"
+    "no": "No",
+    "primaryWindow": "Lead metric",
+    "primary": {
+      "critical": "Most used window",
+      "5h": "5 h session",
+      "7d": "7 d all models",
+      "7d_oi": "7 d Fable"
+    }
   },
   "history": {
     "title": "History",

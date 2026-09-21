@@ -8,6 +8,7 @@ import {
   isKnownHeader,
   levelFor,
   maskValue,
+  primaryWindowFor,
   sortByHeadroom,
 } from '../../src/lib/usageView'
 
@@ -96,5 +97,23 @@ describe('header classification and masking', () => {
   it('masks values keeping a short prefix', () => {
     expect(maskValue('a1b2c3d4-e5f6-7890')).toBe('8d93…')
     expect(maskValue('abc')).toBe('…')
+  })
+})
+
+describe('primaryWindowFor', () => {
+  const p: ParsedUsage = { ...parsed(0.2, 0.6), windows: [
+    { key: '5h', utilization: 0.2, resetsAt: null, status: null },
+    { key: '7d', utilization: 0.6, resetsAt: null, status: null },
+  ] }
+  it('defaults to the critical window', () => {
+    expect(primaryWindowFor(p)!.key).toBe('7d')
+    expect(primaryWindowFor(p, 'critical')!.key).toBe('7d')
+  })
+  it('returns the chosen window when present', () => {
+    expect(primaryWindowFor(p, '5h')!.key).toBe('5h')
+  })
+  it('falls back to critical when the chosen window is missing', () => {
+    expect(primaryWindowFor(p, '7d_oi')!.key).toBe('7d')
+    expect(primaryWindowFor(undefined, '5h')).toBeNull()
   })
 })

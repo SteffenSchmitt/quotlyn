@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchUsage } from '../api/usageClient'
 import type { Account, NewAccount } from '../stores/accounts'
+import { PRIMARY_WINDOWS, type PrimaryWindow } from '../lib/usageView'
 
 const props = defineProps<{ account?: Account }>()
 const emit = defineEmits<{
@@ -15,6 +16,7 @@ const name = ref(props.account?.name ?? '')
 const color = ref(props.account?.color ?? '#2563eb')
 const token = ref('')
 const notificationsEnabled = ref(props.account?.notificationsEnabled ?? true)
+const primaryWindow = ref<PrimaryWindow>(props.account?.primaryWindow ?? 'critical')
 const error = ref<string | null>(null)
 const testState = ref<'idle' | 'busy' | 'ok' | 'fail'>('idle')
 const testMessage = ref('')
@@ -62,6 +64,7 @@ function submit() {
     color: color.value,
     token: tok,
     notificationsEnabled: notificationsEnabled.value,
+    primaryWindow: primaryWindow.value,
   })
 }
 </script>
@@ -86,6 +89,12 @@ function submit() {
         class="mt-1 w-full rounded border px-2 py-1 font-mono dark:border-slate-700 dark:bg-slate-800"
       />
       <span v-if="account" class="text-xs text-slate-500">{{ t('accounts.tokenKeep') }}</span>
+    </label>
+    <label class="block text-sm">
+      {{ t('accounts.primaryWindow') }}
+      <select v-model="primaryWindow" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
+        <option v-for="w in PRIMARY_WINDOWS" :key="w" :value="w">{{ t(`accounts.primary.${w}`) }}</option>
+      </select>
     </label>
     <label class="flex items-center gap-2 text-sm">
       <input v-model="notificationsEnabled" type="checkbox" />
