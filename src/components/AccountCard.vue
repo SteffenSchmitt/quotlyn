@@ -4,22 +4,25 @@ import type { Account } from '../stores/accounts'
 import type { ParsedUsage } from '../api/usageParser'
 import type { AccountPollState } from '../scheduler/poller'
 import { computed } from 'vue'
-import { criticalWindow, formatCountdown, levelColor, levelFor } from '../lib/usageView'
+import { criticalWindow, formatCountdown } from '../lib/usageView'
+import { windowColor } from '../lib/palette'
+import { isDark } from '../lib/theme'
 import { useWindowLabels } from '../lib/windowLabels'
-import UsageGauge from './UsageGauge.vue'
+import UsageRings from './UsageRings.vue'
 import RawDataView from './RawDataView.vue'
 
 const props = defineProps<{ account: Account; parsed?: ParsedUsage; state?: AccountPollState; now: number }>()
 const { t, d } = useI18n()
-const { lines, oneLine } = useWindowLabels()
+const { oneLine } = useWindowLabels()
 
 const summary = computed(() => {
   const w = criticalWindow(props.parsed)
   if (!w) return null
+  const keys = props.parsed!.windows.map((x) => x.key)
   return {
     label: oneLine(w.key),
     percent: Math.round(w.utilization * 100),
-    color: levelColor(levelFor(w.utilization)),
+    color: windowColor(w.key, keys, isDark.value),
     countdown: formatCountdown(w.resetsAt, props.now),
   }
 })
@@ -44,15 +47,8 @@ const summary = computed(() => {
       <p v-if="parsed.probe.fallbackUsed" class="mt-2 rounded bg-red-50 p-2 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
         {{ t('dashboard.fallback', { status: parsed.probe.primaryStatus ?? '?' }) }}
       </p>
-      <div class="mt-3 flex flex-wrap justify-around gap-2">
-        <UsageGauge
-          v-for="w in parsed.windows"
-          :key="w.key"
-          :utilization="w.utilization"
-          :label="lines(w.key)[0]"
-          :sublabel="lines(w.key)[1]"
-          :subtitle="t('dashboard.resetsIn', { t: formatCountdown(w.resetsAt, now) })"
-        />
+      <div class="mt-3">
+        <UsageRings :parsed="parsed" :now="now" :limited="state?.status === 'limited'" />
       </div>
       <p class="mt-2 text-xs text-slate-500">
         {{

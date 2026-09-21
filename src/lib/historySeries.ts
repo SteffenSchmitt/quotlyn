@@ -29,3 +29,15 @@ export function windowKeysIn(snapshots: UsageSnapshot[]): string[] {
   for (const s of snapshots) for (const w of s.parsed?.windows ?? []) set.add(w.key)
   return [...set].sort()
 }
+
+/**
+ * Bands between consecutive reset times, clipped to [fromIso, toIso]. The band before the
+ * first known reset starts at fromIso; the band after the last reset ends at toIso.
+ * Every other band is returned so the chart can alternate a tint.
+ */
+export function resetZones(markers: string[], fromIso: string, toIso: string): Array<[string, string]> {
+  const edges = [fromIso, ...markers.filter((m) => m > fromIso && m < toIso), toIso]
+  const zones: Array<[string, string]> = []
+  for (let i = 0; i + 1 < edges.length; i += 2) zones.push([edges[i]!, edges[i + 1]!])
+  return zones
+}

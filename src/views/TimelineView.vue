@@ -3,16 +3,22 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
-import { ScatterChart } from 'echarts/charts'
+import { CustomChart } from 'echarts/charts'
 import { GridComponent, MarkLineComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
-import { levelColor, levelFor } from '../lib/usageView'
+import { useChartTheme } from '../lib/chartTheme'
+import { windowColor, withAlpha } from '../lib/palette'
+import { formatCountdown } from '../lib/usageView'
+import { timelineBars, type TimelineBar } from '../lib/timelineBars'
+import { useWindowLabels } from '../lib/windowLabels'
 import { useAccountsStore } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
 
-use([ScatterChart, GridComponent, TooltipComponent, MarkLineComponent, CanvasRenderer])
+use([CustomChart, GridComponent, TooltipComponent, MarkLineComponent, CanvasRenderer])
 
 const { t, d } = useI18n()
+const { oneLine } = useWindowLabels()
+const theme = useChartTheme()
 const accounts = useAccountsStore()
 const usage = useUsageStore()
 
@@ -27,56 +33,84 @@ onUnmounted(() => {
   if (tick) clearInterval(tick)
 })
 
-interface Point {
-  value: [string, string]
-  key: string
-  utilization: number
-  color: string
-  border: string
-  symbolSize: number
-}
-
-const points = computed<Point[]>(() =>
-  accounts.accounts.flatMap((a) =>
-    (usage.latest[a.id]?.windows ?? [])
-      .filter((w) => w.resetsAt)
-      .map((w) => ({
-        value: [w.resetsAt!, a.name] as [string, string],
-        key: w.key,
-        utilization: w.utilization,
-        color: levelColor(levelFor(w.utilization)),
-        border: a.color,
-        symbolSize: 10 + Math.round(Math.min(1, w.utilization) * 14),
-      })),
-  ),
+const model = computed(() =>
+  timelineBars(accounts.accounts, usage.latest, now.value, (name, key) => `${name}  ·  ${oneLine(key)}`),
 )
-
-const hasData = computed(() => points.value.length > 0)
+const allKeys = computed(() => [...new Set(model.value.bars.map((b) => b.windowKey))])
+const hasData = computed(() => model.value.bars.length > 0)
 
 const option = computed(() => {
-  const times = points.value.map((p) => Date.parse(p.value[0]))
-  const max = Math.max(now.value, ...times)
+  const th = theme.value
+  const { rows, bars } = model.value
+  const max = Math.max(now.value + 3_600_000, ...bars.map((b) => b.endMs))
+  const colorOf = (b: TimelineBar) => windowColor(b.windowKey, allKeys.value, th.dark)
   return {
+    backgroundColor: 'transparent',
+    textStyle: { color: th.text },
     tooltip: {
-      formatter: (p: { data: Point }) =>
-        `${p.data.value[1]} · ${p.data.key} · ${Math.round(p.data.utilization * 100)} %<br/>${d(new Date(p.data.value[0]), 'datetime')}`,
+      ...th.tooltip,
+      formatter: (p: { data: TimelineBar }) =>
+        `${p.data.accountName} · ${oneLine(p.data.windowKey)}<br/>` +
+        `${Math.round(p.data.utilization * 100)} % · ${t('dashboard.resetsIn', { t: formatCountdown(new Date(p.data.endMs).toISOString(), now.value) })}<br/>` +
+        d(new Date(p.data.endMs), 'datetime'),
     },
-    grid: { left: 120, right: 40, top: 20, bottom: 40 },
-    xAxis: { type: 'time', min: now.value - 3_600_000, max: max + 3_600_000 },
-    yAxis: { type: 'category', data: accounts.accounts.map((a) => a.name), inverse: true },
+    grid: { left: 210, right: 40, top: 16, bottom: 36 },
+    xAxis: {
+      type: 'time',
+      min: now.value - 1_800_000,
+      max: max + 1_800_000,
+      axisLine: { lineStyle: { color: th.axisLine } },
+      axisLabel: { color: th.muted },
+      splitLine: { lineStyle: { color: th.grid, type: 'dashed' } },
+    },
+    yAxis: {
+      type: 'category',
+      data: rows.map((r) => r.label),
+      inverse: true,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: th.text, fontSize: 12 },
+    },
     series: [
       {
-        type: 'scatter',
-        data: points.value.map((p) => ({
-          ...p,
-          itemStyle: { color: p.color, borderColor: p.border, borderWidth: 2 },
-          label: { show: true, position: 'top', formatter: `${p.key} · ${Math.round(p.utilization * 100)} %`, fontSize: 11 },
-        })),
+        type: 'custom',
+        data: bars,
+        encode: { x: ['startMs', 'endMs'], y: 'row' },
+        renderItem: (
+          _params: unknown,
+          api: { value: (i: number | string) => number; coord: (v: [number, number]) => [number, number]; size: (v: [number, number]) => [number, number] },
+        ) => {
+          const bar = bars[api.value('row')]!
+          const [x0, y] = api.coord([bar.startMs, bar.row])
+          const [x1] = api.coord([bar.endMs, bar.row])
+          const height = Math.min(18, api.size([0, 1])[1] * 0.5)
+          const width = Math.max(2, x1 - x0)
+          const fill = Math.max(0, Math.min(1, bar.utilization)) * width
+          const color = colorOf(bar)
+          return {
+            type: 'group',
+            children: [
+              { type: 'rect', shape: { x: x0, y: y - height / 2, width, height, r: height / 2 }, style: { fill: withAlpha(color, 0.18) } },
+              { type: 'rect', shape: { x: x0, y: y - height / 2, width: fill, height, r: height / 2 }, style: { fill: color } },
+              {
+                type: 'text',
+                style: {
+                  x: x0 + width + 8,
+                  y,
+                  text: `${Math.round(bar.utilization * 100)} %`,
+                  fill: th.muted,
+                  fontSize: 11,
+                  verticalAlign: 'middle',
+                },
+              },
+            ],
+          }
+        },
         markLine: {
-          symbol: 'none',
+          symbol: ['none', 'none'],
           silent: true,
-          lineStyle: { color: '#64748b', type: 'solid' },
-          label: { formatter: t('timeline.now'), position: 'insideEndTop' },
+          lineStyle: { color: th.now, type: 'solid', width: 1 },
+          label: { formatter: t('timeline.now'), position: 'insideEndTop', color: th.muted, fontSize: 10 },
           data: [{ xAxis: now.value }],
         },
       },
@@ -88,12 +122,12 @@ const option = computed(() => {
 <template>
   <section class="space-y-4">
     <h2 class="text-lg font-semibold">{{ t('timeline.title') }}</h2>
-    <div class="rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-2">
+    <div class="rounded-lg border bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
       <VChart
         v-if="hasData"
         :option="option"
         autoresize
-        :style="{ height: `${80 + accounts.accounts.length * 70}px`, width: '100%' }"
+        :style="{ height: `${60 + model.rows.length * 40}px`, width: '100%' }"
       />
       <p v-else class="p-6 text-sm text-slate-500">{{ t('timeline.empty') }}</p>
     </div>

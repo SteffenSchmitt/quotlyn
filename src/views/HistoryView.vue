@@ -8,20 +8,33 @@ import {
   DataZoomComponent,
   GridComponent,
   LegendComponent,
+  MarkAreaComponent,
   MarkLineComponent,
   TooltipComponent,
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
-import { RANGES, rangeSince, resetMarkersFor, seriesFor, windowKeysIn, type Range } from '../lib/historySeries'
+import { RANGES, rangeSince, resetMarkersFor, resetZones, seriesFor, windowKeysIn, type Range } from '../lib/historySeries'
+import { useChartTheme } from '../lib/chartTheme'
+import { withAlpha } from '../lib/palette'
 import type { UsageSnapshot } from '../storage/historyDb'
 import { useAccountsStore } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
 import { useWindowLabels } from '../lib/windowLabels'
 
-use([LineChart, GridComponent, TooltipComponent, LegendComponent, MarkLineComponent, DataZoomComponent, CanvasRenderer])
+use([
+  LineChart,
+  GridComponent,
+  TooltipComponent,
+  LegendComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
+  DataZoomComponent,
+  CanvasRenderer,
+])
 
-const { t } = useI18n()
+const { t, d } = useI18n()
 const { oneLine: windowLabel } = useWindowLabels()
+const theme = useChartTheme()
 const accounts = useAccountsStore()
 const usage = useUsageStore()
 
@@ -61,33 +74,92 @@ const windowKeys = computed(() => {
 
 const hasData = computed(() => Object.values(data.value).some((l) => l.length > 0))
 
-const option = computed(() => ({
-  tooltip: { trigger: 'axis', valueFormatter: (v: number | null) => (v === null ? '–' : `${v} %`) },
-  legend: { top: 0 },
-  grid: { left: 48, right: 24, top: 40, bottom: 70 },
-  xAxis: { type: 'time' },
-  yAxis: { type: 'value', min: 0, max: 100, axisLabel: { formatter: '{value} %' } },
-  dataZoom: [{ type: 'inside' }, { type: 'slider', bottom: 10 }],
-  series: accounts.accounts
-    .filter((a) => selected.value.has(a.id))
-    .map((a) => ({
-      name: a.name,
-      type: 'line',
-      showSymbol: true,
-      symbolSize: 5,
-      connectNulls: false,
-      itemStyle: { color: a.color },
-      lineStyle: { color: a.color, width: 2 },
-      data: seriesFor(data.value[a.id] ?? [], windowKey.value),
-      markLine: {
-        symbol: 'none',
-        silent: true,
-        label: { show: false },
-        lineStyle: { color: a.color, type: 'dashed', opacity: 0.6 },
-        data: resetMarkersFor(data.value[a.id] ?? [], windowKey.value).map((iso) => ({ xAxis: iso })),
-      },
-    })),
-}))
+const option = computed(() => {
+  const th = theme.value
+  const since = rangeSince(range.value, Date.now())
+  const nowIso = new Date().toISOString()
+  const selectedAccounts = accounts.accounts.filter((a) => selected.value.has(a.id))
+  return {
+    backgroundColor: 'transparent',
+    textStyle: { color: th.text },
+    tooltip: {
+      trigger: 'axis',
+      ...th.tooltip,
+      axisPointer: { type: 'line', lineStyle: { color: th.axisLine } },
+      valueFormatter: (v: number | null) => (v === null ? '–' : `${v} %`),
+    },
+    legend: { top: 0, textStyle: { color: th.muted }, icon: 'roundRect', itemWidth: 14, itemHeight: 4 },
+    grid: { left: 48, right: 24, top: 40, bottom: 70 },
+    xAxis: {
+      type: 'time',
+      axisLine: { lineStyle: { color: th.axisLine } },
+      axisLabel: { color: th.muted },
+      splitLine: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      axisLabel: { color: th.muted, formatter: '{value} %' },
+      splitLine: { lineStyle: { color: th.grid, type: 'dashed' } },
+    },
+    dataZoom: [
+      { type: 'inside' },
+      { type: 'slider', bottom: 10, borderColor: th.grid, fillerColor: th.zone, textStyle: { color: th.muted } },
+    ],
+    series: selectedAccounts.map((a, idx) => {
+      const snaps = data.value[a.id] ?? []
+      const markers = resetMarkersFor(snaps, windowKey.value)
+      return {
+        name: a.name,
+        type: 'line',
+        smooth: 0.35,
+        showSymbol: true,
+        symbolSize: 5,
+        connectNulls: false,
+        itemStyle: { color: a.color },
+        lineStyle: { color: a.color, width: 2 },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: withAlpha(a.color, 0.28) },
+              { offset: 1, color: withAlpha(a.color, 0) },
+            ],
+          },
+        },
+        emphasis: { focus: 'series' },
+        data: seriesFor(snaps, windowKey.value),
+        // Reset zones only for the first selected account keep the background calm.
+        markArea:
+          idx === 0
+            ? {
+                silent: true,
+                itemStyle: { color: th.zone },
+                data: resetZones(markers, since, nowIso).map(([from, to]) => [{ xAxis: from }, { xAxis: to }]),
+              }
+            : undefined,
+        markLine: {
+          symbol: ['none', 'none'],
+          silent: true,
+          lineStyle: { color: a.color, type: 'dashed', opacity: 0.55, width: 1 },
+          label: {
+            show: idx === 0,
+            position: 'insideEndTop',
+            color: th.muted,
+            fontSize: 10,
+            formatter: (p: { value: string }) => d(new Date(p.value), 'time'),
+          },
+          data: markers.map((iso) => ({ xAxis: iso })),
+        },
+      }
+    }),
+  }
+})
 </script>
 
 <template>

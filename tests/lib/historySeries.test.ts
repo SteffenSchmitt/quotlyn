@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { UsageSnapshot } from '../../src/storage/historyDb'
-import { rangeSince, resetMarkersFor, seriesFor, windowKeysIn } from '../../src/lib/historySeries'
+import { rangeSince, resetMarkersFor, resetZones, seriesFor, windowKeysIn } from '../../src/lib/historySeries'
 
 function ok(fetchedAt: string, windows: Array<[string, number, string | null]>): UsageSnapshot {
   return {
@@ -73,5 +73,20 @@ describe('windowKeysIn', () => {
   it('collects distinct keys', () => {
     expect(windowKeysIn(snaps)).toEqual(['5h', '7d'])
     expect(windowKeysIn([fail('x')])).toEqual([])
+  })
+})
+
+describe('resetZones', () => {
+  it('alternates bands between range start, markers and range end', () => {
+    const zones = resetZones(['2026-09-21T12:00:00.000Z', '2026-09-21T17:00:00.000Z'], '2026-09-21T10:00:00.000Z', '2026-09-21T20:00:00.000Z')
+    expect(zones).toEqual([
+      ['2026-09-21T10:00:00.000Z', '2026-09-21T12:00:00.000Z'],
+      ['2026-09-21T17:00:00.000Z', '2026-09-21T20:00:00.000Z'],
+    ])
+  })
+  it('ignores markers outside the range and yields one band without markers', () => {
+    expect(resetZones(['2026-09-22T00:00:00.000Z'], '2026-09-21T10:00:00.000Z', '2026-09-21T20:00:00.000Z')).toEqual([
+      ['2026-09-21T10:00:00.000Z', '2026-09-21T20:00:00.000Z'],
+    ])
   })
 })
