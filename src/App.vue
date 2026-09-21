@@ -8,6 +8,7 @@ import ThemeToggle from './components/ThemeToggle.vue'
 import { useAccountsStore } from './stores/accounts'
 import { useSettingsStore } from './stores/settings'
 import { useUsageStore } from './stores/usage'
+import { worstUtilization } from './lib/usageView'
 
 const version = __APP_VERSION__
 
@@ -29,6 +30,15 @@ watch(
   () => settings.settings.locale,
   (l) => {
     locale.value = l === 'auto' ? (navigator.language.toLowerCase().startsWith('de') ? 'de' : 'en') : l
+  },
+  { immediate: true },
+)
+
+// Tab title carries the highest utilization, so the state is visible without switching tabs.
+watch(
+  () => worstUtilization(usage.latest),
+  (worst) => {
+    document.title = worst === null ? t('app.title') : `${Math.round(worst * 100)} % · ${t('app.title')}`
   },
   { immediate: true },
 )

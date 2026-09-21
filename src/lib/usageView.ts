@@ -57,6 +57,16 @@ export function accountStatus(
   return { level: limited ? 'crit' : levelFor(window.utilization, thresholds), window, limited }
 }
 
+/** Highest utilization over every account and window, for the tab title; null without data. */
+export function worstUtilization(latest: Record<string, ParsedUsage | undefined>): number | null {
+  let worst: number | null = null
+  for (const parsed of Object.values(latest)) {
+    const w = criticalWindow(parsed)
+    if (w && (worst === null || w.utilization > worst)) worst = w.utilization
+  }
+  return worst
+}
+
 export function headroom(parsed: ParsedUsage | undefined): number {
   if (!parsed) return -1
   const w = criticalWindow(parsed)

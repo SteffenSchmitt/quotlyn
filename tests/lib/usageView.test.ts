@@ -11,6 +11,7 @@ import {
   primaryWindowFor,
   sortByHeadroom,
   accountStatus,
+  worstUtilization,
   claimWindowKey,
   humanizeToken,
 } from '../../src/lib/usageView'
@@ -160,5 +161,13 @@ describe('claimWindowKey', () => {
 describe('humanizeToken', () => {
   it('turns snake_case header values into readable words', () => {
     expect(humanizeToken('seven_day_overage_included')).toBe('seven day overage included')
+  })
+})
+
+describe('worstUtilization', () => {
+  it('returns the highest utilization across all accounts and windows, or null without data', () => {
+    expect(worstUtilization({ a: parsed(0.2, 0.83), b: parsed(0.5), c: undefined })).toBe(0.83)
+    expect(worstUtilization({ a: undefined })).toBeNull()
+    expect(worstUtilization({})).toBeNull()
   })
 })
