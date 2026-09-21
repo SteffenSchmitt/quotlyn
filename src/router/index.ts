@@ -4,6 +4,7 @@ import AccountsView from '../views/AccountsView.vue'
 import HistoryView from '../views/HistoryView.vue'
 import TimelineView from '../views/TimelineView.vue'
 import SettingsView from '../views/SettingsView.vue'
+import HelpView from '../views/HelpView.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -13,5 +14,6 @@ export const router = createRouter({
     { path: '/history', name: 'history', component: HistoryView },
     { path: '/timeline', name: 'timeline', component: TimelineView },
     { path: '/settings', name: 'settings', component: SettingsView },
+    { path: '/help', name: 'help', component: HelpView },
   ],
 })

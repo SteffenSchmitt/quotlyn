@@ -36,7 +36,8 @@
       "label": "Reihenfolge",
       "manual": "wie konfiguriert",
       "headroom": "meiste Luft zuerst"
-    }
+    },
+    "emptyHelp": "Lege einen Account an, um loszulegen. Du brauchst einen Token?"
   },
   "lang": {
     "de": "Deutsch",
@@ -62,7 +63,8 @@
     "accounts": "Accounts",
     "history": "Verlauf",
     "timeline": "Timeline",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "help": "Hilfe"
   },
   "accounts": {
     "title": "Accounts",
@@ -93,7 +95,8 @@
       "5h": "5 h Sitzung",
       "7d": "7 d alle Modelle",
       "7d_oi": "7 d Fable"
-    }
+    },
+    "howTo": "Wie komme ich an einen Token?"
   },
   "history": {
     "title": "Verlauf",
@@ -194,5 +197,49 @@
     "export": "Accounts exportieren die verschlüsselte Tresordatei unverändert. Verlaufs-Exporte enthalten nie Tokens.",
     "import": "Accounts aus einer exportierten Tresordatei zusammenführen oder ersetzen. Du brauchst die Passphrase, mit der die Datei erstellt wurde.",
     "remember": "Hält den Tresor für diesen Browser-Tab offen. Beim Schließen des Tabs wird er wieder gesperrt."
+  },
+  "help_page": {
+    "title": "So kommst du an einen Token",
+    "intro": "Quotlyn liest deine Limits mit einem Token aus der Claude-Kommandozeile. Du brauchst einen Token pro Account, den du beobachten willst. Der Token ist langlebig und erlaubt Modellzugriff auf dieses Abo, behandle ihn also wie ein Passwort.",
+    "steps": {
+      "title": "Schritt für Schritt",
+      "items": [
+        {
+          "h": "Claude-Kommandozeile installieren",
+          "p": "Falls noch nicht vorhanden: Claude Code installieren und einmal starten.",
+          "code": "npm install -g @anthropic-ai/claude-code\nclaude"
+        },
+        {
+          "h": "Mit dem gewünschten Account anmelden",
+          "p": "Beim ersten Start öffnet die Kommandozeile den Browser zur Anmeldung. Ist sie bereits mit einem anderen Account angemeldet, gib in der Sitzung /logout ein, danach /login, und wähle im Browser den richtigen Account.",
+          "code": "/logout\n/login"
+        },
+        {
+          "h": "Langlebigen Token erzeugen",
+          "p": "Führe den Befehl unten im Terminal aus, nicht innerhalb der Claude-Sitzung. Er öffnet erneut den Browser, bittet um Freigabe und gibt einen Token aus, der mit sk-ant-oat01- beginnt.",
+          "code": "claude setup-token"
+        },
+        {
+          "h": "Account in Quotlyn anlegen",
+          "p": "Unter Accounts Name und Farbe wählen, den Token einfügen und Token testen drücken. Eine grüne Zeile mit den aktuellen Prozentwerten heißt: alles läuft.",
+          "code": ""
+        },
+        {
+          "h": "Für jeden weiteren Account wiederholen",
+          "p": "In der Kommandozeile abmelden, mit dem nächsten Account anmelden und dessen Token genauso erzeugen.",
+          "code": ""
+        }
+      ]
+    },
+    "notes": {
+      "title": "Gut zu wissen",
+      "items": [
+        "Tokens liegen verschlüsselt in diesem Browser und gehen nur an den mitgelieferten Proxy auf deinem Rechner.",
+        "Ein Token kann weder Profil- noch Abrechnungsdaten lesen. Quotlyn sieht nur die Rate-Limit-Header einer winzigen Anfrage.",
+        "Zeigt eine Karte „Token abgelehnt“, wurde der Token widerrufen oder falsch eingefügt. Erzeuge einen neuen und tausche ihn unter Accounts aus.",
+        "Wie du einen Token widerrufst, beschreibt die Dokumentation zu Claude Code."
+      ]
+    },
+    "docs": "Dokumentation zu Claude Code"
   }
 }

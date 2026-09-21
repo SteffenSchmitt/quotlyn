@@ -67,7 +67,10 @@ const autoRefresh = computed({
       </label>
     </div>
 
-    <p v-if="accounts.accounts.length === 0" class="text-slate-500">{{ t('dashboard.empty') }}</p>
+    <p v-if="accounts.accounts.length === 0" class="text-slate-500">
+      {{ t('dashboard.emptyHelp') }}
+      <RouterLink to="/help" class="text-sky-700 underline dark:text-sky-400">{{ t('nav.help') }}</RouterLink>
+    </p>
 
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       <AccountCard

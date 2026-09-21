@@ -36,7 +36,8 @@
       "label": "Order",
       "manual": "as configured",
       "headroom": "most room first"
-    }
+    },
+    "emptyHelp": "Add an account to get started. Need a token?"
   },
   "lang": {
     "de": "Deutsch",
@@ -62,7 +63,8 @@
     "accounts": "Accounts",
     "history": "History",
     "timeline": "Timeline",
-    "settings": "Settings"
+    "settings": "Settings",
+    "help": "Help"
   },
   "accounts": {
     "title": "Accounts",
@@ -93,7 +95,8 @@
       "5h": "5 h session",
       "7d": "7 d all models",
       "7d_oi": "7 d Fable"
-    }
+    },
+    "howTo": "How do I get a token?"
   },
   "history": {
     "title": "History",
@@ -194,5 +197,49 @@
     "export": "Accounts export the encrypted vault file as is. History exports never contain tokens.",
     "import": "Merge or replace accounts from an exported vault file. You need the passphrase that file was created with.",
     "remember": "Keeps the vault open for this browser tab. Closing the tab locks it again."
+  },
+  "help_page": {
+    "title": "Getting a token",
+    "intro": "Quotlyn reads your limits with a token from the Claude CLI. You need one token per account you want to watch. The token is long-lived and grants inference access to that subscription, so treat it like a password.",
+    "steps": {
+      "title": "Step by step",
+      "items": [
+        {
+          "h": "Install the Claude CLI",
+          "p": "If you do not have it yet, install Claude Code and start it once.",
+          "code": "npm install -g @anthropic-ai/claude-code\nclaude"
+        },
+        {
+          "h": "Sign in with the account you want to watch",
+          "p": "On first start the CLI opens the browser for sign-in. If the CLI is already signed in with a different account, run /logout inside the CLI, then /login, and pick the right account in the browser.",
+          "code": "/logout\n/login"
+        },
+        {
+          "h": "Create the long-lived token",
+          "p": "Run the command below in your terminal (not inside the CLI session). It opens the browser again, asks for approval and prints a token that starts with sk-ant-oat01-.",
+          "code": "claude setup-token"
+        },
+        {
+          "h": "Add the account in Quotlyn",
+          "p": "Open Accounts, choose a name and colour, paste the token and press Test token. A green line with the current percentages means everything works.",
+          "code": ""
+        },
+        {
+          "h": "Repeat for every account",
+          "p": "Sign out of the CLI, sign in with the next account and create its token the same way.",
+          "code": ""
+        }
+      ]
+    },
+    "notes": {
+      "title": "Good to know",
+      "items": [
+        "Tokens stay encrypted in this browser and are only sent to the bundled proxy on your machine.",
+        "A token cannot read your profile or billing data. Quotlyn only sees the rate-limit headers of a tiny request.",
+        "If a card shows Token rejected, the token was revoked or mistyped. Create a new one and replace it under Accounts.",
+        "How to revoke a token is described in the Claude Code documentation."
+      ]
+    },
+    "docs": "Claude Code documentation"
   }
 }

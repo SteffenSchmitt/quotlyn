@@ -62,6 +62,9 @@ watch(
           <RouterLink to="/settings" class="hover:underline" active-class="font-semibold">
             {{ t('nav.settings') }}
           </RouterLink>
+          <RouterLink to="/help" class="hover:underline" active-class="font-semibold">
+            {{ t('nav.help') }}
+          </RouterLink>
         </nav>
       </div>
       <div class="flex items-center gap-3">

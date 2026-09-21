@@ -90,6 +90,7 @@ function submit() {
         class="mt-1 w-full rounded border px-2 py-1 font-mono dark:border-slate-700 dark:bg-slate-800"
       />
       <span v-if="account" class="text-xs text-slate-500">{{ t('accounts.tokenKeep') }}</span>
+      <RouterLink to="/help" class="ml-2 text-xs text-sky-700 underline dark:text-sky-400">{{ t('accounts.howTo') }}</RouterLink>
     </label>
     <label class="block text-sm">
       {{ t('accounts.primaryWindow') }} <InfoTip :text="t('help.primaryWindow')" />
