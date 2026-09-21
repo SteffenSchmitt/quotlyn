@@ -9,7 +9,7 @@ renders the current state as gauges, trend charts and a reset timeline.
 
 ## Status
 
-Accounts are polled every five minutes (configurable), every result is kept as a local snapshot, and the dashboard shows the current windows with countdowns. Charts and history views are still to come.
+Accounts are polled every five minutes (configurable), every result is kept as a local snapshot, and the dashboard shows gauges per window with countdowns, an overview sorted by remaining headroom and the raw response headers. History charts and the reset timeline are still to come.
 
 ## Run locally
 
