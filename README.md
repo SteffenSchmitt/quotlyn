@@ -9,7 +9,28 @@ renders the current state as gauges, trend charts and a reset timeline.
 
 ## Status
 
-Early planning. No application code yet.
+Skeleton in place: app shell, proxy and container work. No account handling yet.
+
+## Run locally
+
+```sh
+docker compose up --build
+```
+
+Then open <http://localhost:5173>. The container runs the Vite dev server and a
+small proxy that turns a one-token Messages API request into usage data
+(Anthropic returns the subscription limits as response headers). Source
+changes reload live.
+
+Without Docker: `npm install && npm run dev` (Node 22 or newer).
+
+## How it gets the numbers
+
+Tokens created with `claude setup-token` only carry the inference scope, so the
+dedicated usage endpoint rejects them. Quotlyn instead sends the cheapest
+possible request (one output token on Haiku) and reads the
+`anthropic-ratelimit-unified-*` headers of the response. Every poll costs about
+ten tokens of your quota.
 
 ## Principles
 
