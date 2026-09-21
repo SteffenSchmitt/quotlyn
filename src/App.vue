@@ -1,12 +1,27 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Locale } from './i18n'
 import PassphraseGate from './components/PassphraseGate.vue'
 import { useAccountsStore } from './stores/accounts'
+import { useSettingsStore } from './stores/settings'
+import { useUsageStore } from './stores/usage'
 
 const { t, locale } = useI18n()
 const locales: Locale[] = ['de', 'en']
 const store = useAccountsStore()
+const settings = useSettingsStore()
+settings.load()
+const usage = useUsageStore()
+
+watch(
+  () => store.status,
+  (s) => {
+    if (s === 'unlocked') void usage.start()
+    else usage.stop()
+  },
+  { immediate: true },
+)
 </script>
 
 <template>

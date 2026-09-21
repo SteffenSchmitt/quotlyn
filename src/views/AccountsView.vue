@@ -3,9 +3,11 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccountForm from '../components/AccountForm.vue'
 import { useAccountsStore, type Account, type NewAccount } from '../stores/accounts'
+import { useUsageStore } from '../stores/usage'
 
 const { t } = useI18n()
 const store = useAccountsStore()
+const usage = useUsageStore()
 const adding = ref(false)
 const editingId = ref<string | null>(null)
 const confirmingId = ref<string | null>(null)
@@ -17,10 +19,12 @@ async function onAdd(value: Required<NewAccount>) {
 
 async function onEdit(id: string, value: Required<NewAccount>) {
   await store.updateAccount(id, value)
+  usage.resetAccount(id)
   editingId.value = null
 }
 
 async function onDelete(account: Account) {
+  await usage.removeAccountData(account.id)
   await store.removeAccount(account.id)
   confirmingId.value = null
 }
