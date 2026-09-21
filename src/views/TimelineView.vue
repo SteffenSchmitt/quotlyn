@@ -34,8 +34,16 @@ onUnmounted(() => {
   if (tick) clearInterval(tick)
 })
 
+const NAME_COL = 200
+const WINDOW_COL = 120
+const LABEL_GUTTER = 12
+
+function truncate(text: string, max = 28): string {
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text
+}
+
 const model = computed(() =>
-  timelineBars(accounts.accounts, usage.latest, now.value, (name, key) => `${name}  ·  ${oneLine(key)}`),
+  timelineBars(accounts.accounts, usage.latest, now.value, (name, key) => `${name}\u0001${oneLine(key)}`),
 )
 const allKeys = computed(() => [...new Set(model.value.bars.map((b) => b.windowKey))])
 const hasData = computed(() => model.value.bars.length > 0)
@@ -55,7 +63,7 @@ const option = computed(() => {
         `${Math.round(p.data.utilization * 100)} % · ${t('dashboard.resetsIn', { t: formatCountdown(new Date(p.data.endMs).toISOString(), now.value) })}<br/>` +
         d(new Date(p.data.endMs), 'datetime'),
     },
-    grid: { left: 210, right: 40, top: 16, bottom: 36 },
+    grid: { left: LABEL_GUTTER + NAME_COL + WINDOW_COL, right: 56, top: 16, bottom: 36 },
     xAxis: {
       type: 'time',
       min: now.value - 1_800_000,
@@ -70,7 +78,21 @@ const option = computed(() => {
       inverse: true,
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { color: th.text, fontSize: 12 },
+      axisLabel: {
+        // Two left-aligned columns starting at a fixed left edge, like a table.
+        align: 'left',
+        margin: NAME_COL + WINDOW_COL,
+        color: th.text,
+        fontSize: 12,
+        formatter: (value: string) => {
+          const [name = '', win = ''] = value.split('\u0001')
+          return `{name|${truncate(name)}}{win|${win}}`
+        },
+        rich: {
+          name: { width: NAME_COL, align: 'left', color: th.text, fontSize: 12 },
+          win: { width: WINDOW_COL, align: 'left', color: th.muted, fontSize: 12 },
+        },
+      },
     },
     series: [
       {
