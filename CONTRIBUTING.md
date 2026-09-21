@@ -20,6 +20,7 @@ screenshot tooling.
 ```sh
 npm test         # Vitest, the pure logic
 npm run build    # vue-tsc + Vite; this is the type gate, it also checks the .vue files
+npm run smoke    # drives the app through every page against the mock API, fails on page errors
 ```
 
 Both run in CI on every push and pull request. Add a test for logic you touch: parsing,

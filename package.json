@@ -40,7 +40,8 @@
     "mock:upstream": "node scripts/screenshots/mock-upstream.mjs",
     "mock:proxy": "QUOTLYN_UPSTREAM=http://localhost:18999 QUOTLYN_PROXY_PORT=18787 node proxy/server.mjs",
     "mock:web": "QUOTLYN_PROXY_PORT=18787 vite --port 15173 --strictPort",
-    "dev:mock": "concurrently -n mock,proxy,web -c yellow,magenta,cyan \"npm:mock:upstream\" \"npm:mock:proxy\" \"npm:mock:web\""
+    "dev:mock": "concurrently -n mock,proxy,web -c yellow,magenta,cyan \"npm:mock:upstream\" \"npm:mock:proxy\" \"npm:mock:web\"",
+    "smoke": "node scripts/smoke.js"
   },
   "dependencies": {
     "@fontsource/lato": "^5.3.0",
