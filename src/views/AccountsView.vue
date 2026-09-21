@@ -60,7 +60,9 @@ async function onDelete(account: Account) {
         </div>
         <div v-else class="flex items-center gap-3">
           <span class="h-4 w-4 rounded-full" :style="{ backgroundColor: account.color }" />
-          <span class="flex-1 font-medium">{{ account.name }}</span>
+          <button type="button" class="flex-1 text-left font-medium hover:underline" :title="t('accounts.edit')" @click="editingId = account.id">
+            {{ account.name }}
+          </button>
           <span class="text-xs text-slate-400">{{ account.token.slice(0, 14) }}…</span>
           <button
             class="rounded border px-2 py-0.5 text-sm dark:border-slate-600 disabled:opacity-40"
