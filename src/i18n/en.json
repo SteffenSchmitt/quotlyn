@@ -141,7 +141,7 @@
   "timeline": {
     "title": "Reset timeline",
     "empty": "No data yet.",
-    "exhausts": "expected full {time}"
+    "exhausts": "Exhausted at: {time}"
   },
   "settings": {
     "title": "Settings",

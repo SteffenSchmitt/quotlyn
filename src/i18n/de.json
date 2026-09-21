@@ -141,7 +141,7 @@
   "timeline": {
     "title": "Reset-Timeline",
     "empty": "Noch keine Daten.",
-    "exhausts": "voraussichtlich voll {time}"
+    "exhausts": "Erschöpft am: {time}"
   },
   "settings": {
     "title": "Einstellungen",
