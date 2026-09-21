@@ -57,7 +57,9 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "accounts": "Accounts"
+    "accounts": "Accounts",
+    "history": "Verlauf",
+    "timeline": "Timeline"
   },
   "accounts": {
     "title": "Accounts",
@@ -82,5 +84,20 @@
     "invalidToken": "Der Token sollte mit sk-ant-oat beginnen.",
     "yes": "Ja, löschen",
     "no": "Nein"
+  },
+  "history": {
+    "title": "Verlauf",
+    "window": "Fenster",
+    "range": "Zeitraum",
+    "accounts": "Accounts",
+    "empty": "Noch keine Snapshots in diesem Zeitraum.",
+    "range24h": "24 h",
+    "range7d": "7 Tage",
+    "range30d": "30 Tage"
+  },
+  "timeline": {
+    "title": "Reset-Timeline",
+    "empty": "Noch keine Daten.",
+    "now": "jetzt"
   }
 }

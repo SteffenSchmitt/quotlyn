@@ -34,6 +34,12 @@ watch(
         </div>
         <nav v-if="store.status === 'unlocked'" class="flex gap-4 text-sm">
           <RouterLink to="/" class="hover:underline" active-class="font-semibold">{{ t('nav.dashboard') }}</RouterLink>
+          <RouterLink to="/history" class="hover:underline" active-class="font-semibold">
+            {{ t('nav.history') }}
+          </RouterLink>
+          <RouterLink to="/timeline" class="hover:underline" active-class="font-semibold">
+            {{ t('nav.timeline') }}
+          </RouterLink>
           <RouterLink to="/accounts" class="hover:underline" active-class="font-semibold">
             {{ t('nav.accounts') }}
           </RouterLink>

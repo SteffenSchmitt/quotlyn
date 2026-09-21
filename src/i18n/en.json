@@ -57,7 +57,9 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "accounts": "Accounts"
+    "accounts": "Accounts",
+    "history": "History",
+    "timeline": "Timeline"
   },
   "accounts": {
     "title": "Accounts",
@@ -82,5 +84,20 @@
     "invalidToken": "Token should start with sk-ant-oat.",
     "yes": "Yes, delete",
     "no": "No"
+  },
+  "history": {
+    "title": "History",
+    "window": "Window",
+    "range": "Range",
+    "accounts": "Accounts",
+    "empty": "No snapshots in this range yet.",
+    "range24h": "24 h",
+    "range7d": "7 days",
+    "range30d": "30 days"
+  },
+  "timeline": {
+    "title": "Reset timeline",
+    "empty": "No data yet.",
+    "now": "now"
   }
 }
