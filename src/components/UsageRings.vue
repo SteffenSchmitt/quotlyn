@@ -169,7 +169,7 @@ const option = computed(() => ({
       ? {
           valueAnimation: true,
           formatter: () => `${headline.value!.percent} %`,
-          fontSize: 22,
+          fontSize: 18,
           fontWeight: 600,
           color: theme.value.text,
           offsetCenter: [0, '-6%'],
