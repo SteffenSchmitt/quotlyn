@@ -53,8 +53,10 @@ Without Docker: `npm install && npm run dev`.
 session window, the 7-day window for all models and the 7-day Fable window,
 each with a countdown to its reset. The big number is the account's lead
 metric, which you pick per account. Rings glow as a window approaches your
-warn and critical thresholds. Cards can be ordered as configured or by
-remaining room.
+warn and critical thresholds, and the right edge of each card is a traffic
+light: green, amber or red by the most used window, always red while the
+limit is reached. Hover it to see why. Each card can be polled on its own,
+and cards can be ordered as configured or by remaining room.
 
 ![Dashboard with one card per account and nested rings per limit window](docs/screenshots/dashboard.png)
 
@@ -90,11 +92,12 @@ Also included:
   each card. Identifying values are masked by default; headers Quotlyn does
   not know yet are flagged as new, so nothing the API adds goes unnoticed.
 - Browser notifications when a window crosses a threshold, once per
-  crossing rather than on every poll.
+  crossing rather than on every poll. They say which window, how far it
+  is, which threshold it crossed and when it resets.
 - Export of the encrypted account file and of the history as CSV or JSON.
   Import merges or replaces accounts from an exported file.
-- German and English interface, light and dark theme, small info tips next
-  to every control.
+- German and English interface, a sun/moon switch in the header for light
+  and dark theme, small info tips where a control needs explaining.
 
 ## How it reads the numbers
 
