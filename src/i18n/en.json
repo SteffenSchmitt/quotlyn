@@ -1,10 +1,59 @@
 {
-  "app": { "title": "Quotlyn", "tagline": "Usage limits at a glance" },
+  "app": {
+    "title": "Quotlyn",
+    "tagline": "Usage limits at a glance"
+  },
   "dashboard": {
     "empty": "No accounts yet.",
     "ping": "Ping proxy",
     "proxyOk": "Proxy reachable",
     "proxyFail": "Proxy unreachable"
   },
-  "lang": { "de": "Deutsch", "en": "English" }
+  "lang": {
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "vault": {
+    "createTitle": "Create your vault",
+    "createHint": "Choose a passphrase. It encrypts your account tokens in this browser and is never stored.",
+    "unlockTitle": "Unlock vault",
+    "passphrase": "Passphrase",
+    "confirm": "Repeat passphrase",
+    "create": "Create vault",
+    "unlock": "Unlock",
+    "lock": "Lock",
+    "remember": "Keep unlocked for this browser session",
+    "mismatch": "Passphrases do not match.",
+    "tooShort": "Use at least 8 characters.",
+    "wrong": "Wrong passphrase.",
+    "working": "Working…"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "accounts": "Accounts"
+  },
+  "accounts": {
+    "title": "Accounts",
+    "add": "Add account",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Delete account \"{name}\"? This cannot be undone.",
+    "up": "Move up",
+    "down": "Move down",
+    "name": "Name",
+    "color": "Colour",
+    "token": "Token (sk-ant-oat…)",
+    "tokenKeep": "Leave empty to keep the current token.",
+    "notifications": "Notifications",
+    "save": "Save",
+    "cancel": "Cancel",
+    "test": "Test token",
+    "testing": "Testing…",
+    "testOk": "OK · 5h {fiveHour} % · 7d {sevenDay} %",
+    "testFail": "Failed: {error}",
+    "empty": "No accounts yet. Add your first one.",
+    "invalidToken": "Token should start with sk-ant-oat.",
+    "yes": "Yes, delete",
+    "no": "No"
+  }
 }

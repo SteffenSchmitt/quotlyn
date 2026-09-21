@@ -1,10 +1,59 @@
 {
-  "app": { "title": "Quotlyn", "tagline": "Nutzungslimits auf einen Blick" },
+  "app": {
+    "title": "Quotlyn",
+    "tagline": "Nutzungslimits auf einen Blick"
+  },
   "dashboard": {
     "empty": "Noch keine Accounts.",
     "ping": "Proxy prüfen",
     "proxyOk": "Proxy erreichbar",
     "proxyFail": "Proxy nicht erreichbar"
   },
-  "lang": { "de": "Deutsch", "en": "English" }
+  "lang": {
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "vault": {
+    "createTitle": "Tresor anlegen",
+    "createHint": "Wähle eine Passphrase. Sie verschlüsselt deine Account-Tokens in diesem Browser und wird nie gespeichert.",
+    "unlockTitle": "Tresor entsperren",
+    "passphrase": "Passphrase",
+    "confirm": "Passphrase wiederholen",
+    "create": "Tresor anlegen",
+    "unlock": "Entsperren",
+    "lock": "Sperren",
+    "remember": "Für diese Browser-Sitzung entsperrt lassen",
+    "mismatch": "Die Passphrasen stimmen nicht überein.",
+    "tooShort": "Mindestens 8 Zeichen verwenden.",
+    "wrong": "Falsche Passphrase.",
+    "working": "Bitte warten…"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "accounts": "Accounts"
+  },
+  "accounts": {
+    "title": "Accounts",
+    "add": "Account hinzufügen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "confirmDelete": "Account „{name}“ löschen? Das lässt sich nicht rückgängig machen.",
+    "up": "Nach oben",
+    "down": "Nach unten",
+    "name": "Name",
+    "color": "Farbe",
+    "token": "Token (sk-ant-oat…)",
+    "tokenKeep": "Leer lassen, um den aktuellen Token zu behalten.",
+    "notifications": "Benachrichtigungen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "test": "Token testen",
+    "testing": "Teste…",
+    "testOk": "OK · 5h {fiveHour} % · 7d {sevenDay} %",
+    "testFail": "Fehlgeschlagen: {error}",
+    "empty": "Noch keine Accounts. Lege den ersten an.",
+    "invalidToken": "Der Token sollte mit sk-ant-oat beginnen.",
+    "yes": "Ja, löschen",
+    "no": "Nein"
+  }
 }
