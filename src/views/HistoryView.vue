@@ -150,7 +150,18 @@ const option = computed(() => {
       trigger: "axis",
       ...th.tooltip,
       axisPointer: { type: "line", lineStyle: { color: th.axisLine } },
-      valueFormatter: (v: number | null) => (v === null ? "–" : `${v} %`),
+      // Own formatter: ECharts' default header prints the time ISO-like ("2026-09-21 23:01:49"), which
+      // reads like UTC. The header is built from the data point's timestamp in the locale's format.
+      formatter: (params: Array<{ marker: string; seriesName: string; value: [string, number | null] }>) => {
+        const first = params[0];
+        if (!first) return "";
+        const when = new Date(first.value[0]);
+        const head = `${d(when, "datetime")}:${String(when.getSeconds()).padStart(2, "0")}`;
+        const rows = params.map(
+          (p) => `${p.marker} ${p.seriesName}<span style="float:right;margin-left:16px;font-weight:700">${p.value[1] === null ? "–" : `${p.value[1]} %`}</span>`,
+        );
+        return [head, ...rows].join("<br/>");
+      },
     },
     legend: {
       top: 0,
