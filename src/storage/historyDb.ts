@@ -21,7 +21,11 @@ interface Schema extends DBSchema {
 const HI = '￿'
 
 export class HistoryDb {
-  private constructor(private db: IDBPDatabase<Schema>) {}
+  private readonly db: IDBPDatabase<Schema>
+
+  private constructor(db: IDBPDatabase<Schema>) {
+    this.db = db
+  }
 
   static async open(name = 'quotlyn'): Promise<HistoryDb> {
     const db = await openDB<Schema>(name, 1, {

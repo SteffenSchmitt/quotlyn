@@ -71,7 +71,7 @@ const headline = computed(() => {
 const option = computed(() => ({
   textStyle: { fontFamily: theme.value.font },
   animationDuration: 600,
-  animationEasing: 'cubicOut',
+  animationEasing: 'cubicOut' as const,
   tooltip: {
     ...theme.value.tooltip,
     trigger: 'item',

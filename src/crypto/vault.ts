@@ -16,8 +16,11 @@ const SALT_BYTES = 16
 const IV_BYTES = 12
 
 export class VaultError extends Error {
-  constructor(public code: 'wrong_passphrase' | 'malformed') {
+  readonly code: 'wrong_passphrase' | 'malformed'
+
+  constructor(code: 'wrong_passphrase' | 'malformed') {
     super(code)
+    this.code = code
     this.name = 'VaultError'
   }
 }

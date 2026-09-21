@@ -36,8 +36,10 @@ export class Poller {
   private cycle: Promise<void> | null = null
   private _running = false
   private readonly now: () => number
+  private readonly opts: PollerOptions
 
-  constructor(private readonly opts: PollerOptions) {
+  constructor(opts: PollerOptions) {
+    this.opts = opts
     this.intervalMs = opts.intervalMs
     this.staggerMs = opts.staggerMs ?? 2000
     this.now = opts.now ?? Date.now
