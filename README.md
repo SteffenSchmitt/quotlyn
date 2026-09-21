@@ -5,29 +5,51 @@
 <h1 align="center">Quotlyn</h1>
 
 <p align="center">
-  Keep an eye on the usage limits of several Claude subscription accounts, side by side, on your own machine.
+  Usage limits of your Claude Pro and Max subscriptions, side by side, on your own machine.
 </p>
 
 <p align="center">
+  <img alt="Release" src="https://img.shields.io/badge/release-v1.3.9-0f172a">
+  <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-0f172a">
+  <img alt="Vue 3 and TypeScript" src="https://img.shields.io/badge/Vue_3-TypeScript-0f172a">
+  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-0f172a">
+  <img alt="Runs locally" src="https://img.shields.io/badge/runs-locally,_no_cloud-0f172a">
+</p>
+
+<p align="center">
+  <a href="#why-quotlyn">Why</a> ·
   <a href="#quick-start">Quick start</a> ·
-  <a href="#what-you-get">What you get</a> ·
+  <a href="#the-three-windows">The three windows</a> ·
+  <a href="#what-you-see">What you see</a> ·
   <a href="#how-it-reads-the-numbers">How it works</a> ·
   <a href="#security">Security</a> ·
   <a href="#configuration">Configuration</a>
 </p>
 
-![Dashboard with one card per account, nested rings per limit window and countdowns to the next reset](docs/screenshots/dashboard.png)
+![Dashboard with one card per account, nested rings per limit window, a forecast line and a traffic light on the card edge](docs/screenshots/dashboard.png)
 
-Quotlyn is a small self-hosted dashboard. It runs in one Docker container,
-polls every configured account on an interval, keeps a history in your
-browser and renders the current state as rings, trend charts and a reset
-timeline. Nothing leaves your machine except the tiny probe request that
-reads the limits.
+## Why Quotlyn
+
+Claude Code shows you `/usage` for the account you are signed in with. If
+you work with more than one Claude subscription, say a personal Max plan
+and one from your team, you keep switching accounts just to see which one
+still has room in its 5-hour session or its weekly window.
+
+Quotlyn polls every account you give it a token for, shows all three limit
+windows per account as nested rings, keeps a history of every reading and
+forecasts when a window will run out. It warns you before you hit a limit
+and tells you, on a timeline, which account to use next.
+
+It runs in a single Docker container on your machine. Tokens stay in your
+browser, encrypted with a passphrase. The only thing that ever leaves your
+machine is the tiny probe request that reads the limits, sent to the same
+API Claude Code talks to.
 
 ## Quick start
 
-You need Docker with Compose (or Node 22+) and one token per account,
-created with the Claude CLI:
+You need Docker with Compose (or Node 22+) and one token per account. The
+token comes from the Claude CLI and works for Pro and Max subscriptions;
+an API key from the Console is not what you want here.
 
 ```sh
 claude setup-token
@@ -47,57 +69,79 @@ creating a token for each account.
 
 Without Docker: `npm install && npm run dev`.
 
-## What you get
+## The three windows
 
-**Dashboard.** One card per account. Three nested rings show the 5-hour
-session window, the 7-day window for all models and the 7-day Fable window,
-each with a countdown to its reset. The big number is the account's lead
-metric, which you pick per account. Rings glow as a window approaches your
-warn and critical thresholds, and the right edge of each card is a traffic
-light: green, amber or red by the most used window, always red while the
-limit is reached. Hover it to see why. Each card can be polled on its own,
-and cards can be ordered as configured or by remaining room.
+Every Claude subscription is limited by three rolling windows. Quotlyn
+reads all of them from the API and shows each as its own ring, line and bar.
 
-**Forecast.** From the snapshots of the current cycle Quotlyn fits the
-slope of each window and tells you when it will be full, or how full it
-will be at the reset. The session window uses a configurable look-back, the
-week windows the whole cycle from 0 %. The cards show it as a line under
-the lead metric, in the ring legend, and as a thin cycle clock inside each
-ring: the clock runs from the last reset to the next and ends where the
-window is expected to run out.
-History continues each line as a dashed projection, the timeline carries
-the same clock as a line under each bar. The forecast can be switched off.
+| Window | Key | What it limits | Resets |
+|---|---|---|---|
+| **Session** | `5h` | Everything you send within a 5-hour session, across all models | 5 hours after the first message of the session |
+| **Week, all models** | `7d` | Your total usage over seven days, across all models | 7 days after the first message of the cycle |
+| **Week, Fable** | `7d_oi` | Your usage of the largest model over seven days | On its own 7-day cycle, independent of the other two |
 
-![Dashboard with one card per account and nested rings per limit window](docs/screenshots/dashboard.png)
+Each window has a utilization from 0 to 100 % and a reset time. When a
+window is used up the API rejects requests until it resets; Quotlyn shows
+that as *Limit reached* with the current numbers rather than as an error.
 
-**History.** Utilization over time per account and window, for the last 24
-hours, 7 or 30 days. Shaded bands mark the periods between resets.
+## What you see
 
-![History chart with one line per account and reset markers](docs/screenshots/history.png)
+### Dashboard
 
-**Reset timeline.** One bar per account and window: the bar is the full
-capacity, the fill the current utilization, the time to the reset at its
-end. The line beneath runs from now to the reset and ends where the window
-is expected to run out. Handy for deciding which account to use next.
+One card per account. Three nested rings show the session window, the
+weekly window and the weekly Fable window, each with a countdown to its
+reset. The big number is the account's lead metric, which you pick per
+account. Rings glow as a window approaches your warn and critical
+thresholds, and the right edge of each card is a traffic light: green,
+amber or red by the most used window, always red while the limit is
+reached. Hover it to see why. Each card can be polled on its own, and cards
+can be ordered as configured or by remaining room.
 
-![Timeline with a bar per account and window](docs/screenshots/timeline.png)
+### Forecast
 
-**Accounts.** Name, colour, token, lead metric and per-account
-notifications. Reorder with the arrows, test a token before saving.
+From the readings of the current cycle Quotlyn fits the slope of each
+window and tells you when it will be full, or how full it will be at the
+reset. The session window uses a configurable look-back, the weekly windows
+the whole cycle from 0 %, because a busy hour says nothing about a week.
 
-![Account form with token test](docs/screenshots/accounts.png)
+On the cards the forecast is a line under the lead metric and a thin white
+clock inside each ring: the clock runs from the last reset to the next and
+ends where the window is expected to run out. A full clock means the
+window lasts. The forecast can be switched off.
 
-**Settings.** Polling, history retention and forecast, warn and critical
-thresholds with browser notifications, theme and language, and export and
-import of your data.
+### History and timeline
 
-![Settings page](docs/screenshots/settings.png)
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/history.png" alt="History chart with one line per account, reset bands and a dashed projection"></td>
+    <td width="50%"><img src="docs/screenshots/timeline.png" alt="Timeline with one full-width bar per account and window"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>History.</b> Utilization over time per account and window, for the last 24 hours, 7 or 30 days. Shaded bands mark the periods between resets; each line continues as a dashed projection to the expected exhaustion or the reset.</td>
+    <td valign="top"><b>Reset timeline.</b> One bar per account and window: the bar is the full capacity, the fill the current utilization, the time to the reset at its end. The line beneath is the same clock as in the rings, from now to the reset. Handy for deciding which account to use next.</td>
+  </tr>
+</table>
 
-**Help.** A step-by-step guide to obtaining a token, right inside the app.
+### Accounts and settings
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/accounts.png" alt="Account form with token test"></td>
+    <td width="50%"><img src="docs/screenshots/settings.png" alt="Settings page with five groups"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Accounts.</b> Name, colour, token, lead metric and per-account notifications. Reorder with the arrows, test a token before saving.</td>
+    <td valign="top"><b>Settings.</b> Polling, history retention and forecast, warn and critical thresholds with browser notifications, theme and language, and export and import of your data.</td>
+  </tr>
+</table>
+
+### Help
+
+A step-by-step guide to obtaining a token, right inside the app.
 
 ![Help page](docs/screenshots/help.png)
 
-Also included:
+### Also included
 
 - Every response header the API returns, unchanged, behind *Raw headers* on
   each card. Identifying values are masked by default; headers Quotlyn does
@@ -108,7 +152,7 @@ Also included:
 - Export of the encrypted account file and of the history as CSV or JSON.
   Import merges or replaces accounts from an exported file.
 - German and English interface, a sun/moon switch in the header for light
-  and dark theme, small info tips where a control needs explaining.
+  and dark theme.
 
 ## How it reads the numbers
 
@@ -116,7 +160,7 @@ Tokens from `claude setup-token` only carry the inference scope, so the
 dedicated usage endpoint rejects them. Quotlyn instead sends the cheapest
 possible Messages request, one output token, and reads the
 `anthropic-ratelimit-unified-*` headers of the response. Those are the same
-numbers the Claude CLI shows under `/usage`.
+numbers Claude Code shows under `/usage`.
 
 The probe goes to Fable by default, because the model-specific weekly
 window only appears on requests for that model. The API serves the larger
@@ -164,15 +208,15 @@ different port so a host-side `npm run dev` can coexist with it.
 
 ```sh
 npm test          # Vitest
-npm run typecheck # vue-tsc
+npm run build     # vue-tsc + Vite, the type gate for .vue files
 ```
 
 The header shows the version from `package.json`; bump it with every change
 to the app.
 
 Vue 3, TypeScript, Pinia, Tailwind, vue-i18n and Apache ECharts. Pure
-logic (parsing, polling, thresholds, crypto, export) lives in framework-free
-modules with unit tests; components stay thin.
+logic (parsing, polling, thresholds, forecast, crypto, export) lives in
+framework-free modules with unit tests; components stay thin.
 
 ## License
 
