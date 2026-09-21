@@ -85,7 +85,10 @@ const statusOpen = ref(false)
 
 /** Error, fallback or limit hint for the notice line; the most urgent one wins. */
 const notice = computed(() => {
-  if (props.state?.lastError) return { text: props.state.lastError, cls: 'text-red-600 dark:text-red-400' }
+  if (props.state?.lastError) {
+    const time = props.state.lastFetchedAt ? d(new Date(props.state.lastFetchedAt), 'time') : '–'
+    return { text: t('dashboard.attemptFailed', { time, error: props.state.lastError }), cls: 'text-red-600 dark:text-red-400' }
+  }
   if (props.parsed?.probe.fallbackUsed)
     return { text: t('dashboard.fallback', { status: props.parsed.probe.primaryStatus ?? '?' }), cls: 'text-red-600 dark:text-red-400' }
   if (props.state?.status === 'limited') return { text: t('dashboard.limitedHint'), cls: 'text-slate-500' }
@@ -180,8 +183,8 @@ const bindingWindow = computed(() => {
     <p class="mt-2 flex items-center text-xs text-slate-400">
       <span class="min-w-0 flex-1 truncate">
         {{
-          state?.lastFetchedAt
-            ? t('dashboard.lastFetched', { time: d(new Date(state.lastFetchedAt), 'time') })
+          state?.lastOkAt
+            ? t('dashboard.lastRead', { time: d(new Date(state.lastOkAt), 'time') })
             : t('dashboard.never')
         }}
       </span>

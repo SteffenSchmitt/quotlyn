@@ -166,6 +166,22 @@ describe('Poller', () => {
     p.stop()
   })
 
+  it('keeps lastOkAt at the last successful poll while lastFetchedAt follows every attempt', async () => {
+    const p = make(10_000)
+    p.start()
+    await vi.advanceTimersByTimeAsync(2000)
+    const okAt = p.getState('a').lastOkAt
+    expect(okAt).toBe(p.getState('a').lastFetchedAt)
+    responder = () => {
+      throw new Error('boom')
+    }
+    await vi.advanceTimersByTimeAsync(10_000)
+    expect(p.getState('a').status).toBe('error')
+    expect(p.getState('a').lastOkAt).toBe(okAt)
+    expect(p.getState('a').lastFetchedAt).not.toBe(okAt)
+    p.stop()
+  })
+
   it('setIntervalMs reschedules the next cycle', async () => {
     const p = make(10_000)
     p.start()

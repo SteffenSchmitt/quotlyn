@@ -7,7 +7,10 @@ export interface PollTarget {
 
 export interface AccountPollState {
   status: 'idle' | 'fetching' | 'ok' | 'limited' | 'error' | 'paused' | 'disabled'
+  /** Last attempt, whatever its outcome. */
   lastFetchedAt: string | null
+  /** Last successful read. */
+  lastOkAt: string | null
   lastError: string | null
   pausedUntil: string | null
 }
@@ -22,7 +25,7 @@ export interface PollerOptions {
   now?: () => number
 }
 
-const IDLE: AccountPollState = { status: 'idle', lastFetchedAt: null, lastError: null, pausedUntil: null }
+const IDLE: AccountPollState = { status: 'idle', lastFetchedAt: null, lastOkAt: null, lastError: null, pausedUntil: null }
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -140,7 +143,7 @@ export class Poller {
     this.opts.onResult(target, result)
 
     if (result.ok) {
-      this.setState(target.id, { status: 'ok', lastFetchedAt: fetchedAt, lastError: null, pausedUntil: null })
+      this.setState(target.id, { status: 'ok', lastFetchedAt: fetchedAt, lastOkAt: fetchedAt, lastError: null, pausedUntil: null })
       return
     }
     if (result.status === 401 || result.status === 403) {
@@ -153,7 +156,7 @@ export class Poller {
       return
     }
     if (result.status === 429 && result.limitReached) {
-      this.setState(target.id, { status: 'limited', lastFetchedAt: fetchedAt, lastError: null, pausedUntil: null })
+      this.setState(target.id, { status: 'limited', lastFetchedAt: fetchedAt, lastOkAt: fetchedAt, lastError: null, pausedUntil: null })
       return
     }
     if (result.status === 429) {
