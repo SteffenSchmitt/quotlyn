@@ -83,6 +83,18 @@ describe('parseUsage', () => {
     expect(parsed.usage).toBeNull()
   })
 
+  it('parses a limit-reached body with rejected status', () => {
+    const parsed = parseUsage({
+      ...body,
+      upstreamStatus: 429,
+      usage: undefined,
+      headers: { ...body.headers, 'anthropic-ratelimit-unified-status': 'rejected', 'anthropic-ratelimit-unified-5h-status': 'rejected', 'anthropic-ratelimit-unified-5h-utilization': '1' },
+    })
+    expect(parsed.overall.status).toBe('rejected')
+    expect(parsed.windows[0]).toMatchObject({ key: '5h', utilization: 1, status: 'rejected' })
+    expect(parsed.usage).toBeNull()
+  })
+
   it('throws ParseError without a headers object', () => {
     expect(() => parseUsage({ nope: true })).toThrow(ParseError)
     expect(() => parseUsage(null)).toThrow(ParseError)

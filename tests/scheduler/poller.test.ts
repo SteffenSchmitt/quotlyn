@@ -96,6 +96,19 @@ describe('Poller', () => {
     p.stop()
   })
 
+  it('keeps polling normally when the 429 is a reached subscription limit', async () => {
+    responder = (t) =>
+      t.id === 'a' ? { ok: false, status: 429, error: 'limit_reached', limitReached: true, body: {} } : ok
+    const p = make(10_000)
+    p.start()
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(p.getState('a').status).toBe('limited')
+    expect(p.getState('a').pausedUntil).toBeNull()
+    await vi.advanceTimersByTimeAsync(12_000)
+    expect(calls.filter((c) => c.id === 'a')).toHaveLength(2)
+    p.stop()
+  })
+
   it('records network errors as error state but keeps polling', async () => {
     responder = () => ({ ok: false, status: null, error: 'Failed to fetch' })
     const p = make(10_000)

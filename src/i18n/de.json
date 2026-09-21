@@ -18,7 +18,8 @@
       "ok": "OK",
       "error": "Fehler",
       "paused": "Pausiert (Rate-Limit)",
-      "disabled": "Token abgelehnt"
+      "disabled": "Token abgelehnt",
+      "limited": "Limit erreicht"
     },
     "overage": "Extra Usage: {status}",
     "cost": "Probe-Kosten: {i} in / {o} out Token",
@@ -36,7 +37,8 @@
     },
     "overall": "Gesamt: {status} · bindendes Fenster: {claim}",
     "fallback": "Fable-Limit erreicht: Die Fable-Probe wurde abgewiesen ({status}); die Werte stammen aus einer Haiku-Probe, das Fable-Fenster fehlt.",
-    "probeModel": "Probe: {model}"
+    "probeModel": "Probe: {model}",
+    "limitedHint": "Die API lehnt Anfragen ab, bis das bindende Fenster zurückgesetzt wird; die Zahlen unten sind trotzdem aktuell."
   },
   "lang": {
     "de": "Deutsch",

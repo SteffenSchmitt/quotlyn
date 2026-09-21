@@ -47,6 +47,22 @@ export const useUsageStore = defineStore('usage', () => {
           error: { status: result.status, message: err instanceof Error ? err.message : 'parse_error' },
         }
       }
+    } else if (result.limitReached && result.body) {
+      let parsed: ParsedUsage | null = null
+      try {
+        parsed = parseUsage(result.body)
+        latest[target.id] = parsed
+        notifyCrossings(target.id, parsed)
+      } catch {
+        parsed = null
+      }
+      snapshot = {
+        accountId: target.id,
+        fetchedAt: parsed?.fetchedAt ?? fetchedAt,
+        ok: parsed !== null,
+        parsed,
+        error: parsed ? null : { status: result.status, message: result.error },
+      }
     } else {
       snapshot = {
         accountId: target.id,

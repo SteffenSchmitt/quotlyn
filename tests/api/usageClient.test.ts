@@ -39,12 +39,22 @@ describe('fetchUsage', () => {
       'bad',
       mockFetch(401, { upstreamStatus: 401, headers: {}, error: { type: 'authentication_error' } }),
     )
-    expect(result).toEqual({ ok: false, status: 401, error: 'unauthorized' })
+    expect(result).toMatchObject({ ok: false, status: 401, error: 'unauthorized' })
   })
 
   it('exposes retry-after on 429', async () => {
     const result = await fetchUsage('tok', mockFetch(429, {}, { 'retry-after': '45' }))
-    expect(result).toEqual({ ok: false, status: 429, error: 'rate_limited', retryAfterSeconds: 45 })
+    expect(result).toEqual({ ok: false, status: 429, error: 'rate_limited', retryAfterSeconds: 45, body: {} })
+  })
+
+  it('marks a 429 that carries usage headers as limit reached', async () => {
+    const body = {
+      upstreamStatus: 429,
+      headers: { 'anthropic-ratelimit-unified-status': 'rejected', 'anthropic-ratelimit-unified-5h-utilization': '1' },
+      error: { type: 'rate_limit_error', message: 'Error' },
+    }
+    const result = await fetchUsage('tok', mockFetch(429, body))
+    expect(result).toEqual({ ok: false, status: 429, error: 'limit_reached', limitReached: true, body })
   })
 
   it('maps network failures to status null', async () => {

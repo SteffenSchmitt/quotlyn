@@ -21,9 +21,15 @@ function windowLabel(key: string): string {
     <header class="flex items-center gap-2">
       <span class="h-3 w-3 rounded-full" :style="{ backgroundColor: account.color }" />
       <h3 class="flex-1 font-semibold">{{ account.name }}</h3>
-      <span class="text-xs text-slate-500">{{ t(`dashboard.state.${state?.status ?? 'idle'}`) }}</span>
+      <span
+        class="text-xs"
+        :class="state?.status === 'limited' ? 'font-medium text-red-600' : 'text-slate-500'"
+      >
+        {{ t(`dashboard.state.${state?.status ?? 'idle'}`) }}
+      </span>
     </header>
     <p v-if="state?.lastError" class="mt-1 text-xs text-red-600">{{ state.lastError }}</p>
+    <p v-if="state?.status === 'limited'" class="mt-1 text-xs text-slate-500">{{ t('dashboard.limitedHint') }}</p>
 
     <template v-if="parsed">
       <p v-if="parsed.probe.fallbackUsed" class="mt-2 rounded bg-red-50 p-2 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">

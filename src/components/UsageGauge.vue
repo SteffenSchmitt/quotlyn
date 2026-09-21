@@ -5,6 +5,7 @@ import { use } from 'echarts/core'
 import { GaugeChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
 import { DEFAULT_THRESHOLDS, levelColor, levelFor, type Thresholds } from '../lib/usageView'
+import { isDark } from '../lib/theme'
 
 use([GaugeChart, CanvasRenderer])
 
@@ -39,7 +40,7 @@ const option = computed(() => ({
         formatter: (v: number) => `${Math.round(v)} %`,
         fontSize: 18,
         fontWeight: 600,
-        color: 'inherit',
+        color: isDark.value ? '#f1f5f9' : '#0f172a',
         offsetCenter: [0, '5%'],
       },
       data: [{ value: percent.value }],

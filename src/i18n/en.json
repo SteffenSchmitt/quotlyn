@@ -18,7 +18,8 @@
       "ok": "OK",
       "error": "Error",
       "paused": "Paused (rate limited)",
-      "disabled": "Token rejected"
+      "disabled": "Token rejected",
+      "limited": "Limit reached"
     },
     "overage": "Extra usage: {status}",
     "cost": "Probe cost: {i} in / {o} out tokens",
@@ -36,7 +37,8 @@
     },
     "overall": "Overall: {status} · binding window: {claim}",
     "fallback": "Fable limit reached: the Fable probe was rejected ({status}); values come from a Haiku probe and the Fable window is missing.",
-    "probeModel": "Probe: {model}"
+    "probeModel": "Probe: {model}",
+    "limitedHint": "The API rejects requests until the binding window resets; the numbers below are still current."
   },
   "lang": {
     "de": "Deutsch",

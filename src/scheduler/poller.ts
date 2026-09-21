@@ -6,7 +6,7 @@ export interface PollTarget {
 }
 
 export interface AccountPollState {
-  status: 'idle' | 'fetching' | 'ok' | 'error' | 'paused' | 'disabled'
+  status: 'idle' | 'fetching' | 'ok' | 'limited' | 'error' | 'paused' | 'disabled'
   lastFetchedAt: string | null
   lastError: string | null
   pausedUntil: string | null
@@ -140,6 +140,10 @@ export class Poller {
         lastError: result.error,
         pausedUntil: null,
       })
+      return
+    }
+    if (result.status === 429 && result.limitReached) {
+      this.setState(target.id, { status: 'limited', lastFetchedAt: fetchedAt, lastError: null, pausedUntil: null })
       return
     }
     if (result.status === 429) {
