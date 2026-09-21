@@ -12,6 +12,8 @@ let seen: Seen = {}
 let upstreamStatus = 200
 let upstreamBody = '{"usage":{"input_tokens":22,"output_tokens":1}}'
 let upstreamHeaders: Record<string, string> = {}
+let perModel: Record<string, { status: number; headers?: Record<string, string>; body?: string }> = {}
+let seenModels: string[] = []
 
 function listen(server: http.Server): Promise<string> {
   return new Promise((resolve) => {
@@ -46,12 +48,25 @@ beforeAll(async () => {
         method: req.method,
         body,
       }
+      let model = ''
+      try {
+        model = JSON.parse(body).model
+      } catch {
+        model = ''
+      }
+      seenModels.push(model)
+      const special = perModel[model]
+      if (special) {
+        res.writeHead(special.status, { 'content-type': 'application/json', ...(special.headers ?? {}) })
+        res.end(special.body ?? '{"type":"error","error":{"type":"rate_limit_error","message":"Error"}}')
+        return
+      }
       res.writeHead(upstreamStatus, { 'content-type': 'application/json', ...upstreamHeaders })
       res.end(upstreamBody)
     })
   })
   const upstreamBase = await listen(upstream)
-  proxy = createProxyServer({ upstream: upstreamBase, model: 'test-model' })
+  proxy = createProxyServer({ upstream: upstreamBase, model: 'test-model', fallbackModel: 'fallback-model' })
   proxyBase = await listen(proxy)
 })
 
@@ -74,16 +89,18 @@ describe('GET /usage', () => {
     expect(JSON.parse(seen.body!)).toEqual({
       model: 'test-model',
       max_tokens: 1,
+      system: [{ type: 'text', text: "You are Claude Code, Anthropic's official CLI for Claude." }],
       messages: [{ role: 'user', content: 'hi' }],
     })
   })
 
-  it('returns anthropic headers, usage and fetchedAt as JSON', async () => {
+  it('returns anthropic headers, usage, probe info and fetchedAt as JSON', async () => {
     upstreamStatus = 200
     upstreamHeaders = RATE_HEADERS
     const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
     const json = await res.json()
     expect(json.upstreamStatus).toBe(200)
+    expect(json.probe).toEqual({ model: 'test-model', fallbackUsed: false, primaryStatus: 200 })
     expect(typeof json.fetchedAt).toBe('string')
     expect(json.headers['anthropic-ratelimit-unified-5h-utilization']).toBe('0.28')
     expect(json.headers['anthropic-organization-id']).toBe('org-test')
@@ -110,6 +127,44 @@ describe('GET /usage', () => {
     const res = await fetch(`${proxyBase}/usage`)
     expect(res.status).toBe(401)
     expect(seen.auth).toBe('untouched')
+  })
+})
+
+describe('fallback probe', () => {
+  it('retries with the fallback model when the primary is rate limited without headers', async () => {
+    upstreamStatus = 200
+    upstreamHeaders = RATE_HEADERS
+    perModel = { 'test-model': { status: 429 } }
+    seenModels = []
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(seenModels).toEqual(['test-model', 'fallback-model'])
+    expect(json.probe).toEqual({ model: 'fallback-model', fallbackUsed: true, primaryStatus: 429 })
+    expect(json.headers['anthropic-ratelimit-unified-5h-utilization']).toBe('0.28')
+    perModel = {}
+  })
+
+  it('does not retry when the 429 carries rate-limit headers', async () => {
+    perModel = {
+      'test-model': { status: 429, headers: { ...RATE_HEADERS, 'anthropic-ratelimit-unified-status': 'rejected' } },
+    }
+    seenModels = []
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(429)
+    expect(seenModels).toEqual(['test-model'])
+    const json = await res.json()
+    expect(json.probe).toEqual({ model: 'test-model', fallbackUsed: false, primaryStatus: 429 })
+    perModel = {}
+  })
+
+  it('does not retry on 401', async () => {
+    perModel = { 'test-model': { status: 401, body: '{"type":"error","error":{"type":"authentication_error","message":"bad"}}' } }
+    seenModels = []
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(401)
+    expect(seenModels).toEqual(['test-model'])
+    perModel = {}
   })
 })
 

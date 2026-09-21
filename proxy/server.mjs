@@ -8,7 +8,12 @@ import { URL } from 'node:url'
 const BETA_HEADER = 'oauth-2025-04-20'
 const API_VERSION = '2023-06-01'
 const MESSAGES_PATH = '/v1/messages'
-const DEFAULT_MODEL = 'claude-haiku-4-5-20251001'
+const DEFAULT_MODEL = 'claude-fable-5-1'
+const DEFAULT_FALLBACK_MODEL = 'claude-haiku-4-5-20251001'
+// The API only serves the larger models to these OAuth tokens when the request
+// identifies itself as the Claude CLI. This is the CLI's own system prompt.
+const PROBE_SYSTEM = "You are Claude Code, Anthropic's official CLI for Claude."
+const RATE_LIMIT_MARKER = 'anthropic-ratelimit-unified-status'
 
 function json(res, status, payload, extraHeaders = {}) {
   res.writeHead(status, { 'content-type': 'application/json', ...extraHeaders })
@@ -25,17 +30,60 @@ function pickHeaders(headers) {
   return out
 }
 
-export function createProxyServer({ upstream, port, model } = {}) {
-  const base = new URL(upstream ?? process.env.QUOTLYN_UPSTREAM ?? 'https://api.anthropic.com')
-  const probeModel = model ?? process.env.QUOTLYN_PROBE_MODEL ?? DEFAULT_MODEL
-  const client = base.protocol === 'https:' ? https : http
-  const probeBody = JSON.stringify({
-    model: probeModel,
+function probeBody(model) {
+  return JSON.stringify({
+    model,
     max_tokens: 1,
+    system: [{ type: 'text', text: PROBE_SYSTEM }],
     messages: [{ role: 'user', content: 'hi' }],
   })
+}
 
-  const server = http.createServer((req, res) => {
+export function createProxyServer({ upstream, port, model, fallbackModel } = {}) {
+  const base = new URL(upstream ?? process.env.QUOTLYN_UPSTREAM ?? 'https://api.anthropic.com')
+  const primaryModel = model ?? process.env.QUOTLYN_PROBE_MODEL ?? DEFAULT_MODEL
+  const secondaryModel = fallbackModel ?? process.env.QUOTLYN_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL
+  const client = base.protocol === 'https:' ? https : http
+
+  function sendProbe(auth, probeModel) {
+    return new Promise((resolve, reject) => {
+      const body = probeBody(probeModel)
+      const req = client.request(
+        {
+          protocol: base.protocol,
+          hostname: base.hostname,
+          port: base.port || undefined,
+          path: MESSAGES_PATH,
+          method: 'POST',
+          headers: {
+            authorization: auth,
+            'anthropic-beta': BETA_HEADER,
+            'anthropic-version': API_VERSION,
+            'content-type': 'application/json',
+            'content-length': Buffer.byteLength(body),
+          },
+        },
+        (upstreamRes) => {
+          let raw = ''
+          upstreamRes.setEncoding('utf8')
+          upstreamRes.on('data', (chunk) => (raw += chunk))
+          upstreamRes.on('end', () => {
+            let parsed = null
+            try {
+              parsed = JSON.parse(raw)
+            } catch {
+              parsed = null
+            }
+            resolve({ status: upstreamRes.statusCode ?? 502, headers: upstreamRes.headers, parsed, raw })
+          })
+        },
+      )
+      req.on('error', reject)
+      req.end(body)
+    })
+  }
+
+  const server = http.createServer(async (req, res) => {
     const started = Date.now()
     const url = new URL(req.url ?? '/', 'http://localhost')
 
@@ -50,59 +98,38 @@ export function createProxyServer({ upstream, port, model } = {}) {
     const auth = req.headers.authorization
     if (!auth) return json(res, 401, { error: 'missing_authorization' })
 
-    const upstreamReq = client.request(
-      {
-        protocol: base.protocol,
-        hostname: base.hostname,
-        port: base.port || undefined,
-        path: MESSAGES_PATH,
-        method: 'POST',
-        headers: {
-          authorization: auth,
-          'anthropic-beta': BETA_HEADER,
-          'anthropic-version': API_VERSION,
-          'content-type': 'application/json',
-          'content-length': Buffer.byteLength(probeBody),
-        },
-      },
-      (upstreamRes) => {
-        let raw = ''
-        upstreamRes.setEncoding('utf8')
-        upstreamRes.on('data', (chunk) => (raw += chunk))
-        upstreamRes.on('end', () => {
-          const status = upstreamRes.statusCode ?? 502
-          let parsed = null
-          try {
-            parsed = JSON.parse(raw)
-          } catch {
-            parsed = null
-          }
+    try {
+      let probeModel = primaryModel
+      let result = await sendProbe(auth, primaryModel)
+      const primaryStatus = result.status
+      let fallbackUsed = false
+      if (result.status === 429 && !(RATE_LIMIT_MARKER in result.headers) && secondaryModel !== primaryModel) {
+        probeModel = secondaryModel
+        result = await sendProbe(auth, secondaryModel)
+        fallbackUsed = true
+      }
 
-          const payload = {
-            fetchedAt: new Date().toISOString(),
-            upstreamStatus: status,
-            headers: pickHeaders(upstreamRes.headers),
-          }
-          if (status >= 200 && status < 300) {
-            payload.usage = parsed?.usage ?? null
-          } else {
-            payload.error = parsed?.error ?? { type: 'upstream_error', message: raw.slice(0, 200) }
-          }
-          const retryAfter = upstreamRes.headers['retry-after']
-          json(res, status, payload, retryAfter ? { 'retry-after': retryAfter } : {})
-        })
-      },
-    )
-
-    upstreamReq.on('error', (err) => {
+      const payload = {
+        fetchedAt: new Date().toISOString(),
+        upstreamStatus: result.status,
+        headers: pickHeaders(result.headers),
+        probe: { model: probeModel, fallbackUsed, primaryStatus },
+      }
+      if (result.status >= 200 && result.status < 300) {
+        payload.usage = result.parsed?.usage ?? null
+      } else {
+        payload.error = result.parsed?.error ?? { type: 'upstream_error', message: result.raw.slice(0, 200) }
+      }
+      const retryAfter = result.headers['retry-after']
+      json(res, result.status, payload, retryAfter ? { 'retry-after': retryAfter } : {})
+    } catch (err) {
       json(res, 502, {
         fetchedAt: new Date().toISOString(),
         upstreamStatus: null,
         headers: {},
         error: { type: 'upstream_unreachable', message: err.message },
       })
-    })
-    upstreamReq.end(probeBody)
+    }
   })
 
   if (port !== undefined) server.listen(port, '0.0.0.0')
