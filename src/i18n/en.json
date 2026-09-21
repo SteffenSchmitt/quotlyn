@@ -63,7 +63,7 @@
       "exhausts": "Exhausted in: {t} (+{rate} %/h)",
       "lasts": "lasts until the reset, then ≈ {p} % (+{rate} %/h)",
       "short": {
-        "exhausts": "exhausted in {t}",
+        "exhausts": "Exhausted in: {t}",
         "lasts": "≈ {p} % at reset"
       }
     }

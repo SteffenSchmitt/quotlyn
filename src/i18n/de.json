@@ -63,7 +63,7 @@
       "exhausts": "Erschöpft in: {t} (+{rate} %/h)",
       "lasts": "reicht bis zum Reset, dann ≈ {p} % (+{rate} %/h)",
       "short": {
-        "exhausts": "erschöpft in {t}",
+        "exhausts": "Erschöpft in: {t}",
         "lasts": "≈ {p} % beim Reset"
       }
     }
