@@ -9,10 +9,13 @@ import { notify } from '../notify/webNotify'
 import { crossingNotification } from '../notify/notifyText'
 import { i18n } from '../i18n'
 import { windowOneLine } from '../lib/windowLabels'
+import { forecastWindow, type Forecast } from '../lib/forecast'
 import { useAccountsStore } from './accounts'
 import { useSettingsStore } from './settings'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+/** How much history the forecast keeps in memory: the longest window is seven days. */
+const CYCLE_MS = 7 * DAY_MS
 
 export const useUsageStore = defineStore('usage', () => {
   const accounts = useAccountsStore()
@@ -21,6 +24,8 @@ export const useUsageStore = defineStore('usage', () => {
   const latest = reactive<Record<string, ParsedUsage | undefined>>({})
   const pollState = reactive<Record<string, AccountPollState | undefined>>({})
   const lastSnapshot = reactive<Record<string, UsageSnapshot | undefined>>({})
+  /** OK snapshots of the last seven days per account, ascending, for the forecast. */
+  const cycle = reactive<Record<string, UsageSnapshot[] | undefined>>({})
   const refreshing = ref(false)
 
   let db: HistoryDb | null = null
@@ -76,7 +81,22 @@ export const useUsageStore = defineStore('usage', () => {
       }
     }
     lastSnapshot[target.id] = snapshot
+    if (snapshot.ok) remember(target.id, snapshot)
     if (db) await db.add(snapshot)
+  }
+
+  function remember(accountId: string, snapshot: Omit<UsageSnapshot, 'id'>) {
+    const cutoff = new Date(Date.now() - CYCLE_MS).toISOString()
+    const kept = (cycle[accountId] ?? []).filter((s) => s.fetchedAt >= cutoff)
+    kept.push(snapshot)
+    cycle[accountId] = kept
+  }
+
+  /** Forecast for one window of an account, or null when disabled or not enough data. */
+  function forecastFor(accountId: string, windowKey: string, nowMs: number): Forecast | null {
+    const opts = settingsStore.settings.forecast
+    if (!opts.enabled) return null
+    return forecastWindow(cycle[accountId] ?? [], windowKey, opts, nowMs)
   }
 
   function notifyCrossings(accountId: string, parsed: ParsedUsage) {
@@ -125,6 +145,8 @@ export const useUsageStore = defineStore('usage', () => {
       if (snap?.parsed) latest[a.id] = snap.parsed
       const last = await db.latest(a.id)
       if (last) lastSnapshot[a.id] = last
+      const since = new Date(Date.now() - CYCLE_MS).toISOString()
+      cycle[a.id] = (await db.list(a.id, since)).filter((s) => s.ok)
     }
     await prune()
     if (pruneTimer) clearInterval(pruneTimer)
@@ -141,6 +163,7 @@ export const useUsageStore = defineStore('usage', () => {
     for (const k of Object.keys(latest)) delete latest[k]
     for (const k of Object.keys(pollState)) delete pollState[k]
     for (const k of Object.keys(lastSnapshot)) delete lastSnapshot[k]
+    for (const k of Object.keys(cycle)) delete cycle[k]
   }
 
   async function refreshNow() {
@@ -162,6 +185,7 @@ export const useUsageStore = defineStore('usage', () => {
     delete latest[id]
     delete pollState[id]
     delete lastSnapshot[id]
+    delete cycle[id]
     if (db) await db.deleteAccount(id)
   }
 
@@ -190,7 +214,9 @@ export const useUsageStore = defineStore('usage', () => {
     latest,
     pollState,
     lastSnapshot,
+    cycle,
     refreshing,
+    forecastFor,
     start,
     stop,
     refreshNow,

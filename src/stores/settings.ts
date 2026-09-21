@@ -2,16 +2,22 @@ import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { SETTINGS_KEY, readJson, writeJson } from '../storage/localStore'
 import { DEFAULT_THRESHOLDS, type Thresholds } from '../lib/usageView'
+import { DEFAULT_FORECAST, LOOKBACK_CHOICES, type ForecastOptions } from '../lib/forecast'
 
 export type Theme = 'system' | 'light' | 'dark'
 export type LocaleSetting = 'auto' | 'de' | 'en'
 export type DashboardSort = 'manual' | 'headroom'
+
+export interface ForecastSettings extends ForecastOptions {
+  enabled: boolean
+}
 
 export interface Settings {
   intervalSeconds: number
   autoRefresh: boolean
   retentionDays: number
   thresholds: Thresholds
+  forecast: ForecastSettings
   notificationsEnabled: boolean
   theme: Theme
   locale: LocaleSetting
@@ -23,12 +29,15 @@ export const DEFAULT_SETTINGS: Settings = {
   autoRefresh: true,
   retentionDays: 30,
   thresholds: { ...DEFAULT_THRESHOLDS },
+  forecast: { enabled: true, ...DEFAULT_FORECAST },
   notificationsEnabled: false,
   theme: 'system',
   locale: 'auto',
   dashboardSort: 'manual',
 }
 export const MIN_INTERVAL_SECONDS = 60
+export const MIN_FORECAST_POINTS = 2
+export const MAX_FORECAST_POINTS = 10
 const THEMES: Theme[] = ['system', 'light', 'dark']
 const LOCALES: LocaleSetting[] = ['auto', 'de', 'en']
 const SORTS: DashboardSort[] = ['manual', 'headroom']
@@ -42,7 +51,7 @@ function clamp(n: number, lo: number, hi: number): number {
 }
 
 function sanitize(input: Partial<Settings>, base: Settings): Settings {
-  const out: Settings = { ...base, thresholds: { ...base.thresholds } }
+  const out: Settings = { ...base, thresholds: { ...base.thresholds }, forecast: { ...base.forecast } }
   if (typeof input.intervalSeconds === 'number' && Number.isFinite(input.intervalSeconds)) {
     out.intervalSeconds = Math.max(MIN_INTERVAL_SECONDS, Math.round(input.intervalSeconds))
   }
@@ -58,6 +67,14 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
       out.thresholds.warn = Math.round((out.thresholds.crit - 0.01) * 100) / 100
     }
   }
+  if (input.forecast && typeof input.forecast === 'object') {
+    const { enabled, lookbackMinutes, minPoints } = input.forecast
+    if (typeof enabled === 'boolean') out.forecast.enabled = enabled
+    if ((LOOKBACK_CHOICES as readonly number[]).includes(lookbackMinutes)) out.forecast.lookbackMinutes = lookbackMinutes
+    if (typeof minPoints === 'number' && Number.isFinite(minPoints)) {
+      out.forecast.minPoints = clamp(Math.round(minPoints), MIN_FORECAST_POINTS, MAX_FORECAST_POINTS)
+    }
+  }
   if (typeof input.notificationsEnabled === 'boolean') out.notificationsEnabled = input.notificationsEnabled
   if (input.theme && THEMES.includes(input.theme)) out.theme = input.theme
   if (input.locale && LOCALES.includes(input.locale)) out.locale = input.locale
@@ -66,7 +83,7 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
 }
 
 export const useSettingsStore = defineStore('settings', () => {
-  const settings = reactive<Settings>({ ...DEFAULT_SETTINGS, thresholds: { ...DEFAULT_THRESHOLDS } })
+  const settings = reactive<Settings>({ ...DEFAULT_SETTINGS, thresholds: { ...DEFAULT_THRESHOLDS }, forecast: { ...DEFAULT_SETTINGS.forecast } })
 
   function load() {
     const stored = readJson<Partial<Settings>>(settingsDeps.storage(), SETTINGS_KEY) ?? {}
@@ -75,7 +92,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   function update(patch: Partial<Settings>) {
     Object.assign(settings, sanitize(patch, settings))
-    writeJson(settingsDeps.storage(), SETTINGS_KEY, { ...settings, thresholds: { ...settings.thresholds } })
+    writeJson(settingsDeps.storage(), SETTINGS_KEY, { ...settings, thresholds: { ...settings.thresholds }, forecast: { ...settings.forecast } })
   }
 
   return { settings, load, update }

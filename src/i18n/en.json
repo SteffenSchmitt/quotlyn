@@ -57,7 +57,16 @@
       "seven_day_overage_included": "7 d incl. overage"
     },
     "binding": "binding: {window}",
-    "refreshAccount": "Poll this account now"
+    "refreshAccount": "Poll this account now",
+    "forecast": {
+      "label": "Forecast",
+      "exhausts": "full in about {t} (+{rate} %/h)",
+      "lasts": "lasts until the reset, then ≈ {p} % (+{rate} %/h)",
+      "short": {
+        "exhausts": "full in {t}",
+        "lasts": "≈ {p} % at reset"
+      }
+    }
   },
   "lang": {
     "de": "Deutsch",
@@ -177,6 +186,13 @@
       "run": "Import",
       "done": "Imported {imported} account(s), {total} in total.",
       "malformed": "This is not a Quotlyn accounts file."
+    },
+    "forecast": {
+      "enabled": "Show forecast",
+      "lookback": "Look-back for the session forecast (week windows use the whole cycle)",
+      "lookbackCycle": "since the last reset",
+      "lookbackMin": "last {n} min",
+      "minPoints": "Minimum data points"
     }
   },
   "windows": {
@@ -212,7 +228,8 @@
     "appearance": "Theme and language of the interface.",
     "export": "Accounts export the encrypted vault file as is. History exports never contain tokens.",
     "import": "Merge or replace accounts from an exported vault file. You need the passphrase that file was created with.",
-    "remember": "Keeps the vault open for this browser tab. Closing the tab locks it again."
+    "remember": "Keeps the vault open for this browser tab. Closing the tab locks it again.",
+    "forecast": "The slope of the utilization is fitted by linear regression over the snapshots of the current cycle and extended to 100 % or to the reset. For the session window the look-back decides how much history enters; week windows always use the whole cycle from 0 %, because a busy hour says nothing about a week."
   },
   "help_page": {
     "title": "Getting a token",

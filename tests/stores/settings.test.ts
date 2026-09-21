@@ -47,6 +47,18 @@ describe('settings store', () => {
     expect(s.settings.thresholds).toEqual({ warn: 0.5, crit: 1 })
   })
 
+  it('sanitizes forecast options', () => {
+    const s = useSettingsStore()
+    s.load()
+    expect(s.settings.forecast).toEqual({ enabled: true, lookbackMinutes: 60, minPoints: 3 })
+    s.update({ forecast: { enabled: false, lookbackMinutes: 120, minPoints: 5 } })
+    expect(s.settings.forecast).toEqual({ enabled: false, lookbackMinutes: 120, minPoints: 5 })
+    s.update({ forecast: { enabled: true, lookbackMinutes: 45 as never, minPoints: 99 } })
+    expect(s.settings.forecast).toEqual({ enabled: true, lookbackMinutes: 120, minPoints: 10 })
+    s.update({ forecast: { minPoints: 1 } as never })
+    expect(s.settings.forecast.minPoints).toBe(2)
+  })
+
   it('persists theme, locale and notifications', () => {
     const s = useSettingsStore()
     s.load()
