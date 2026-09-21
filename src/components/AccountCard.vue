@@ -62,13 +62,6 @@ const summary = computed(() => {
           })
         }}
       </p>
-      <div class="mt-2 rounded bg-slate-50 p-2 dark:bg-slate-800 text-xs">
-        <div class="font-medium">{{ t('dashboard.overageBlock.title') }}</div>
-        <div>{{ t('dashboard.overageBlock.status', { status: parsed.overage.status ?? '–' }) }}</div>
-        <div v-if="parsed.overage.disabledReason">
-          {{ t('dashboard.overageBlock.reason', { reason: parsed.overage.disabledReason }) }}
-        </div>
-      </div>
       <p v-if="parsed.usage" class="mt-1 text-xs text-slate-400">
         {{ t('dashboard.cost', { i: parsed.usage.inputTokens, o: parsed.usage.outputTokens }) }}
         <span v-if="parsed.probe.model"> · {{ t('dashboard.probeModel', { model: parsed.probe.model }) }}</span>

@@ -21,7 +21,6 @@
       "disabled": "Token rejected",
       "limited": "Limit reached"
     },
-    "overage": "Extra usage: {status}",
     "cost": "Probe cost: {i} in / {o} out tokens",
     "raw": {
       "toggle": "Raw headers",
@@ -29,11 +28,6 @@
       "new": "new"
     },
     "noData": "No data yet",
-    "overageBlock": {
-      "title": "Extra usage",
-      "status": "Status: {status}",
-      "reason": "Reason: {reason}"
-    },
     "overall": "Overall: {status} · binding window: {claim}",
     "fallback": "Fable limit reached: the Fable probe was rejected ({status}); values come from a Haiku probe and the Fable window is missing.",
     "probeModel": "Probe: {model}",

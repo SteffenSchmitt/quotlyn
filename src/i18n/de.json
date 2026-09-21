@@ -21,7 +21,6 @@
       "disabled": "Token abgelehnt",
       "limited": "Limit erreicht"
     },
-    "overage": "Extra Usage: {status}",
     "cost": "Probe-Kosten: {i} in / {o} out Token",
     "raw": {
       "toggle": "Rohdaten (Header)",
@@ -29,11 +28,6 @@
       "new": "neu"
     },
     "noData": "Noch keine Daten",
-    "overageBlock": {
-      "title": "Extra Usage",
-      "status": "Status: {status}",
-      "reason": "Grund: {reason}"
-    },
     "overall": "Gesamt: {status} · bindendes Fenster: {claim}",
     "fallback": "Fable-Limit erreicht: Die Fable-Probe wurde abgewiesen ({status}); die Werte stammen aus einer Haiku-Probe, das Fable-Fenster fehlt.",
     "probeModel": "Probe: {model}",
