@@ -125,3 +125,42 @@ describe('cyclePosition', () => {
     expect(f.cycleStart).toBe(new Date(T0).toISOString())
   })
 })
+
+describe('forecastWindow with last week\'s pattern', () => {
+  const DAY = 24 * H
+  const reset = new Date(T0 + 4 * DAY).toISOString() // cycle started 3 days ago
+  const prevReset = new Date(T0 - 3 * DAY).toISOString() // previous cycle: T0-10d .. T0-3d
+  // Previous cycle: at the same point of its cycle (3 days in) it stood at 0.5 and rose to 0.9 by its end.
+  const prev = [
+    snap(-7 * 24 * 60, 0.5, prevReset, '7d'),
+    snap(-5 * 24 * 60, 0.7, prevReset, '7d'),
+    snap(-3 * 24 * 60 - 30, 0.9, prevReset, '7d'),
+  ]
+  // Current cycle: 0.3 after 3 days; the cycle average alone would predict 0.7 at the reset.
+  const cur = [snap(-2 * 24 * 60, 0.1, reset, '7d'), snap(-60, 0.29, reset, '7d'), snap(0, 0.3, reset, '7d')]
+
+  it('blends the cycle average with what happened over the same span last week', () => {
+    const f = forecastWindow([...prev, ...cur], '7d', OPTS, T0)!
+    expect(f.pattern).toBe(true)
+    // last week: +0.4 over the remaining span; cycle average: +0.4 (0.3 over 3 days -> 0.4 over 4 days) => 0.7
+    expect(f.atReset).toBeCloseTo(0.7, 1)
+  })
+
+  it('uses last week\'s rise when it differs from the trend', () => {
+    const quietLastWeek = [
+      snap(-7 * 24 * 60, 0.5, prevReset, '7d'),
+      snap(-3 * 24 * 60 - 30, 0.52, prevReset, '7d'),
+    ]
+    const f = forecastWindow([...quietLastWeek, ...cur], '7d', OPTS, T0)!
+    expect(f.pattern).toBe(true)
+    // trend says +0.4, last week says +0.02 -> blended about +0.21
+    expect(f.atReset).toBeGreaterThan(0.45)
+    expect(f.atReset).toBeLessThan(0.6)
+  })
+
+  it('falls back to the trend without a previous cycle', () => {
+    const f = forecastWindow(cur, '7d', OPTS, T0)!
+    expect(f.pattern).toBe(false)
+    expect(f.atReset).toBeCloseTo(0.7, 1)
+  })
+})

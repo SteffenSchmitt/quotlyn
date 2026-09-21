@@ -27,6 +27,8 @@ export interface Forecast {
   cycleStart: string
   /** Snapshots the fit used. */
   points: number
+  /** True when last week's rise over the same span was blended into a weekly forecast. */
+  pattern?: boolean
 }
 
 /** Where the exhaustion sits on the cycle clock: 0 at the last reset, 1 at the next (or when the window lasts). */
@@ -46,6 +48,34 @@ const RESET_TOLERANCE = 5 * 60_000
 const WINDOW_LENGTH_MS: Record<string, number> = { '5h': 5 * HOUR, '7d': 7 * DAY, '7d_oi': 7 * DAY }
 /** Windows longer than this always use the whole cycle: a busy hour says nothing about a week. */
 const LONG_WINDOW_MS = DAY
+/** How far a snapshot may sit from the moment we want to know the utilization of, last week. */
+const PATTERN_TOLERANCE = 6 * HOUR
+
+type Sample = { t: number; u: number; resetsAt: string }
+
+/** Utilization at time t, interpolated between the neighbouring snapshots when both are near enough. */
+function valueAt(samples: Sample[], t: number): Sample | null {
+  let before: Sample | null = null
+  let after: Sample | null = null
+  for (const s of samples) {
+    if (s.t <= t && (!before || s.t > before.t)) before = s
+    if (s.t >= t && (!after || s.t < after.t)) after = s
+  }
+  if (before && after && before.resetsAt === after.resetsAt && after.t - before.t <= 2 * PATTERN_TOLERANCE) {
+    const f = after.t === before.t ? 0 : (t - before.t) / (after.t - before.t)
+    return { t, u: before.u + (after.u - before.u) * f, resetsAt: before.resetsAt }
+  }
+  const nearest = [before, after].filter((s): s is Sample => s !== null && Math.abs(s.t - t) <= PATTERN_TOLERANCE)
+  return nearest.sort((a, b) => Math.abs(a.t - t) - Math.abs(b.t - t))[0] ?? null
+}
+
+/** Last week's rise over the span [from, to] shifted back by one cycle, or null without data. */
+function lastWeekRise(samples: Sample[], from: number, to: number, length: number): number | null {
+  const a = valueAt(samples, from - length)
+  const b = valueAt(samples, to - length)
+  if (!a || !b || a.resetsAt !== b.resetsAt) return null
+  return Math.max(0, b.u - a.u)
+}
 
 /**
  * Linear least-squares forecast of one window from the snapshots of the current cycle.
@@ -58,7 +88,7 @@ export function forecastWindow(
   opts: ForecastOptions,
   nowMs: number,
 ): Forecast | null {
-  const samples: Array<{ t: number; u: number; resetsAt: string }> = []
+  const samples: Sample[] = []
   for (const s of snapshots) {
     if (!s.ok || !s.parsed) continue
     const w = s.parsed.windows.find((x) => x.key === windowKey)
@@ -99,7 +129,17 @@ export function forecastWindow(
     }
   }
 
-  const slope = slopePerMs(fitPoints)
+  let slope = slopePerMs(fitPoints)
+  let pattern = false
+  // Weekly windows: blend the trend with what happened over the same span last week, when known.
+  if (wholeCycle && length !== undefined && length > LONG_WINDOW_MS && resetMs > last.t) {
+    const rise = lastWeekRise(samples, last.t, resetMs, length)
+    if (rise !== null) {
+      const remaining = resetMs - last.t
+      slope = (Math.max(0, slope) * remaining + rise) / 2 / remaining
+      pattern = true
+    }
+  }
   if (!(slope > 0)) return null
   const ratePerHour = slope * HOUR
   const exhaustMs = last.t + (1 - last.u) / slope
@@ -114,6 +154,7 @@ export function forecastWindow(
     resetsAt: last.resetsAt,
     cycleStart,
     points: points.length,
+    pattern,
   }
 }
 
