@@ -6,40 +6,40 @@
   "dashboard": {
     "empty": "Noch keine Accounts.",
     "refresh": "Jetzt aktualisieren",
-    "refreshing": "Aktualisiere…",
+    "refreshing": "Wird aktualisiert…",
     "autoRefresh": "Auto-Refresh",
     "autoRefreshOff": "Auto-Refresh: aus",
     "autoRefreshEveryMin": "Auto-Refresh: alle {n} min",
     "autoRefreshEverySec": "Auto-Refresh: alle {n} s",
-    "lastFetched": "Zuletzt {time}",
+    "lastFetched": "Zuletzt abgefragt {time}",
     "never": "Noch nicht abgefragt",
     "resetsIn": "Reset in {t}",
     "state": {
-      "idle": "Bereit",
-      "fetching": "Lade…",
+      "idle": "Wartet",
+      "fetching": "Wird abgefragt…",
       "ok": "OK",
       "error": "Fehler",
-      "paused": "Pausiert (Rate-Limit)",
+      "paused": "Pausiert (gedrosselt)",
       "disabled": "Token abgelehnt",
       "limited": "Limit erreicht"
     },
-    "cost": "Probe-Kosten: {i} in / {o} out Token",
+    "cost": "Abfragekosten: {i} Eingabe- / {o} Ausgabe-Token",
     "raw": {
       "toggle": "Rohdaten (Header)",
       "mask": "Identifizierende Werte maskieren",
       "new": "neu"
     },
     "noData": "Noch keine Daten",
-    "overall": "Gesamt: {status} · bindendes Fenster: {claim}",
-    "fallback": "Fable-Limit erreicht: Die Fable-Probe wurde abgewiesen ({status}); die Werte stammen aus einer Haiku-Probe, das Fable-Fenster fehlt.",
-    "probeModel": "Probe: {model}",
-    "limitedHint": "Die API lehnt Anfragen ab, bis das bindende Fenster zurückgesetzt wird; die Zahlen unten sind trotzdem aktuell.",
+    "overall": "Status: {status} · maßgebliches Fenster: {claim}",
+    "fallback": "Fable-Limit erreicht: Die Fable-Abfrage wurde abgelehnt ({status}). Die Werte stammen aus einer Haiku-Abfrage, das Fable-Fenster fehlt deshalb.",
+    "probeModel": "Modell: {model}",
+    "limitedHint": "Die API lehnt Anfragen ab, bis sich das maßgebliche Fenster zurücksetzt. Die Zahlen unten sind trotzdem aktuell.",
     "sort": {
       "label": "Reihenfolge",
-      "manual": "wie konfiguriert",
-      "headroom": "meiste Luft zuerst"
+      "manual": "wie festgelegt",
+      "headroom": "größter Spielraum zuerst"
     },
-    "emptyHelp": "Lege einen Account an, um loszulegen. Du brauchst einen Token?"
+    "emptyHelp": "Lege einen Account an, um loszulegen. Du brauchst noch einen Token?"
   },
   "lang": {
     "de": "Deutsch",
@@ -47,16 +47,16 @@
   },
   "vault": {
     "createTitle": "Tresor anlegen",
-    "createHint": "Wähle eine Passphrase. Sie verschlüsselt deine Account-Tokens in diesem Browser und wird nie gespeichert.",
+    "createHint": "Wähle eine Passphrase. Sie verschlüsselt die Tokens deiner Accounts in diesem Browser und wird selbst nie gespeichert.",
     "unlockTitle": "Tresor entsperren",
     "passphrase": "Passphrase",
     "confirm": "Passphrase wiederholen",
     "create": "Tresor anlegen",
     "unlock": "Entsperren",
     "lock": "Sperren",
-    "remember": "Für diese Browser-Sitzung entsperrt lassen",
+    "remember": "In dieser Browser-Sitzung entsperrt lassen",
     "mismatch": "Die Passphrasen stimmen nicht überein.",
-    "tooShort": "Mindestens 8 Zeichen verwenden.",
+    "tooShort": "Bitte mindestens 8 Zeichen.",
     "wrong": "Falsche Passphrase.",
     "working": "Bitte warten…"
   },
@@ -73,39 +73,39 @@
     "add": "Account hinzufügen",
     "edit": "Bearbeiten",
     "delete": "Löschen",
-    "confirmDelete": "Account „{name}“ löschen? Das lässt sich nicht rückgängig machen.",
+    "confirmDelete": "Account „{name}“ wirklich löschen? Das lässt sich nicht rückgängig machen.",
     "up": "Nach oben",
     "down": "Nach unten",
     "name": "Name",
     "color": "Farbe",
     "token": "Token (sk-ant-oat…)",
-    "tokenSet": "Gesetzt · wird durch Speichern nicht geändert",
+    "tokenSet": "Gesetzt · bleibt beim Speichern erhalten",
     "notifications": "Benachrichtigungen",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "test": "Token testen",
-    "testing": "Teste…",
+    "testing": "Wird getestet…",
     "testOk": "OK · 5h {fiveHour} % · 7d {sevenDay} %",
     "testFail": "Fehlgeschlagen: {error}",
     "empty": "Noch keine Accounts. Lege den ersten an.",
-    "invalidToken": "Der Token sollte mit sk-ant-oat beginnen.",
+    "invalidToken": "Der Token muss mit sk-ant-oat beginnen.",
     "yes": "Ja, löschen",
     "no": "Nein",
     "primaryWindow": "Hauptmetrik",
     "primary": {
-      "critical": "Kritischstes Fenster",
+      "critical": "Am stärksten genutztes Fenster",
       "5h": "5 h Sitzung",
       "7d": "7 d alle Modelle",
       "7d_oi": "7 d Fable"
     },
-    "howTo": "Wie komme ich an einen Token?"
+    "howTo": "Wie bekomme ich einen Token?"
   },
   "history": {
     "title": "Verlauf",
     "window": "Fenster",
     "range": "Zeitraum",
     "accounts": "Accounts",
-    "empty": "Noch keine Snapshots in diesem Zeitraum.",
+    "empty": "Keine Snapshots in diesem Zeitraum.",
     "range24h": "24 h",
     "range7d": "7 Tage",
     "range30d": "30 Tage"
@@ -117,15 +117,15 @@
   },
   "settings": {
     "title": "Einstellungen",
-    "polling": "Abfrage",
+    "polling": "Abfragen",
     "interval": "Intervall (Sekunden, min. 60)",
-    "retention": "Verlauf behalten (Tage)",
+    "retention": "Verlauf aufbewahren (Tage)",
     "thresholds": "Schwellwerte",
     "warn": "Warnen ab (%)",
     "crit": "Kritisch ab (%)",
-    "notifications": "Browser-Benachrichtigung beim Überschreiten",
+    "notifications": "Browser-Benachrichtigung beim Überschreiten einer Schwelle",
     "permission": {
-      "unsupported": "von diesem Browser nicht unterstützt",
+      "unsupported": "in diesem Browser nicht verfügbar",
       "default": "Berechtigung noch nicht erteilt",
       "granted": "Berechtigung erteilt",
       "denied": "im Browser blockiert"
@@ -148,7 +148,7 @@
       "accounts": "Accounts (verschlüsseltes JSON)",
       "csv": "Verlauf als CSV",
       "json": "Verlauf als JSON",
-      "identifying": "identifizierende Header einschließen",
+      "identifying": "identifizierende Header mit exportieren",
       "hint": "Die Accounts-Datei bleibt mit deiner Passphrase verschlüsselt. Verlaufs-Exporte enthalten nie Tokens."
     },
     "import": {
@@ -157,8 +157,8 @@
       "merge": "Zusammenführen",
       "replace": "Alles ersetzen",
       "run": "Importieren",
-      "done": "{imported} Account(s) importiert, insgesamt {total}.",
-      "malformed": "Das ist keine Quotlyn-Accounts-Datei."
+      "done": "{imported} Account(s) importiert, jetzt {total} insgesamt.",
+      "malformed": "Das ist keine Accounts-Datei von Quotlyn."
     }
   },
   "windows": {
@@ -179,32 +179,32 @@
     }
   },
   "help": {
-    "refresh": "Fragt jetzt alle Accounts nacheinander ab. Accounts mit erreichtem Limit werden mitgenommen, abgelehnte Tokens übersprungen.",
-    "autoRefresh": "Fragt alle Accounts automatisch im Intervall aus den Einstellungen ab. Aus heißt: nur manuell.",
-    "sort": "Reihenfolge der Karten: wie unter Accounts konfiguriert, oder der Account mit der meisten Luft zuerst.",
-    "summary": "Die Hauptmetrik des Accounts: Auslastung eines Fensters und wann es zurückgesetzt wird. Das Fenster wählst du pro Account unter Accounts.",
-    "state": "Ergebnis der letzten Abfrage: OK, lädt, Limit erreicht (die API lehnt ab, bis das Fenster zurückgesetzt wird), pausiert (gedrosselt), Fehler oder Token abgelehnt.",
-    "raw": "Alle Header, die die API geliefert hat, unverändert. Identifizierende Werte sind standardmäßig maskiert; der App unbekannte Header sind als neu markiert.",
-    "cost": "Was eine Probe kostet: die Token der winzigen Anfrage, mit der die Limits gelesen werden, und das Modell, an das sie ging.",
-    "historyWindow": "Welches Limit-Fenster gezeichnet wird.",
-    "historyRange": "Wie weit zurück angezeigt wird. Ältere Snapshots bleiben bis zum Ende der Aufbewahrungsfrist erhalten.",
-    "historyAccounts": "Welche Accounts gezeichnet werden. Jede Linie trägt die Account-Farbe; die getönten Bänder wechseln zwischen den Resets.",
-    "timeline": "Ein Balken pro Account und Fenster, von jetzt bis zum Reset dieses Fensters. Die Füllung zeigt die aktuelle Auslastung.",
+    "refresh": "Fragt alle Accounts jetzt nacheinander ab. Accounts am Limit werden mit abgefragt, abgelehnte Tokens übersprungen.",
+    "autoRefresh": "Fragt alle Accounts automatisch im gewählten Intervall ab. „Aus“ heißt: nur von Hand.",
+    "sort": "Reihenfolge der Karten: wie unter Accounts festgelegt oder der Account mit dem größten Spielraum zuerst.",
+    "summary": "Die Hauptmetrik dieses Accounts: Auslastung eines Fensters und wann es sich zurücksetzt. Welches Fenster das ist, legst du pro Account fest.",
+    "state": "Ergebnis der letzten Abfrage: OK, wird abgefragt, Limit erreicht (die API lehnt ab, bis sich das Fenster zurücksetzt), pausiert (gedrosselt), Fehler oder Token abgelehnt.",
+    "raw": "Alle Header, die die API geliefert hat, unverändert. Identifizierende Werte sind standardmäßig maskiert, unbekannte Header als neu markiert.",
+    "cost": "Was eine Abfrage kostet: die Token der winzigen Anfrage, mit der die Limits gelesen werden, und das Modell, an das sie ging.",
+    "historyWindow": "Welches Limit-Fenster angezeigt wird.",
+    "historyRange": "Wie weit der Verlauf zurückreicht. Ältere Snapshots bleiben bis zum Ende der Aufbewahrung erhalten.",
+    "historyAccounts": "Welche Accounts angezeigt werden. Jede Linie hat die Farbe ihres Accounts, die getönten Bänder markieren die Abschnitte zwischen zwei Resets.",
+    "timeline": "Ein Balken pro Account und Fenster, von jetzt bis zum Reset des Fensters. Die Füllung zeigt die aktuelle Auslastung.",
     "token": "Ein langlebiger Token aus `claude setup-token`. Er liegt verschlüsselt in diesem Browser und geht nur an den mitgelieferten Proxy.",
-    "primaryWindow": "Das Fenster, das als große Zahl auf der Karte steht. „Kritischstes“ nimmt das gerade vollste Fenster.",
-    "notificationsAccount": "Ob Schwellwert-Benachrichtigungen für diesen Account ausgelöst werden. Zusätzlich müssen sie in den Einstellungen aktiv sein.",
-    "color": "Für den Kartenrand und die Linie dieses Accounts im Verlauf.",
-    "polling": "Wie oft jeder Account abgefragt wird und wie lange Snapshots bleiben. Eine Probe kostet etwa 35 Token Kontingent.",
-    "thresholds": "Warn- und Kritisch-Schwelle in Prozent. Sie steuern den Glow der Ringe und die Browser-Benachrichtigungen.",
-    "notifications": "Schickt eine Browser-Benachrichtigung, wenn ein Fenster eine Schwelle überschreitet. Einmal pro Überschreitung, nicht bei jeder Abfrage.",
+    "primaryWindow": "Das Fenster, das als große Zahl auf der Karte steht. „Am stärksten genutzt“ nimmt jeweils das vollste Fenster.",
+    "notificationsAccount": "Ob dieser Account Schwellwert-Benachrichtigungen auslöst. Zusätzlich müssen sie in den Einstellungen eingeschaltet sein.",
+    "color": "Farbe für den Kartenrand und die Linie dieses Accounts im Verlauf.",
+    "polling": "Wie oft jeder Account abgefragt wird und wie lange Snapshots aufbewahrt werden. Eine Abfrage kostet rund 35 Token vom Kontingent.",
+    "thresholds": "Warn- und Kritisch-Schwelle in Prozent. Sie steuern das Leuchten der Ringe und die Browser-Benachrichtigungen.",
+    "notifications": "Schickt eine Browser-Benachrichtigung, sobald ein Fenster eine Schwelle überschreitet. Einmal pro Überschreitung, nicht bei jeder Abfrage.",
     "appearance": "Theme und Sprache der Oberfläche.",
-    "export": "Accounts exportieren die verschlüsselte Tresordatei unverändert. Verlaufs-Exporte enthalten nie Tokens.",
-    "import": "Accounts aus einer exportierten Tresordatei zusammenführen oder ersetzen. Du brauchst die Passphrase, mit der die Datei erstellt wurde.",
+    "export": "„Accounts“ exportiert die verschlüsselte Tresordatei unverändert. Verlaufs-Exporte enthalten nie Tokens.",
+    "import": "Accounts aus einer exportierten Tresordatei zusammenführen oder ersetzen. Dafür brauchst du die Passphrase, mit der die Datei erstellt wurde.",
     "remember": "Hält den Tresor für diesen Browser-Tab offen. Beim Schließen des Tabs wird er wieder gesperrt."
   },
   "help_page": {
     "title": "So kommst du an einen Token",
-    "intro": "Quotlyn liest deine Limits mit einem Token aus der Claude-Kommandozeile. Du brauchst einen Token pro Account, den du beobachten willst. Der Token ist langlebig und erlaubt Modellzugriff auf dieses Abo, behandle ihn also wie ein Passwort.",
+    "intro": "Quotlyn liest deine Limits mit einem Token der Claude-Kommandozeile. Du brauchst einen Token pro Account, den du beobachten willst. Der Token ist langlebig und gewährt Modellzugriff auf das Abo, behandle ihn also wie ein Passwort.",
     "steps": {
       "title": "Schritt für Schritt",
       "items": [
@@ -214,15 +214,15 @@
         },
         {
           "h": "Mit dem gewünschten Account anmelden",
-          "p": "Beim ersten Start öffnet die Kommandozeile den Browser zur Anmeldung. Ist sie bereits mit einem anderen Account angemeldet, gib in der Sitzung /logout ein, danach /login, und wähle im Browser den richtigen Account."
+          "p": "Beim ersten Start öffnet die Kommandozeile den Browser zur Anmeldung. Ist sie schon mit einem anderen Account angemeldet, gib in der Sitzung /logout und danach /login ein und wähle im Browser den richtigen Account."
         },
         {
           "h": "Langlebigen Token erzeugen",
-          "p": "Führe den Befehl unten im Terminal aus, nicht innerhalb der Claude-Sitzung. Er öffnet erneut den Browser, bittet um Freigabe und gibt einen Token aus, der mit sk-ant-oat01- beginnt."
+          "p": "Führe den Befehl unten im Terminal aus, nicht innerhalb der Claude-Sitzung. Er öffnet noch einmal den Browser, bittet um Freigabe und gibt einen Token aus, der mit sk-ant-oat01- beginnt."
         },
         {
           "h": "Account in Quotlyn anlegen",
-          "p": "Unter Accounts Name und Farbe wählen, den Token einfügen und Token testen drücken. Eine grüne Zeile mit den aktuellen Prozentwerten heißt: alles läuft."
+          "p": "Unter Accounts Name und Farbe wählen, den Token einfügen und auf „Token testen“ klicken. Eine grüne Zeile mit den aktuellen Prozentwerten heißt: alles läuft."
         },
         {
           "h": "Für jeden weiteren Account wiederholen",
@@ -236,7 +236,7 @@
         "Tokens liegen verschlüsselt in diesem Browser und gehen nur an den mitgelieferten Proxy auf deinem Rechner.",
         "Ein Token kann weder Profil- noch Abrechnungsdaten lesen. Quotlyn sieht nur die Rate-Limit-Header einer winzigen Anfrage.",
         "Zeigt eine Karte „Token abgelehnt“, wurde der Token widerrufen oder falsch eingefügt. Erzeuge einen neuen und tausche ihn unter Accounts aus.",
-        "Wie du einen Token widerrufst, beschreibt die Dokumentation zu Claude Code."
+        "Wie du einen Token widerrufst, steht in der Dokumentation zu Claude Code."
       ]
     },
     "docs": "Dokumentation zu Claude Code"
