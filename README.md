@@ -211,8 +211,10 @@ npm test          # Vitest
 npm run build     # vue-tsc + Vite, the type gate for .vue files
 ```
 
-The header shows the version from `package.json`; bump it with every change
-to the app.
+The header shows the version from `package.json`. Releases go through
+`npm run release -- <version|major|minor|patch>`: it runs the checks, bumps
+the version and the badge, regenerates [CHANGELOG.md](CHANGELOG.md) from
+the git tags, commits, tags and pushes.
 
 Vue 3, TypeScript, Pinia, Tailwind, vue-i18n and Apache ECharts. Pure
 logic (parsing, polling, thresholds, forecast, crypto, export) lives in
