@@ -38,6 +38,28 @@ describe('settings store', () => {
     expect(s.settings.retentionDays).toBe(1)
   })
 
+  it('clamps thresholds and keeps warn below crit', () => {
+    const s = useSettingsStore()
+    s.load()
+    s.update({ thresholds: { warn: 0.97, crit: 0.95 } })
+    expect(s.settings.thresholds).toEqual({ warn: 0.94, crit: 0.95 })
+    s.update({ thresholds: { warn: 0.5, crit: 2 } })
+    expect(s.settings.thresholds).toEqual({ warn: 0.5, crit: 1 })
+  })
+
+  it('persists theme, locale and notifications', () => {
+    const s = useSettingsStore()
+    s.load()
+    s.update({ theme: 'dark', locale: 'en', notificationsEnabled: true })
+    setActivePinia(createPinia())
+    const t = useSettingsStore()
+    t.load()
+    expect(t.settings).toMatchObject({ theme: 'dark', locale: 'en', notificationsEnabled: true })
+    t.update({ theme: 'weird' as never, locale: 'fr' as never })
+    expect(t.settings.theme).toBe('dark')
+    expect(t.settings.locale).toBe('en')
+  })
+
   it('ignores unknown or malformed stored values', () => {
     storage.setItem(SETTINGS_KEY, JSON.stringify({ intervalSeconds: 'abc', junk: 1 }))
     const s = useSettingsStore()
