@@ -56,6 +56,8 @@ metric, which you pick per account. Rings glow as a window approaches your
 warn and critical thresholds. Cards can be ordered as configured or by
 remaining room.
 
+![Dashboard with one card per account and nested rings per limit window](docs/screenshots/dashboard.png)
+
 **History.** Utilization over time per account and window, for the last 24
 hours, 7 or 30 days. Shaded bands mark the periods between resets.
 
