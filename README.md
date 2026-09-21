@@ -58,6 +58,14 @@ light: green, amber or red by the most used window, always red while the
 limit is reached. Hover it to see why. Each card can be polled on its own,
 and cards can be ordered as configured or by remaining room.
 
+**Forecast.** From the snapshots of the current cycle Quotlyn fits the
+slope of each window and tells you when it will be full, or how full it
+will be at the reset. The session window uses a configurable look-back, the
+week windows the whole cycle from 0 %. The cards show it as a line under
+the lead metric, as a faint ghost arc on each ring and in the ring legend.
+History continues each line as a dashed projection, the timeline marks the
+expected exhaustion with a diamond. The forecast can be switched off.
+
 ![Dashboard with one card per account and nested rings per limit window](docs/screenshots/dashboard.png)
 
 **History.** Utilization over time per account and window, for the last 24
@@ -76,9 +84,9 @@ notifications. Reorder with the arrows, test a token before saving.
 
 ![Account form with token test](docs/screenshots/accounts.png)
 
-**Settings.** Polling interval and history retention, warn and critical
-thresholds, browser notifications, theme and language, plus export and
-import.
+**Settings.** Polling, history retention and forecast, warn and critical
+thresholds with browser notifications, theme and language, and export and
+import of your data.
 
 ![Settings page](docs/screenshots/settings.png)
 
