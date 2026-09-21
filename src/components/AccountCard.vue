@@ -32,7 +32,7 @@ const summary = computed(() => {
 
 <template>
   <article
-    class="@container rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
+    class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
     :style="{ borderLeft: `4px solid ${account.color}` }"
   >
     <header>

@@ -142,7 +142,7 @@ const option = computed(() => ({
       @mouseover="onChartHover"
       @mouseout="onChartHover(null)"
     />
-    <ul class="min-w-0 flex-1 space-y-2 text-sm">
+    <ul class="@container min-w-0 flex-1 space-y-2 text-sm">
       <li
         v-for="r in rings"
         :key="r.key"
@@ -156,9 +156,9 @@ const option = computed(() => ({
           :class="limited && r.percent >= 100 ? 'motion-safe:animate-pulse' : ''"
           :style="{ backgroundColor: r.base, boxShadow: r.style.glow ? `0 0 ${r.style.glow}px ${r.style.glowColor}` : 'none' }"
         />
-        <span class="min-w-0 flex-1 truncate">
+        <span class="min-w-0 flex-1 whitespace-nowrap">
           <span class="font-bold">{{ r.short }}</span>
-          <span v-if="r.tag" class="ml-1 hidden text-slate-500 @[24rem]:inline">{{ r.tag }}</span>
+          <span v-if="r.tag" class="ml-1 hidden text-slate-500 @[14.5rem]:inline">{{ r.tag }}</span>
         </span>
         <span class="tabular-nums" :class="headline && headline.key === r.key ? 'font-bold' : ''">{{ r.percent }} %</span>
         <span class="w-16 text-right text-xs text-slate-500 tabular-nums" :title="t('dashboard.resetsIn', { t: r.countdown })">

@@ -78,7 +78,7 @@ function submit() {
     </label>
     <label class="block text-sm">
       <span class="flex items-center">{{ t('accounts.color') }}<InfoTip :text="t('help.color')" /></span>
-      <input v-model="color" type="color" class="mt-1 block h-8 w-12 cursor-pointer rounded-md border bg-white p-0.5 dark:border-slate-700 dark:bg-slate-800" />
+      <input v-model="color" type="color" class="mt-1 block h-8 w-12 cursor-pointer rounded-md border bg-white p-0.5 dark:border-slate-700 dark:bg-slate-900" />
     </label>
     <label class="block text-sm">
       <span class="flex items-center">{{ t('accounts.token') }}<InfoTip :text="t('help.token')" /></span>
