@@ -59,7 +59,8 @@
     "dashboard": "Dashboard",
     "accounts": "Accounts",
     "history": "History",
-    "timeline": "Timeline"
+    "timeline": "Timeline",
+    "settings": "Settings"
   },
   "accounts": {
     "title": "Accounts",
@@ -99,5 +100,51 @@
     "title": "Reset timeline",
     "empty": "No data yet.",
     "now": "now"
+  },
+  "settings": {
+    "title": "Settings",
+    "polling": "Polling",
+    "interval": "Interval (seconds, min. 60)",
+    "retention": "Keep history (days)",
+    "thresholds": "Thresholds",
+    "warn": "Warn at (%)",
+    "crit": "Critical at (%)",
+    "notifications": "Browser notifications on threshold crossings",
+    "permission": {
+      "unsupported": "not supported by this browser",
+      "default": "permission not yet granted",
+      "granted": "permission granted",
+      "denied": "blocked in browser settings"
+    },
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": "Language",
+    "locales": {
+      "auto": "Browser default",
+      "de": "Deutsch",
+      "en": "English"
+    },
+    "export": {
+      "title": "Export",
+      "accounts": "Accounts (encrypted JSON)",
+      "csv": "History as CSV",
+      "json": "History as JSON",
+      "identifying": "include identifying headers",
+      "hint": "The accounts file stays encrypted with your passphrase. History exports never contain tokens."
+    },
+    "import": {
+      "title": "Import accounts",
+      "passphrase": "Passphrase of the file",
+      "merge": "Merge",
+      "replace": "Replace all",
+      "run": "Import",
+      "done": "Imported {imported} account(s), {total} in total.",
+      "malformed": "This is not a Quotlyn accounts file."
+    }
   }
 }

@@ -32,7 +32,7 @@ const tiles = computed(() =>
       <div
         v-for="tile in tiles"
         :key="tile.account.id"
-        class="flex min-w-40 items-center gap-3 rounded-lg border bg-white px-3 py-2"
+        class="flex min-w-40 items-center gap-3 rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 px-3 py-2"
         :style="{ borderLeft: `4px solid ${tile.account.color}` }"
       >
         <div class="flex-1">

@@ -88,7 +88,7 @@ const option = computed(() => {
 <template>
   <section class="space-y-4">
     <h2 class="text-lg font-semibold">{{ t('timeline.title') }}</h2>
-    <div class="rounded-lg border bg-white p-2">
+    <div class="rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-2">
       <VChart
         v-if="hasData"
         :option="option"

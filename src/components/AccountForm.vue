@@ -67,10 +67,10 @@ function submit() {
 </script>
 
 <template>
-  <form class="space-y-3 rounded-lg border bg-white p-4" @submit.prevent="submit">
+  <form class="space-y-3 rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-4" @submit.prevent="submit">
     <label class="block text-sm">
       {{ t('accounts.name') }}
-      <input v-model="name" required class="mt-1 w-full rounded border px-2 py-1" />
+      <input v-model="name" required class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" />
     </label>
     <label class="block text-sm">
       {{ t('accounts.color') }}
@@ -83,7 +83,7 @@ function submit() {
         type="password"
         autocomplete="off"
         spellcheck="false"
-        class="mt-1 w-full rounded border px-2 py-1 font-mono"
+        class="mt-1 w-full rounded border px-2 py-1 font-mono dark:border-slate-700 dark:bg-slate-800"
       />
       <span v-if="account" class="text-xs text-slate-500">{{ t('accounts.tokenKeep') }}</span>
     </label>
@@ -95,8 +95,8 @@ function submit() {
     <p v-if="testState === 'ok'" class="text-sm text-green-600">{{ testMessage }}</p>
     <p v-if="testState === 'fail'" class="text-sm text-red-600">{{ testMessage }}</p>
     <div class="flex gap-2">
-      <button type="submit" class="rounded bg-slate-800 px-3 py-1 text-white">{{ t('accounts.save') }}</button>
-      <button type="button" class="rounded border px-3 py-1" :disabled="testState === 'busy'" @click="test">
+      <button type="submit" class="rounded bg-slate-800 px-3 py-1 text-white dark:bg-slate-200 dark:text-slate-900">{{ t('accounts.save') }}</button>
+      <button type="button" class="rounded border px-3 py-1 dark:border-slate-600" :disabled="testState === 'busy'" @click="test">
         {{ testState === 'busy' ? t('accounts.testing') : t('accounts.test') }}
       </button>
       <button type="button" class="rounded px-3 py-1 text-slate-500" @click="emit('cancel')">

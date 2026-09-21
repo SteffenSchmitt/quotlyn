@@ -33,7 +33,7 @@ const autoRefresh = computed({
   <section class="space-y-6">
     <div class="flex flex-wrap items-center gap-4">
       <button
-        class="rounded bg-slate-800 px-3 py-1 text-white disabled:opacity-50"
+        class="rounded bg-slate-800 px-3 py-1 text-white dark:bg-slate-200 dark:text-slate-900 disabled:opacity-50"
         :disabled="usage.refreshing || accounts.accounts.length === 0"
         @click="usage.refreshNow()"
       >

@@ -12,7 +12,7 @@ const { t, d } = useI18n()
 </script>
 
 <template>
-  <article class="rounded-lg border bg-white p-4">
+  <article class="rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-4">
     <header class="flex items-center gap-2">
       <span class="h-3 w-3 rounded-full" :style="{ backgroundColor: account.color }" />
       <h3 class="flex-1 font-semibold">{{ account.name }}</h3>
@@ -38,7 +38,7 @@ const { t, d } = useI18n()
           })
         }}
       </p>
-      <div class="mt-2 rounded bg-slate-50 p-2 text-xs">
+      <div class="mt-2 rounded bg-slate-50 p-2 dark:bg-slate-800 text-xs">
         <div class="font-medium">{{ t('dashboard.overageBlock.title') }}</div>
         <div>{{ t('dashboard.overageBlock.status', { status: parsed.overage.status ?? '–' }) }}</div>
         <div v-if="parsed.overage.disabledReason">

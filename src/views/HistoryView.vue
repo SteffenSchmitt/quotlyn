@@ -94,7 +94,7 @@ const option = computed(() => ({
     <div class="flex flex-wrap items-center gap-6 text-sm">
       <label class="flex items-center gap-2">
         {{ t('history.window') }}
-        <select v-model="windowKey" class="rounded border px-2 py-1">
+        <select v-model="windowKey" class="rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
           <option v-for="k in windowKeys" :key="k" :value="k">{{ k }}</option>
         </select>
       </label>
@@ -103,7 +103,7 @@ const option = computed(() => ({
         <button
           v-for="r in RANGES"
           :key="r"
-          class="rounded border px-2 py-1"
+          class="rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800"
           :class="range === r ? 'bg-slate-800 text-white' : ''"
           @click="range = r"
         >
@@ -119,7 +119,7 @@ const option = computed(() => ({
         </label>
       </div>
     </div>
-    <div class="rounded-lg border bg-white p-2">
+    <div class="rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-2">
       <VChart v-if="hasData" :option="option" autoresize :style="{ height: '420px', width: '100%' }" />
       <p v-else class="p-6 text-sm text-slate-500">{{ t('history.empty') }}</p>
     </div>

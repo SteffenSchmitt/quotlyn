@@ -59,7 +59,8 @@
     "dashboard": "Dashboard",
     "accounts": "Accounts",
     "history": "Verlauf",
-    "timeline": "Timeline"
+    "timeline": "Timeline",
+    "settings": "Einstellungen"
   },
   "accounts": {
     "title": "Accounts",
@@ -99,5 +100,51 @@
     "title": "Reset-Timeline",
     "empty": "Noch keine Daten.",
     "now": "jetzt"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "polling": "Abfrage",
+    "interval": "Intervall (Sekunden, min. 60)",
+    "retention": "Verlauf behalten (Tage)",
+    "thresholds": "Schwellwerte",
+    "warn": "Warnen ab (%)",
+    "crit": "Kritisch ab (%)",
+    "notifications": "Browser-Benachrichtigung beim Überschreiten",
+    "permission": {
+      "unsupported": "von diesem Browser nicht unterstützt",
+      "default": "Berechtigung noch nicht erteilt",
+      "granted": "Berechtigung erteilt",
+      "denied": "im Browser blockiert"
+    },
+    "appearance": "Darstellung",
+    "theme": "Theme",
+    "themes": {
+      "system": "System",
+      "light": "Hell",
+      "dark": "Dunkel"
+    },
+    "language": "Sprache",
+    "locales": {
+      "auto": "Browser-Standard",
+      "de": "Deutsch",
+      "en": "English"
+    },
+    "export": {
+      "title": "Export",
+      "accounts": "Accounts (verschlüsseltes JSON)",
+      "csv": "Verlauf als CSV",
+      "json": "Verlauf als JSON",
+      "identifying": "identifizierende Header einschließen",
+      "hint": "Die Accounts-Datei bleibt mit deiner Passphrase verschlüsselt. Verlaufs-Exporte enthalten nie Tokens."
+    },
+    "import": {
+      "title": "Accounts importieren",
+      "passphrase": "Passphrase der Datei",
+      "merge": "Zusammenführen",
+      "replace": "Alles ersetzen",
+      "run": "Importieren",
+      "done": "{imported} Account(s) importiert, insgesamt {total}.",
+      "malformed": "Das ist keine Quotlyn-Accounts-Datei."
+    }
   }
 }
