@@ -9,7 +9,7 @@ renders the current state as gauges, trend charts and a reset timeline.
 
 ## Status
 
-Accounts can be added, tested and managed; tokens are stored encrypted behind a passphrase. No polling or charts yet.
+Accounts are polled every five minutes (configurable), every result is kept as a local snapshot, and the dashboard shows the current windows with countdowns. Charts and history views are still to come.
 
 ## Run locally
 
