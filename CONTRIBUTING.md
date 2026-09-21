@@ -24,7 +24,9 @@ npm run build    # vue-tsc + Vite; this is the type gate, it also checks the .vu
 
 Both run in CI on every push and pull request. Add a test for logic you touch: parsing,
 polling, thresholds, forecast, export and import live in framework-free modules under `src/lib`,
-`src/notify`, `src/scheduler` and `src/storage`, and components stay thin.
+`src/notify`, `src/scheduler` and `src/storage`, and components stay thin. Component tests live
+under `tests/components` (Vue Test Utils on happy-dom, opted in per file with a
+`// @vitest-environment happy-dom` comment); charts are stubbed there.
 
 ## Conventions
 
