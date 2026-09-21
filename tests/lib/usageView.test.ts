@@ -95,7 +95,7 @@ describe('header classification and masking', () => {
     expect(isKnownHeader('anthropic-new-thing')).toBe(false)
   })
   it('masks values keeping a short prefix', () => {
-    expect(maskValue('a1b2c3d4-e5f6-7890')).toBe('8d93…')
+    expect(maskValue('a1b2c3d4-e5f6-7890')).toBe('a1b2…')
     expect(maskValue('abc')).toBe('…')
   })
 })
