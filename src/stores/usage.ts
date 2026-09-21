@@ -4,6 +4,8 @@ import { fetchUsage, type UsageResult } from '../api/usageClient'
 import { parseUsage, type ParsedUsage } from '../api/usageParser'
 import { Poller, type AccountPollState, type PollTarget } from '../scheduler/poller'
 import { HistoryDb, type UsageSnapshot } from '../storage/historyDb'
+import { ThresholdWatcher } from '../notify/thresholds'
+import { notify } from '../notify/webNotify'
 import { useAccountsStore } from './accounts'
 import { useSettingsStore } from './settings'
 
@@ -21,6 +23,7 @@ export const useUsageStore = defineStore('usage', () => {
   let db: HistoryDb | null = null
   let poller: Poller | null = null
   let pruneTimer: ReturnType<typeof setInterval> | null = null
+  const watcher = new ThresholdWatcher()
 
   function targets(): PollTarget[] {
     return accounts.accounts.map((a) => ({ id: a.id, token: a.token }))
@@ -33,6 +36,7 @@ export const useUsageStore = defineStore('usage', () => {
       try {
         const parsed = parseUsage(result.body)
         latest[target.id] = parsed
+        notifyCrossings(target.id, parsed)
         snapshot = { accountId: target.id, fetchedAt: parsed.fetchedAt, ok: true, parsed, error: null }
       } catch (err) {
         snapshot = {
@@ -54,6 +58,15 @@ export const useUsageStore = defineStore('usage', () => {
     }
     lastSnapshot[target.id] = snapshot
     if (db) await db.add(snapshot)
+  }
+
+  function notifyCrossings(accountId: string, parsed: ParsedUsage) {
+    const account = accounts.accounts.find((a) => a.id === accountId)
+    const crossings = watcher.evaluate(accountId, parsed.windows, settingsStore.settings.thresholds)
+    if (!account || !settingsStore.settings.notificationsEnabled || !account.notificationsEnabled) return
+    for (const c of crossings) {
+      notify(`Quotlyn · ${account.name}`, `${c.windowKey}: ${Math.round(c.utilization * 100)} % (${c.level})`)
+    }
   }
 
   function ensurePoller(): Poller {
@@ -112,6 +125,7 @@ export const useUsageStore = defineStore('usage', () => {
   }
 
   async function removeAccountData(id: string) {
+    watcher.forget(id)
     delete latest[id]
     delete pollState[id]
     delete lastSnapshot[id]
