@@ -1,6 +1,6 @@
 {
   "name": "quotlyn",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Usage limits of several Claude Pro and Max subscriptions, side by side, on your own machine: nested rings, history, forecast and reset timeline.",
   "keywords": [
     "claude",
