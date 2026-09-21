@@ -13,9 +13,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "echarts": "^6.1.0",
     "idb": "^8.0.3",
     "pinia": "^4.0.3",
     "vue": "^3.5.42",
+    "vue-echarts": "^8.3.0",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1"
   },
