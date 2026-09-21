@@ -59,19 +59,32 @@ const recommendation = computed(() => {
   const status = Object.fromEntries(accounts.accounts.map((a) => [a.id, usage.pollState[a.id]?.status]));
   return recommend(accounts.accounts, usage.latest, forecasts, status);
 });
+function pickName(pick: { accountId: string } | null): string {
+  if (!pick) return t("dashboard.recommend.none");
+  return accounts.accounts.find((a) => a.id === pick.accountId)?.name ?? "?";
+}
 function pickText(pick: { accountId: string; windowKey: string; utilization: number; forecast: import("../lib/forecast").Forecast | null } | null): string {
   if (!pick) return t("dashboard.recommend.none");
   const name = accounts.accounts.find((a) => a.id === pick.accountId)?.name ?? "?";
   const base = `${name} · ${oneLine(pick.windowKey)} ${Math.round(pick.utilization * 100)} %`;
   return pick.forecast ? `${base} · ${forecastLine(pick.forecast, now.value, (k, p) => t(k, p ?? {}))}` : base;
 }
-function badgeFor(accountId: string): string | null {
-  const r = recommendation.value;
-  const both = r.now?.accountId === accountId && r.week?.accountId === accountId;
-  if (both) return t("dashboard.recommend.both");
-  if (r.now?.accountId === accountId) return t("dashboard.recommend.now");
-  if (r.week?.accountId === accountId) return t("dashboard.recommend.week");
-  return null;
+const RECOMMEND_OPEN_KEY = "quotlyn.recommend.open";
+function readOpen(): boolean {
+  try {
+    return localStorage.getItem(RECOMMEND_OPEN_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
+const recommendOpen = ref(readOpen());
+function toggleRecommend() {
+  recommendOpen.value = !recommendOpen.value;
+  try {
+    localStorage.setItem(RECOMMEND_OPEN_KEY, recommendOpen.value ? "1" : "0");
+  } catch {
+    // storage may be unavailable; the strip just does not remember
+  }
 }
 function intervalLabel(seconds: number): string {
   return seconds % 60 === 0
@@ -136,20 +149,34 @@ function intervalLabel(seconds: number): string {
       }}</RouterLink>
     </p>
 
-    <div
+    <section
       v-if="accounts.accounts.length > 1 && (recommendation.now || recommendation.week)"
-      class="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-lg border bg-white px-4 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+      class="rounded-lg border bg-white text-sm dark:border-slate-700 dark:bg-slate-900"
     >
-      <span class="font-bold">{{ t("dashboard.recommend.title") }}</span>
-      <span class="flex items-center gap-2">
-        <span class="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-white dark:bg-slate-200 dark:text-slate-900">{{ t("dashboard.recommend.now") }}</span>
-        <span class="text-slate-600 dark:text-slate-300">{{ pickText(recommendation.now) }}</span>
-      </span>
-      <span class="flex items-center gap-2">
-        <span class="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-white dark:bg-slate-200 dark:text-slate-900">{{ t("dashboard.recommend.week") }}</span>
-        <span class="text-slate-600 dark:text-slate-300">{{ pickText(recommendation.week) }}</span>
-      </span>
-    </div>
+      <button
+        type="button"
+        class="flex w-full items-center gap-2 px-4 py-2 text-left font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+        :aria-expanded="recommendOpen"
+        @click="toggleRecommend"
+      >
+        <span class="inline-block w-3 text-xs text-slate-500">{{ recommendOpen ? "▾" : "▸" }}</span>
+        {{ t("dashboard.recommend.title") }}
+        <span v-if="!recommendOpen" class="ml-2 truncate font-normal text-slate-500">
+          <span class="text-amber-400">★</span> {{ pickName(recommendation.now) }} ·
+          <span class="text-sky-400">★</span> {{ pickName(recommendation.week) }}
+        </span>
+      </button>
+      <ul v-if="recommendOpen" class="space-y-1.5 px-4 pb-3">
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 text-amber-400" aria-hidden="true">★</span>
+          <span><span class="font-bold">{{ t("dashboard.recommend.now") }}:</span> {{ pickText(recommendation.now) }}</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="mt-0.5 text-sky-400" aria-hidden="true">★</span>
+          <span><span class="font-bold">{{ t("dashboard.recommend.week") }}:</span> {{ pickText(recommendation.week) }}</span>
+        </li>
+      </ul>
+    </section>
 
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       <AccountCard
@@ -160,7 +187,8 @@ function intervalLabel(seconds: number): string {
         :state="usage.pollState[a.id]"
         :thresholds="settings.settings.thresholds"
         :forecasts="forecastsFor(a.id)"
-        :badge="badgeFor(a.id)"
+        :star-now="recommendation.now?.accountId === a.id"
+        :star-week="recommendation.week?.accountId === a.id"
         :now="now"
         @refresh="usage.refreshAccount(a.id)"
       />

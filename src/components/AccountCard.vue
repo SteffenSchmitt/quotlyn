@@ -32,8 +32,9 @@ const props = withDefaults(
     thresholds?: Thresholds
     /** Forecast per window key, from the usage store. */
     forecasts?: Record<string, Forecast | null>
-    /** "Now", "Week" or both: this account is the recommendation. */
-    badge?: string | null
+    /** Recommendation stars: for the session (now) and for the week. */
+    starNow?: boolean
+    starWeek?: boolean
     now: number
   }>(),
   { thresholds: () => DEFAULT_THRESHOLDS },
@@ -137,13 +138,16 @@ const bindingWindow = computed(() => {
     </div>
     <header>
       <div class="flex items-start gap-3">
-        <h3 class="min-w-0 flex-1 truncate font-bold">
-          {{ account.name }}
-          <span
-            v-if="badge"
-            class="ml-1.5 inline-block rounded bg-slate-800 px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide text-white dark:bg-slate-200 dark:text-slate-900"
-            >{{ badge }}</span
-          >
+        <h3 class="flex min-w-0 flex-1 items-center gap-1.5 truncate font-bold">
+          <span class="truncate">{{ account.name }}</span>
+          <svg v-if="starNow" viewBox="0 0 20 20" class="h-4 w-4 shrink-0 text-amber-400" fill="currentColor" aria-hidden="true">
+            <title>{{ t('dashboard.recommend.starNow') }}</title>
+            <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z" />
+          </svg>
+          <svg v-if="starWeek" viewBox="0 0 20 20" class="h-4 w-4 shrink-0 text-sky-400" fill="currentColor" aria-hidden="true">
+            <title>{{ t('dashboard.recommend.starWeek') }}</title>
+            <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z" />
+          </svg>
         </h3>
         <div v-if="summary" class="flex items-center gap-2 text-xl font-bold tabular-nums">
           <span class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: summary.color }" />
