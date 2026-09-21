@@ -3,8 +3,11 @@
 // regenerates CHANGELOG.md from the git tags, commits "chore: release X", tags vX and pushes.
 //
 //   npm run release -- <version|major|minor|patch> [--message "tag text"] [--dry-run] [--no-push] [--skip-checks]
+//   npm run release -- --sync-releases        # GitHub release entries for tags that have none
 //
-// The tag text defaults to the commit subjects since the last tag. No dependencies.
+// The tag text defaults to the commit subjects since the last tag. After the push a GitHub release
+// with the changelog section is created through gh, if gh is logged in as the repository owner.
+// No dependencies.
 import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -18,6 +21,7 @@ const option = (name) => {
 }
 const dryRun = flag('--dry-run')
 const spec = args.find((a) => !a.startsWith('--') && a !== option('--message'))
+const syncOnly = flag('--sync-releases')
 
 function git(...a) {
   return execFileSync('git', a, { cwd: root, encoding: 'utf8' }).trim()
@@ -41,11 +45,11 @@ function bump(current, how) {
   if (/^\d+\.\d+\.\d+$/.test(how)) return how
   return null
 }
-if (!spec) fail('usage: npm run release -- <version|major|minor|patch> [--message "..."] [--dry-run] [--no-push]')
-const version = bump(pkg.version, spec)
-if (!version) fail(`not a version: ${spec}`)
+if (!spec && !flag('--sync-releases')) fail('usage: npm run release -- <version|major|minor|patch> [--message "..."] [--dry-run] [--no-push]')
+const version = spec ? bump(pkg.version, spec) : null
+if (spec && !version) fail(`not a version: ${spec}`)
 if (version === pkg.version) fail(`already at ${version}`)
-if (git('tag', '-l', `v${version}`)) fail(`tag v${version} exists`)
+if (version && git('tag', '-l', `v${version}`)) fail(`tag v${version} exists`)
 
 // --- history -------------------------------------------------------------------------------------
 const tags = git('tag', '-l', 'v*', '--sort=version:refname').split('\n').filter(Boolean)
@@ -61,6 +65,50 @@ function tagInfo(tag) {
   const date = git('log', '-1', '--format=%cs', tag)
   const message = git('tag', '-l', '--format=%(contents:subject)', tag)
   return { date, message }
+}
+
+// --- github releases -----------------------------------------------------------------------------
+const repo = (pkg.repository?.url ?? '').match(/github\.com[/:]([^/]+\/[^/.]+)/)?.[1]
+function ghLogin() {
+  try {
+    return execFileSync('gh', ['api', 'user', '--jq', '.login'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+  } catch {
+    return null
+  }
+}
+function ghReady() {
+  if (!repo) return 'no GitHub repository in package.json'
+  const login = ghLogin()
+  const owner = repo.split('/')[0]
+  if (!login) return 'gh is not available or not logged in'
+  if (login.toLowerCase() !== owner.toLowerCase()) return `gh is logged in as ${login}, not ${owner}`
+  return null
+}
+function ghReleaseExists(tag) {
+  try {
+    execFileSync('gh', ['release', 'view', tag, '--repo', repo], { cwd: root, stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+function ghReleaseCreate(tag, message, subjects) {
+  const notes = [message, '', ...subjects.map((s) => `- ${s}`)].join('\n')
+  execFileSync('gh', ['release', 'create', tag, '--repo', repo, '--title', tag, '--notes', notes, '--verify-tag'], { cwd: root, stdio: 'inherit' })
+}
+
+if (syncOnly) {
+  const why = ghReady()
+  if (why) fail(why)
+  let created = 0
+  for (let i = 0; i < tags.length; i++) {
+    if (ghReleaseExists(tags[i])) continue
+    const { message } = tagInfo(tags[i])
+    ghReleaseCreate(tags[i], message, subjectsBetween(tags[i - 1], tags[i]))
+    created++
+  }
+  console.log(`release: ${created} GitHub release(s) created, ${tags.length - created} existed`)
+  process.exit(0)
 }
 
 const pending = subjectsBetween(lastTag, 'HEAD')
@@ -124,4 +172,10 @@ console.log(`release: committed and tagged v${version}`)
 if (!flag('--no-push')) {
   run('git', ['push', 'origin', 'main', '--follow-tags'])
   console.log('release: pushed')
+  const why = ghReady()
+  if (why) console.log(`release: no GitHub release (${why})`)
+  else {
+    ghReleaseCreate(`v${version}`, message, pending)
+    console.log(`release: GitHub release v${version} created`)
+  }
 }
