@@ -215,7 +215,8 @@
       "done": "Imported {added} snapshot(s), {skipped} already present.",
       "unknown": "Unknown accounts skipped: {names}.",
       "malformed": "This is not a Quotlyn history file."
-    }
+    },
+    "resetNotifications": "Also notify when a window that was used up is free again"
   },
   "windows": {
     "session": {
@@ -300,7 +301,9 @@
     },
     "body": "{window} at {percent} % (threshold {threshold} %) · resets in {countdown}",
     "bodyNoReset": "{window} at {percent} % (threshold {threshold} %)",
-    "forecastTitle": "{account} · Forecast"
+    "forecastTitle": "{account} · Forecast",
+    "resetTitle": "{account} · Reset",
+    "resetBody": "{window} is free again ({percent} %)"
   },
   "theme": {
     "toggle": "Toggle colour scheme",

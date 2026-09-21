@@ -11,6 +11,7 @@ import { i18n } from '../i18n'
 import { windowOneLine } from '../lib/windowLabels'
 import { forecastWindow, type Forecast } from '../lib/forecast'
 import { ForecastWatcher } from '../notify/forecastAlerts'
+import { ResetWatcher } from '../notify/resetAlerts'
 import { forecastLine } from '../lib/forecastText'
 import { useAccountsStore } from './accounts'
 import { useSettingsStore } from './settings'
@@ -35,6 +36,7 @@ export const useUsageStore = defineStore('usage', () => {
   let pruneTimer: ReturnType<typeof setInterval> | null = null
   const watcher = new ThresholdWatcher()
   const forecastWatcher = new ForecastWatcher()
+  const resetWatcher = new ResetWatcher()
   const FORECAST_HORIZON_MS = 3_600_000
 
   function targets(): PollTarget[] {
@@ -125,7 +127,17 @@ export const useUsageStore = defineStore('usage', () => {
   function notifyCrossings(accountId: string, parsed: ParsedUsage) {
     const account = accounts.accounts.find((a) => a.id === accountId)
     const crossings = watcher.evaluate(accountId, parsed.windows, settingsStore.settings.thresholds)
+    const resets = resetWatcher.evaluate(accountId, parsed.windows, parsed.overall.status === 'rejected')
     if (!account || !settingsStore.settings.notificationsEnabled || !account.notificationsEnabled) return
+    if (settingsStore.settings.resetNotifications) {
+      const { t, te } = i18n.global
+      for (const r of resets) {
+        notify(
+          t('notify.resetTitle', { account: account.name }),
+          t('notify.resetBody', { window: windowOneLine((k) => t(k), te, r.windowKey), percent: Math.round(r.utilization * 100) }),
+        )
+      }
+    }
     const { t, te } = i18n.global
     const now = Date.now()
     for (const c of crossings) {
@@ -218,6 +230,7 @@ export const useUsageStore = defineStore('usage', () => {
   async function removeAccountData(id: string) {
     watcher.forget(id)
     forecastWatcher.forget(id)
+    resetWatcher.forget(id)
     delete latest[id]
     delete pollState[id]
     delete lastSnapshot[id]

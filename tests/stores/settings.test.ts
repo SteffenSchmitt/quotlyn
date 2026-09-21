@@ -59,6 +59,16 @@ describe('settings store', () => {
     expect(s.settings.forecast.minPoints).toBe(2)
   })
 
+  it('sanitizes the reset notification switch', () => {
+    const s = useSettingsStore()
+    s.load()
+    expect(s.settings.resetNotifications).toBe(true)
+    s.update({ resetNotifications: false })
+    expect(s.settings.resetNotifications).toBe(false)
+    s.update({ resetNotifications: 'yes' as never })
+    expect(s.settings.resetNotifications).toBe(false)
+  })
+
   it('persists theme, locale and notifications', () => {
     const s = useSettingsStore()
     s.load()

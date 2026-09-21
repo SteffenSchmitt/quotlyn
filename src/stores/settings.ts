@@ -21,6 +21,8 @@ export interface Settings {
   thresholds: Thresholds
   forecast: ForecastSettings
   notificationsEnabled: boolean
+  /** Notify when a window that was used up is free again. */
+  resetNotifications: boolean
   theme: Theme
   locale: LocaleSetting
   dashboardSort: DashboardSort
@@ -33,6 +35,7 @@ export const DEFAULT_SETTINGS: Settings = {
   thresholds: { ...DEFAULT_THRESHOLDS },
   forecast: { enabled: true, notify: true, ...DEFAULT_FORECAST },
   notificationsEnabled: false,
+  resetNotifications: true,
   theme: 'system',
   locale: 'auto',
   dashboardSort: 'manual',
@@ -79,6 +82,7 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
     }
   }
   if (typeof input.notificationsEnabled === 'boolean') out.notificationsEnabled = input.notificationsEnabled
+  if (input.resetNotifications !== undefined) out.resetNotifications = input.resetNotifications === true
   if (input.theme && THEMES.includes(input.theme)) out.theme = input.theme
   if (input.locale && LOCALES.includes(input.locale)) out.locale = input.locale
   if (input.dashboardSort && SORTS.includes(input.dashboardSort)) out.dashboardSort = input.dashboardSort

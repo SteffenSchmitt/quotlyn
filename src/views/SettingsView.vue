@@ -211,6 +211,10 @@ async function runImport() {
         <span class="text-xs text-slate-400">{{ t(`settings.permission.${permission}`) }}</span>
         <InfoTip :text="t('help.notifications')" />
       </label>
+      <label class="mt-2 flex items-center gap-2 text-sm">
+        <input :checked="s.resetNotifications" type="checkbox" :disabled="!s.notificationsEnabled" @change="settings.update({ resetNotifications: ($event.target as HTMLInputElement).checked })" />
+        {{ t('settings.resetNotifications') }}
+      </label>
       <p v-if="isMac" class="mt-2 text-xs text-slate-500">{{ t('settings.notificationsMacHint') }}</p>
     </fieldset>
 

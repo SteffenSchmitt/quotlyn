@@ -215,7 +215,8 @@
       "done": "{added} Snapshot(s) importiert, {skipped} bereits vorhanden.",
       "unknown": "Unbekannte Accounts übersprungen: {names}.",
       "malformed": "Das ist keine Verlaufsdatei von Quotlyn."
-    }
+    },
+    "resetNotifications": "Auch benachrichtigen, wenn ein erschöpftes Fenster wieder frei ist"
   },
   "windows": {
     "session": {
@@ -300,7 +301,9 @@
     },
     "body": "{window} bei {percent} % (Schwelle {threshold} %) · Reset in {countdown}",
     "bodyNoReset": "{window} bei {percent} % (Schwelle {threshold} %)",
-    "forecastTitle": "{account} · Prognose"
+    "forecastTitle": "{account} · Prognose",
+    "resetTitle": "{account} · Reset",
+    "resetBody": "{window} ist wieder frei ({percent} %)"
   },
   "theme": {
     "toggle": "Farbschema umschalten",
