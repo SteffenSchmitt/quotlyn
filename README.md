@@ -65,8 +65,8 @@ week windows the whole cycle from 0 %. The cards show it as a line under
 the lead metric, in the ring legend, and as a thin cycle clock inside each
 ring: the clock runs from the last reset to the next and ends where the
 window is expected to run out.
-History continues each line as a dashed projection, the timeline marks the
-expected exhaustion with a diamond. The forecast can be switched off.
+History continues each line as a dashed projection, the timeline carries
+the same clock as a line under each bar. The forecast can be switched off.
 
 ![Dashboard with one card per account and nested rings per limit window](docs/screenshots/dashboard.png)
 
@@ -75,9 +75,10 @@ hours, 7 or 30 days. Shaded bands mark the periods between resets.
 
 ![History chart with one line per account and reset markers](docs/screenshots/history.png)
 
-**Reset timeline.** One bar per account and window, from now until that
-window resets, filled by current utilization. Handy for deciding which
-account to use next.
+**Reset timeline.** One bar per account and window: the bar is the full
+capacity, the fill the current utilization, the time to the reset at its
+end. The line beneath runs from now to the reset and ends where the window
+is expected to run out. Handy for deciding which account to use next.
 
 ![Timeline with a bar per account and window](docs/screenshots/timeline.png)
 
