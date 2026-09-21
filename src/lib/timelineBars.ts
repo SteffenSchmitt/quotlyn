@@ -60,3 +60,13 @@ export function timelineBars(
   }
   return { rows, bars }
 }
+
+/** End-of-bar text: "44 % · resets in 6d 22h", or "Exhausted · resets in …" at 100 %. */
+export function barLabel(
+  utilization: number,
+  countdown: string,
+  t: (key: string, params?: Record<string, unknown>) => string,
+): string {
+  const head = utilization >= 1 ? t('timeline.exhausted') : `${Math.round(utilization * 100)} %`
+  return `${head} · ${t('dashboard.resetsIn', { t: countdown })}`
+}

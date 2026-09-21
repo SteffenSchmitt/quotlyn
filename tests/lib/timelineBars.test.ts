@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ParsedUsage } from '../../src/api/usageParser'
-import { timelineBars } from '../../src/lib/timelineBars'
+import { barLabel, timelineBars } from '../../src/lib/timelineBars'
 
 function parsed(windows: Array<[string, number, string | null]>): ParsedUsage {
   return {
@@ -60,5 +60,13 @@ describe('timelineBars', () => {
   it('clamps past resets to now', () => {
     const { bars } = timelineBars([{ id: 'a', name: 'A' }], { a: parsed([['5h', 1, '2026-09-21T11:00:00.000Z']]) }, now, (n) => n)
     expect(bars[0]!.endMs).toBe(now)
+  })
+})
+
+describe('barLabel', () => {
+  const t = (key: string, params: Record<string, unknown> = {}) => `${key}{${Object.values(params).join(',')}}`
+  it('shows percent and countdown, and says exhausted at 100 %', () => {
+    expect(barLabel(0.44, '6d 22h', t)).toBe('44 % · dashboard.resetsIn{6d 22h}')
+    expect(barLabel(1, '3d 19h', t)).toBe('timeline.exhausted{} · dashboard.resetsIn{3d 19h}')
   })
 })

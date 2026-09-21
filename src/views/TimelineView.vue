@@ -10,7 +10,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { useChartTheme } from '../lib/chartTheme'
 import { windowColor, withAlpha } from '../lib/palette'
 import { formatCountdown } from '../lib/usageView'
-import { timelineBars, type TimelineBar } from '../lib/timelineBars'
+import { barLabel, timelineBars, type TimelineBar } from '../lib/timelineBars'
 import { useWindowLabels } from '../lib/windowLabels'
 import { useAccountsStore } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
@@ -76,7 +76,7 @@ const option = computed(() => {
       ...th.tooltip,
       formatter: (p: { data: TimelineBar }) =>
         `${p.data.accountName} · ${oneLine(p.data.windowKey)}<br/>` +
-        `${Math.round(p.data.utilization * 100)} % · ${t('dashboard.resetsIn', { t: countdown(p.data) })}<br/>` +
+        `${barLabel(p.data.utilization, countdown(p.data), (k, pr) => t(k, pr ?? {}))}<br/>` +
         d(new Date(p.data.endMs), 'datetime') +
         (p.data.exhaustsAtMs !== null
           ? `<br/>${t('timeline.exhausts', { time: d(new Date(p.data.exhaustsAtMs), 'datetime') })}`
@@ -175,7 +175,7 @@ const option = computed(() => {
                 style: {
                   x: x0 + width + 8,
                   y,
-                  text: `${Math.round(bar.utilization * 100)} % · ${t('dashboard.resetsIn', { t: countdown(bar) })}`,
+                  text: barLabel(bar.utilization, countdown(bar), (k, p) => t(k, p ?? {})),
                   fill: th.muted,
                   fontSize: 11,
                   verticalAlign: 'middle',
