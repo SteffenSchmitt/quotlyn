@@ -3,8 +3,8 @@ import { onBeforeUnmount, ref } from 'vue'
 
 /**
  * Small (i) control that reveals a short explanation on hover, focus or tap.
- * Always placed directly after the label text it explains; the 4px gap is built in,
- * so callers must not add whitespace or flex gaps between the label and the tip.
+ * Always the last element of a flex row: it pushes itself to the right edge and keeps
+ * an 8px gap to whatever precedes it.
  */
 const props = defineProps<{ text: string; label?: string }>()
 const open = ref(false)
@@ -18,7 +18,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 </script>
 
 <template>
-  <span class="relative ml-1 inline-flex shrink-0 align-middle">
+  <span class="relative ml-auto inline-flex shrink-0 pl-2 align-middle">
     <button
       type="button"
       class="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-400 text-[10px] font-bold leading-none text-slate-500 hover:border-slate-600 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-slate-500 dark:text-slate-400 dark:hover:border-slate-300 dark:hover:text-slate-200"

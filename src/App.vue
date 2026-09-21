@@ -73,7 +73,7 @@ watch(
         </button>
         <select
           :value="locale"
-          class="field w-auto"
+          class="select"
           @change="settings.update({ locale: ($event.target as HTMLSelectElement).value as 'de' | 'en' })"
         >
           <option v-for="l in locales" :key="l" :value="l">{{ t(`lang.${l}`) }}</option>

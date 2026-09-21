@@ -170,13 +170,14 @@ const option = computed(() => {
     <h2 class="text-lg font-bold">{{ t('history.title') }}</h2>
     <div class="flex flex-wrap items-center gap-6 text-sm">
       <label class="flex items-center gap-2">
-        <span>{{ t('history.window') }}<InfoTip :text="t('help.historyWindow')" /></span>
-        <select v-model="windowKey" class="field w-auto">
+        {{ t('history.window') }}
+        <select v-model="windowKey" class="select">
           <option v-for="k in windowKeys" :key="k" :value="k">{{ windowLabel(k) }}</option>
         </select>
+        <InfoTip :text="t('help.historyWindow')" />
       </label>
       <div class="flex items-center gap-2">
-        <span>{{ t('history.range') }}<InfoTip :text="t('help.historyRange')" /></span>
+        {{ t('history.range') }}
         <button
           v-for="r in RANGES"
           :key="r"
@@ -185,14 +186,16 @@ const option = computed(() => {
         >
           {{ t(`history.range${r}`) }}
         </button>
+        <InfoTip :text="t('help.historyRange')" />
       </div>
       <div class="flex flex-wrap items-center gap-3">
-        <span>{{ t('history.accounts') }}<InfoTip :text="t('help.historyAccounts')" /></span>
+        {{ t('history.accounts') }}
         <label v-for="a in accounts.accounts" :key="a.id" class="flex items-center gap-1">
           <input type="checkbox" :checked="selected.has(a.id)" @change="toggle(a.id)" />
           <span class="h-2 w-2 rounded-full" :style="{ backgroundColor: a.color }" />
           {{ a.name }}
         </label>
+        <InfoTip :text="t('help.historyAccounts')" />
       </div>
     </div>
     <div class="rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-2">

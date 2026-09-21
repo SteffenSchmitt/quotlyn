@@ -8,7 +8,8 @@
 }
 
 /*
- * Control system. Every interactive control is 32px tall, 14px text, 6px radius.
+ * Control system. Every interactive control is 32px tall, 14px text, 6px radius,
+ * and carries the same 1px border as the cards (currentColor, slate-700 in dark mode).
  * Type scale: page title 18px bold, card title 16px bold, body 14px, meta 12px.
  * The only larger figure is an account's lead number (20px bold).
  */
@@ -17,28 +18,37 @@
     focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-50;
 }
 @utility btn-primary {
-  @apply btn bg-slate-800 text-white hover:bg-slate-700 dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-white;
+  @apply btn border border-slate-800 bg-slate-800 text-white hover:bg-slate-700 dark:border-slate-200 dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-white;
 }
 @utility btn-secondary {
-  @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
+  @apply btn border bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
 }
 @utility btn-danger {
   @apply btn-secondary text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950;
 }
 @utility btn-danger-solid {
-  @apply btn bg-red-600 text-white hover:bg-red-700;
+  @apply btn border border-red-600 bg-red-600 text-white hover:bg-red-700;
 }
 @utility btn-ghost {
-  @apply btn text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-100;
+  @apply btn border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-100;
 }
 @utility btn-icon {
   @apply btn-secondary w-8 px-0;
 }
 @utility field {
-  @apply h-8 w-full rounded-md border border-slate-300 bg-white px-2.5 text-sm text-slate-900 placeholder:text-slate-400
-    focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100;
+  @apply h-8 rounded-md border bg-white px-2.5 text-sm text-slate-900 placeholder:text-slate-400
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100;
+}
+@utility select {
+  @apply field cursor-pointer appearance-none bg-no-repeat pr-8;
+  background-position: right 0.5rem center;
+  background-size: 1rem 1rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2364748b' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  @variant dark {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2394a3b8' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  }
 }
 @utility field-file {
-  @apply text-sm text-slate-500 file:mr-3 file:h-8 file:rounded-md file:border file:border-slate-300 file:bg-white file:px-3 file:text-sm
-    file:text-slate-800 dark:file:border-slate-600 dark:file:bg-slate-800 dark:file:text-slate-100;
+  @apply text-sm text-slate-500 file:mr-3 file:h-8 file:rounded-md file:border file:bg-white file:px-3 file:text-sm
+    file:text-slate-800 dark:file:border-slate-700 dark:file:bg-slate-800 dark:file:text-slate-100;
 }

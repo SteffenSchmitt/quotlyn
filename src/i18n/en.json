@@ -8,7 +8,9 @@
     "refresh": "Refresh now",
     "refreshing": "Refreshing…",
     "autoRefresh": "Auto-refresh",
-    "interval": "every {n} s",
+    "autoRefreshOff": "Auto-refresh: off",
+    "autoRefreshEveryMin": "Auto-refresh: every {n} min",
+    "autoRefreshEverySec": "Auto-refresh: every {n} s",
     "lastFetched": "Last fetched {time}",
     "never": "Not fetched yet",
     "resetsIn": "resets in {t}",
@@ -162,15 +164,18 @@
   "windows": {
     "session": {
       "short": "5 h",
-      "scope": "session"
+      "scope": "session",
+      "tag": "Session"
     },
     "weekAll": {
       "short": "7 d",
-      "scope": "all models"
+      "scope": "all models",
+      "tag": "All"
     },
     "weekFable": {
       "short": "7 d",
-      "scope": "Fable"
+      "scope": "Fable",
+      "tag": "Fable"
     }
   },
   "help": {
@@ -178,7 +183,6 @@
     "autoRefresh": "Polls all accounts automatically at the interval set in Settings. Off means only manual refresh.",
     "sort": "Order of the cards: as configured under Accounts, or the account with the most remaining room first.",
     "summary": "The account's lead metric: utilization of one window and when it resets. Choose the window per account under Accounts.",
-    "rings": "One ring per limit window, outer to inner: 5 h session, 7 d all models, 7 d Fable. Full ring = 100 %. Glow grows as a window nears its threshold.",
     "state": "What the last poll did: OK, fetching, limit reached (the API rejects requests until the window resets), paused (throttled), error, or token rejected.",
     "raw": "Every header the API returned, unchanged. Identifying values are masked by default; headers the app does not know yet are marked as new.",
     "cost": "What one probe costs: the tokens of the tiny request used to read the limits, and the model it was sent to.",

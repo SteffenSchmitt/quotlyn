@@ -30,15 +30,45 @@ const orderedAccounts = computed(() =>
     : accounts.accounts,
 )
 
-const autoRefresh = computed({
-  get: () => settings.settings.autoRefresh,
-  set: (v: boolean) => settings.update({ autoRefresh: v }),
+const INTERVAL_PRESETS = [60, 120, 300, 600, 900, 1800]
+const intervalOptions = computed(() => {
+  const current = settings.settings.intervalSeconds
+  return INTERVAL_PRESETS.includes(current) ? INTERVAL_PRESETS : [...INTERVAL_PRESETS, current].sort((a, b) => a - b)
 })
+const autoRefreshValue = computed(() => (settings.settings.autoRefresh ? String(settings.settings.intervalSeconds) : 'off'))
+function onAutoRefresh(value: string) {
+  if (value === 'off') settings.update({ autoRefresh: false })
+  else settings.update({ autoRefresh: true, intervalSeconds: Number(value) })
+}
+function intervalLabel(seconds: number): string {
+  return seconds % 60 === 0
+    ? t('dashboard.autoRefreshEveryMin', { n: seconds / 60 })
+    : t('dashboard.autoRefreshEverySec', { n: seconds })
+}
 </script>
 
 <template>
   <section class="space-y-6">
-    <div class="flex flex-wrap items-center gap-4">
+    <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
+      <span class="flex items-center">
+        <select :value="autoRefreshValue" class="select" :aria-label="t('dashboard.autoRefresh')" @change="onAutoRefresh(($event.target as HTMLSelectElement).value)">
+          <option value="off">{{ t('dashboard.autoRefreshOff') }}</option>
+          <option v-for="s in intervalOptions" :key="s" :value="String(s)">{{ intervalLabel(s) }}</option>
+        </select>
+        <InfoTip :text="t('help.autoRefresh')" />
+      </span>
+      <span class="flex items-center">
+        <select
+          :value="settings.settings.dashboardSort"
+          class="select"
+          :aria-label="t('dashboard.sort.label')"
+          @change="settings.update({ dashboardSort: ($event.target as HTMLSelectElement).value as 'manual' | 'headroom' })"
+        >
+          <option value="manual">{{ t('dashboard.sort.label') }}: {{ t('dashboard.sort.manual') }}</option>
+          <option value="headroom">{{ t('dashboard.sort.label') }}: {{ t('dashboard.sort.headroom') }}</option>
+        </select>
+        <InfoTip :text="t('help.sort')" />
+      </span>
       <span class="flex items-center">
         <button
           class="btn-primary"
@@ -49,22 +79,6 @@ const autoRefresh = computed({
         </button>
         <InfoTip :text="t('help.refresh')" />
       </span>
-      <label class="flex items-center gap-2 text-sm">
-        <input v-model="autoRefresh" type="checkbox" />
-        <span>{{ t('dashboard.autoRefresh') }}<InfoTip :text="t('help.autoRefresh')" /></span>
-        <span class="text-slate-400">{{ t('dashboard.interval', { n: settings.settings.intervalSeconds }) }}</span>
-      </label>
-      <label class="flex items-center gap-2 text-sm">
-        <span>{{ t('dashboard.sort.label') }}<InfoTip :text="t('help.sort')" /></span>
-        <select
-          :value="settings.settings.dashboardSort"
-          class="field w-auto"
-          @change="settings.update({ dashboardSort: ($event.target as HTMLSelectElement).value as 'manual' | 'headroom' })"
-        >
-          <option value="manual">{{ t('dashboard.sort.manual') }}</option>
-          <option value="headroom">{{ t('dashboard.sort.headroom') }}</option>
-        </select>
-      </label>
     </div>
 
     <p v-if="accounts.accounts.length === 0" class="text-slate-500">

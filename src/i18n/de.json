@@ -8,7 +8,9 @@
     "refresh": "Jetzt aktualisieren",
     "refreshing": "Aktualisiere…",
     "autoRefresh": "Auto-Refresh",
-    "interval": "alle {n} s",
+    "autoRefreshOff": "Auto-Refresh: aus",
+    "autoRefreshEveryMin": "Auto-Refresh: alle {n} min",
+    "autoRefreshEverySec": "Auto-Refresh: alle {n} s",
     "lastFetched": "Zuletzt {time}",
     "never": "Noch nicht abgefragt",
     "resetsIn": "Reset in {t}",
@@ -162,15 +164,18 @@
   "windows": {
     "session": {
       "short": "5 h",
-      "scope": "Sitzung"
+      "scope": "Sitzung",
+      "tag": "Sitzung"
     },
     "weekAll": {
       "short": "7 d",
-      "scope": "alle Modelle"
+      "scope": "alle Modelle",
+      "tag": "Alle"
     },
     "weekFable": {
       "short": "7 d",
-      "scope": "Fable"
+      "scope": "Fable",
+      "tag": "Fable"
     }
   },
   "help": {
@@ -178,7 +183,6 @@
     "autoRefresh": "Fragt alle Accounts automatisch im Intervall aus den Einstellungen ab. Aus heißt: nur manuell.",
     "sort": "Reihenfolge der Karten: wie unter Accounts konfiguriert, oder der Account mit der meisten Luft zuerst.",
     "summary": "Die Hauptmetrik des Accounts: Auslastung eines Fensters und wann es zurückgesetzt wird. Das Fenster wählst du pro Account unter Accounts.",
-    "rings": "Ein Ring pro Limit-Fenster, von außen nach innen: 5 h Sitzung, 7 d alle Modelle, 7 d Fable. Voller Ring = 100 %. Der Glow nimmt zu, je näher ein Fenster an seiner Schwelle ist.",
     "state": "Ergebnis der letzten Abfrage: OK, lädt, Limit erreicht (die API lehnt ab, bis das Fenster zurückgesetzt wird), pausiert (gedrosselt), Fehler oder Token abgelehnt.",
     "raw": "Alle Header, die die API geliefert hat, unverändert. Identifizierende Werte sind standardmäßig maskiert; der App unbekannte Header sind als neu markiert.",
     "cost": "Was eine Probe kostet: die Token der winzigen Anfrage, mit der die Limits gelesen werden, und das Modell, an das sie ging.",

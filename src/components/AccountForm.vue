@@ -74,33 +74,34 @@ function submit() {
   <form class="space-y-3 rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-4" @submit.prevent="submit">
     <label class="block text-sm">
       {{ t('accounts.name') }}
-      <input v-model="name" required class="field mt-1" />
+      <input v-model="name" required class="field mt-1 w-full" />
     </label>
     <label class="block text-sm">
-      {{ t('accounts.color') }}<InfoTip :text="t('help.color')" />
-      <input v-model="color" type="color" class="mt-1 block h-8 w-12 cursor-pointer rounded-md border border-slate-300 bg-white p-0.5 dark:border-slate-600 dark:bg-slate-800" />
+      <span class="flex items-center">{{ t('accounts.color') }}<InfoTip :text="t('help.color')" /></span>
+      <input v-model="color" type="color" class="mt-1 block h-8 w-12 cursor-pointer rounded-md border bg-white p-0.5 dark:border-slate-700 dark:bg-slate-800" />
     </label>
     <label class="block text-sm">
-      {{ t('accounts.token') }}<InfoTip :text="t('help.token')" />
+      <span class="flex items-center">{{ t('accounts.token') }}<InfoTip :text="t('help.token')" /></span>
       <input
         v-model="token"
         type="password"
         autocomplete="off"
         spellcheck="false"
         :placeholder="account?.token ? t('accounts.tokenSet') : ''"
-        class="field mt-1 font-mono placeholder:font-sans"
+        class="field mt-1 w-full font-mono placeholder:font-sans"
       />
       <RouterLink to="/help" class="ml-2 text-xs text-sky-700 underline dark:text-sky-400">{{ t('accounts.howTo') }}</RouterLink>
     </label>
     <label class="block text-sm">
-      {{ t('accounts.primaryWindow') }}<InfoTip :text="t('help.primaryWindow')" />
-      <select v-model="primaryWindow" class="field mt-1">
+      <span class="flex items-center">{{ t('accounts.primaryWindow') }}<InfoTip :text="t('help.primaryWindow')" /></span>
+      <select v-model="primaryWindow" class="select mt-1 w-full">
         <option v-for="w in PRIMARY_WINDOWS" :key="w" :value="w">{{ t(`accounts.primary.${w}`) }}</option>
       </select>
     </label>
     <label class="flex items-center gap-2 text-sm">
       <input v-model="notificationsEnabled" type="checkbox" />
-      <span>{{ t('accounts.notifications') }}<InfoTip :text="t('help.notificationsAccount')" /></span>
+      {{ t('accounts.notifications') }}
+      <InfoTip :text="t('help.notificationsAccount')" />
     </label>
     <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
     <p v-if="testState === 'ok'" class="text-sm text-green-600">{{ testMessage }}</p>

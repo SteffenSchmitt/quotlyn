@@ -32,20 +32,21 @@ const summary = computed(() => {
 
 <template>
   <article
-    class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
+    class="@container rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
     :style="{ borderLeft: `4px solid ${account.color}` }"
   >
-    <header class="flex items-start gap-3">
-      <div class="min-w-0 flex-1">
-        <h3 class="truncate font-bold">{{ account.name }}</h3>
-        <p v-if="summary" class="text-xs text-slate-500">
-          {{ summary.label }} · {{ t('dashboard.resetsIn', { t: summary.countdown }) }}<InfoTip :text="t('help.summary')" />
-        </p>
+    <header>
+      <div class="flex items-start gap-3">
+        <h3 class="min-w-0 flex-1 truncate font-bold">{{ account.name }}</h3>
+        <div v-if="summary" class="flex items-center gap-2 text-xl font-bold tabular-nums">
+          <span class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: summary.color }" />
+          {{ summary.percent }} %
+        </div>
       </div>
-      <div v-if="summary" class="flex items-center gap-2 text-xl font-bold tabular-nums">
-        <span class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: summary.color }" />
-        {{ summary.percent }} %
-      </div>
+      <p v-if="summary" class="flex items-center text-xs text-slate-500">
+        <span class="min-w-0 truncate">{{ summary.label }} · {{ t('dashboard.resetsIn', { t: summary.countdown }) }}</span>
+        <InfoTip :text="t('help.summary')" />
+      </p>
     </header>
     <p v-if="state?.lastError" class="mt-1 text-xs text-red-600">{{ state.lastError }}</p>
     <p v-if="state?.status === 'limited'" class="mt-1 text-xs text-slate-500">{{ t('dashboard.limitedHint') }}</p>
@@ -60,9 +61,7 @@ const summary = computed(() => {
         :now="now"
         :limited="state?.status === 'limited'"
         :primary-window="account.primaryWindow"
-      >
-        <template #corner><InfoTip :text="t('help.rings')" /></template>
-      </UsageRings>
+      />
       <p class="mt-2 text-xs text-slate-500">
         {{
           t('dashboard.overall', {
@@ -71,9 +70,12 @@ const summary = computed(() => {
           })
         }}
       </p>
-      <p v-if="parsed.usage" class="mt-1 text-xs text-slate-400">
-        {{ t('dashboard.cost', { i: parsed.usage.inputTokens, o: parsed.usage.outputTokens }) }}
-        <span v-if="parsed.probe.model"> · {{ t('dashboard.probeModel', { model: parsed.probe.model }) }}</span><InfoTip :text="t('help.cost')" />
+      <p v-if="parsed.usage" class="mt-1 flex items-center text-xs text-slate-400">
+        <span class="min-w-0 truncate">
+          {{ t('dashboard.cost', { i: parsed.usage.inputTokens, o: parsed.usage.outputTokens }) }}
+          <span v-if="parsed.probe.model"> · {{ t('dashboard.probeModel', { model: parsed.probe.model }) }}</span>
+        </span>
+        <InfoTip :text="t('help.cost')" />
       </p>
       <RawDataView :raw="parsed.raw" />
     </template>

@@ -61,17 +61,18 @@ async function submit() {
           v-model="passphrase"
           type="password"
           autocomplete="current-password"
-          class="field mt-1"
+          class="field mt-1 w-full"
           autofocus
         />
       </label>
       <label v-if="store.status === 'no_vault'" class="block text-sm">
         {{ t('vault.confirm') }}
-        <input v-model="confirm" type="password" autocomplete="new-password" class="field mt-1" />
+        <input v-model="confirm" type="password" autocomplete="new-password" class="field mt-1 w-full" />
       </label>
       <label class="flex items-center gap-2 text-sm">
         <input v-model="remember" type="checkbox" />
-        <span>{{ t('vault.remember') }}<InfoTip :text="t('help.remember')" /></span>
+        {{ t('vault.remember') }}
+        <InfoTip :text="t('help.remember')" />
       </label>
       <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
       <button
