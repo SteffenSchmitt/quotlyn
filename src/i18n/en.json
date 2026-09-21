@@ -135,12 +135,14 @@
     "empty": "No snapshots in this range yet.",
     "range24h": "24 h",
     "range7d": "7 days",
-    "range30d": "30 days"
+    "range30d": "30 days",
+    "forecast": "{name} · forecast"
   },
   "timeline": {
     "title": "Reset timeline",
     "empty": "No data yet.",
-    "now": "now"
+    "now": "now",
+    "exhausts": "expected full {time}"
   },
   "settings": {
     "title": "Settings",

@@ -19,11 +19,21 @@ import {
 import { windowColor } from '../lib/palette'
 import { isDark } from '../lib/theme'
 import { useWindowLabels } from '../lib/windowLabels'
+import type { Forecast } from '../lib/forecast'
+import { FORECAST_TONE_CLASS, forecastLine, forecastTone } from '../lib/forecastText'
 import UsageRings from './UsageRings.vue'
 import RawDataView from './RawDataView.vue'
 
 const props = withDefaults(
-  defineProps<{ account: Account; parsed?: ParsedUsage; state?: AccountPollState; thresholds?: Thresholds; now: number }>(),
+  defineProps<{
+    account: Account
+    parsed?: ParsedUsage
+    state?: AccountPollState
+    thresholds?: Thresholds
+    /** Forecast per window key, from the usage store. */
+    forecasts?: Record<string, Forecast | null>
+    now: number
+  }>(),
   { thresholds: () => DEFAULT_THRESHOLDS },
 )
 const emit = defineEmits<{ refresh: [] }>()
@@ -39,7 +49,12 @@ const summary = computed(() => {
     percent: Math.round(w.utilization * 100),
     color: windowColor(w.key, keys, isDark.value),
     countdown: formatCountdown(w.resetsAt, props.now),
+    forecast: props.forecasts?.[w.key] ?? null,
   }
+})
+const forecastText = computed(() => {
+  const f = summary.value?.forecast
+  return f ? { text: forecastLine(f, props.now, (k, p) => t(k, p ?? {})), cls: FORECAST_TONE_CLASS[forecastTone(f, props.now)] } : null
 })
 
 const NONE_COLOR = '#94a3b8'
@@ -118,6 +133,10 @@ const bindingWindow = computed(() => {
         <span class="min-w-0 truncate">{{ summary.label }} · {{ t('dashboard.resetsIn', { t: summary.countdown }) }}</span>
         <InfoTip :text="t('help.summary')" />
       </p>
+      <!-- Forecast on its own line; the line is always there so cards keep the same height. -->
+      <p v-if="summary" class="h-4 truncate text-xs leading-4" :class="forecastText?.cls">
+        {{ forecastText?.text }}
+      </p>
     </header>
     <p v-if="state?.lastError" class="mt-1 text-xs text-red-600">{{ state.lastError }}</p>
     <p v-if="state?.status === 'limited'" class="mt-1 text-xs text-slate-500">{{ t('dashboard.limitedHint') }}</p>
@@ -132,6 +151,7 @@ const bindingWindow = computed(() => {
         :now="now"
         :limited="state?.status === 'limited'"
         :thresholds="thresholds"
+        :forecasts="forecasts"
         :primary-window="account.primaryWindow"
       />
       <p class="mt-2 h-4 truncate text-xs leading-4 text-slate-500">

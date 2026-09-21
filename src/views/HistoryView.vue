@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import VChart from "vue-echarts";
 import { use } from "echarts/core";
@@ -45,6 +45,17 @@ const { oneLine: windowLabel } = useWindowLabels();
 const theme = useChartTheme();
 const accounts = useAccountsStore();
 const usage = useUsageStore();
+
+const now = ref(Date.now());
+let tick: ReturnType<typeof setInterval> | null = null;
+onMounted(() => {
+  tick = setInterval(() => {
+    now.value = Date.now();
+  }, 30_000);
+});
+onUnmounted(() => {
+  if (tick) clearInterval(tick);
+});
 
 const range = ref<Range>("24h");
 const windowKey = ref("5h");
@@ -94,13 +105,42 @@ const hasData = computed(() =>
   Object.values(data.value).some((l) => l.length > 0),
 );
 
+/** Dashed continuation of an account's line to the forecast exhaustion or the reset. */
+function forecastSeries(a: { id: string; name: string; color: string }, snaps: UsageSnapshot[]) {
+  const f = usage.forecastFor(a.id, windowKey.value, now.value);
+  const last = [...snaps].reverse().find((s) => s.ok && s.parsed);
+  const w = last?.parsed?.windows.find((x) => x.key === windowKey.value);
+  if (!f || !last || !w) return null;
+  const endIso = f.beforeReset ? f.exhaustsAt : f.resetsAt;
+  const endValue = Math.round((f.beforeReset ? 1 : f.atReset) * 1000) / 10;
+  return {
+    name: t("history.forecast", { name: a.name }),
+    type: "line",
+    showSymbol: false,
+    symbol: "none",
+    silent: false,
+    itemStyle: { color: a.color },
+    lineStyle: { color: a.color, width: 2, type: "dashed", opacity: 0.7 },
+    emphasis: { focus: "series" },
+    data: [
+      [last.fetchedAt, Math.round(w.utilization * 1000) / 10],
+      [endIso, endValue],
+    ],
+    endIso,
+  };
+}
+
 const option = computed(() => {
   const th = theme.value;
-  const since = rangeSince(range.value, Date.now());
-  const nowIso = new Date().toISOString();
+  const since = rangeSince(range.value, now.value);
+  const nowIso = new Date(now.value).toISOString();
   const selectedAccounts = accounts.accounts.filter((a) =>
     selected.value.has(a.id),
   );
+  const forecasts = selectedAccounts
+    .map((a) => forecastSeries(a, data.value[a.id] ?? []))
+    .filter((f): f is NonNullable<typeof f> => f !== null);
+  const axisMax = forecasts.reduce((m, f) => (f.endIso > m ? f.endIso : m), nowIso);
   return {
     backgroundColor: "transparent",
     textStyle: { color: th.text, fontFamily: th.font },
@@ -112,6 +152,7 @@ const option = computed(() => {
     },
     legend: {
       top: 0,
+      data: selectedAccounts.map((a) => a.name),
       textStyle: { color: th.muted },
       icon: "roundRect",
       itemWidth: 14,
@@ -121,7 +162,7 @@ const option = computed(() => {
     xAxis: {
       type: "time",
       min: since,
-      max: nowIso,
+      max: axisMax,
       axisLine: { lineStyle: { color: th.axisLine } },
       axisLabel: { color: th.muted },
       splitLine: { show: false },
@@ -143,7 +184,7 @@ const option = computed(() => {
         textStyle: { color: th.muted },
       },
     ],
-    series: selectedAccounts.map((a, idx) => {
+    series: [...selectedAccounts.map((a, idx) => {
       const snaps = data.value[a.id] ?? [];
       const markers = resetMarkersFor(snaps, windowKey.value);
       return {
@@ -201,7 +242,7 @@ const option = computed(() => {
           data: markers.map((iso) => ({ xAxis: iso })),
         },
       };
-    }),
+    }), ...forecasts.map(({ endIso: _end, ...f }) => f)],
   };
 });
 </script>

@@ -43,7 +43,13 @@ function truncate(text: string, max = 28): string {
 }
 
 const model = computed(() =>
-  timelineBars(accounts.accounts, usage.latest, now.value, (name, key) => `${name}\u0001${oneLine(key)}`),
+  timelineBars(
+    accounts.accounts,
+    usage.latest,
+    now.value,
+    (name, key) => `${name}\u0001${oneLine(key)}`,
+    (id, key) => usage.forecastFor(id, key, now.value),
+  ),
 )
 const allKeys = computed(() => [...new Set(model.value.bars.map((b) => b.windowKey))])
 const hasData = computed(() => model.value.bars.length > 0)
@@ -61,7 +67,10 @@ const option = computed(() => {
       formatter: (p: { data: TimelineBar }) =>
         `${p.data.accountName} · ${oneLine(p.data.windowKey)}<br/>` +
         `${Math.round(p.data.utilization * 100)} % · ${t('dashboard.resetsIn', { t: formatCountdown(new Date(p.data.endMs).toISOString(), now.value) })}<br/>` +
-        d(new Date(p.data.endMs), 'datetime'),
+        d(new Date(p.data.endMs), 'datetime') +
+        (p.data.exhaustsAtMs !== null
+          ? `<br/><span style="color:${th.crit}">${t('timeline.exhausts', { time: d(new Date(p.data.exhaustsAtMs), 'datetime') })}</span>`
+          : ''),
     },
     grid: { left: LABEL_GUTTER + NAME_COL + WINDOW_COL, right: 56, top: 16, bottom: 36 },
     xAxis: {
@@ -111,6 +120,24 @@ const option = computed(() => {
           const width = Math.max(2, x1 - x0)
           const fill = Math.max(0, Math.min(1, bar.utilization)) * width
           const color = colorOf(bar)
+          const marker =
+            bar.exhaustsAtMs === null
+              ? []
+              : [
+                  {
+                    // Forecast exhaustion: a diamond on the bar at the expected time.
+                    type: 'polygon',
+                    shape: {
+                      points: [
+                        [api.coord([bar.exhaustsAtMs, bar.row])[0], y - height / 2 - 3],
+                        [api.coord([bar.exhaustsAtMs, bar.row])[0] + 5, y],
+                        [api.coord([bar.exhaustsAtMs, bar.row])[0], y + height / 2 + 3],
+                        [api.coord([bar.exhaustsAtMs, bar.row])[0] - 5, y],
+                      ],
+                    },
+                    style: { fill: th.crit, stroke: th.dark ? '#0f172a' : '#ffffff', lineWidth: 1 },
+                  },
+                ]
           return {
             type: 'group',
             children: [
@@ -127,6 +154,7 @@ const option = computed(() => {
                   verticalAlign: 'middle',
                 },
               },
+              ...marker,
             ],
           }
         },

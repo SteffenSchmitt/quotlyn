@@ -14,6 +14,7 @@ export function useChartTheme() {
       axisLine: dark ? 'rgba(148,163,184,0.3)' : 'rgba(100,116,139,0.3)',
       zone: dark ? 'rgba(148,163,184,0.06)' : 'rgba(100,116,139,0.06)',
       now: dark ? '#e2e8f0' : '#0f172a',
+      crit: '#ef4444',
       tooltip: {
         backgroundColor: dark ? '#0f172a' : '#ffffff',
         borderColor: dark ? '#334155' : '#e2e8f0',

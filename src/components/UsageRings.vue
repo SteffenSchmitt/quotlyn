@@ -18,11 +18,20 @@ import {
   type Thresholds,
 } from '../lib/usageView'
 import { useWindowLabels } from '../lib/windowLabels'
+import type { Forecast } from '../lib/forecast'
+import { FORECAST_TONE_CLASS, forecastTone } from '../lib/forecastText'
 
 use([GaugeChart, TooltipComponent, CanvasRenderer])
 
 const props = withDefaults(
-  defineProps<{ parsed: ParsedUsage; now: number; limited?: boolean; thresholds?: Thresholds; primaryWindow?: PrimaryWindow }>(),
+  defineProps<{
+    parsed: ParsedUsage
+    now: number
+    limited?: boolean
+    thresholds?: Thresholds
+    primaryWindow?: PrimaryWindow
+    forecasts?: Record<string, Forecast | null>
+  }>(),
   { limited: false, thresholds: () => DEFAULT_THRESHOLDS, primaryWindow: 'critical' },
 )
 const { t } = useI18n()
@@ -36,10 +45,17 @@ const HOVER_GLOW = 18
 /** Key of the window whose ring is hovered, in the chart or in the legend. */
 const hoverKey = ref<string | null>(null)
 
-function onChartHover(params: { seriesIndex?: number } | null) {
-  const r = params?.seriesIndex === undefined ? undefined : rings.value[params.seriesIndex]
-  hoverKey.value = r?.key ?? null
+/** Series 0..n-1 are the rings, n.. are the forecast ghosts drawn beneath them. */
+function ringAt(seriesIndex: number | undefined) {
+  if (seriesIndex === undefined) return undefined
+  const n = rings.value.length
+  return rings.value[seriesIndex < n ? seriesIndex : seriesIndex - n]
 }
+
+function onChartHover(params: { seriesIndex?: number } | null) {
+  hoverKey.value = ringAt(params?.seriesIndex)?.key ?? null
+}
+
 
 const rings = computed(() => {
   const keys = props.parsed.windows.map((w) => w.key)
@@ -48,12 +64,25 @@ const rings = computed(() => {
     const level = levelFor(w.utilization, props.thresholds)
     const style = ringStyle(base, level, theme.value.dark)
     const [short, scope] = lines(w.key)
+    const forecast = props.forecasts?.[w.key] ?? null
+    const percent = Math.min(100, Math.round(w.utilization * 100))
+    // Ghost arc: where the ring is expected to end up, 100 % when it runs out before the reset.
+    const ghost = forecast ? Math.min(100, Math.round((forecast.beforeReset ? 1 : forecast.atReset) * 100)) : null
+    const forecastText = forecast
+      ? forecast.beforeReset
+        ? t('dashboard.forecast.short.exhausts', { t: formatCountdown(forecast.exhaustsAt, props.now) })
+        : t('dashboard.forecast.short.lasts', { p: Math.round(forecast.atReset * 100) })
+      : null
     return {
+      forecast,
+      ghost: ghost !== null && ghost > percent ? ghost : null,
+      forecastText,
+      forecastClass: forecast ? FORECAST_TONE_CLASS[forecastTone(forecast, props.now)] : '',
       key: w.key,
       short,
       scope,
       tag: tag(w.key),
-      percent: Math.min(100, Math.round(w.utilization * 100)),
+      percent,
       countdown: formatCountdown(w.resetsAt, props.now),
       level,
       base,
@@ -77,13 +106,15 @@ const option = computed(() => ({
     trigger: 'item',
     confine: true,
     formatter: (params: { seriesIndex: number }) => {
-      const r = rings.value[params.seriesIndex]
+      const r = ringAt(params.seriesIndex)
       if (!r) return ''
       const label = r.scope ? `${r.short} ${r.scope}` : r.short
-      return `<b>${label}</b><br/>${r.percent} % · ${t('dashboard.resetsIn', { t: r.countdown })}`
+      const forecast = r.forecastText ? `<br/>${t('dashboard.forecast.label')}: ${r.forecastText}` : ''
+      return `<b>${label}</b><br/>${r.percent} % · ${t('dashboard.resetsIn', { t: r.countdown })}${forecast}`
     },
   },
-  series: rings.value.map((r, i) => ({
+  series: [...rings.value.map((r, i) => ({
+    z: 3,
     type: 'gauge',
     startAngle: 225,
     endAngle: -45,
@@ -129,7 +160,33 @@ const option = computed(() => ({
         }
       : { show: false },
     data: [{ value: r.percent }],
-  })),
+  })), ...rings.value.map((r) => ({
+    // Forecast ghost beneath the ring; an empty series keeps the indices stable when there is none.
+    type: 'gauge',
+    z: 2,
+    startAngle: 225,
+    endAngle: -45,
+    min: 0,
+    max: 100,
+    radius: `${r.radius}%`,
+    center: ['50%', '54%'],
+    silent: r.ghost === null,
+    // progress.show must not toggle between renders (ECharts' gauge diff throws); hide via colour instead.
+    progress: {
+      show: true,
+      width: RING_WIDTH,
+      roundCap: true,
+      itemStyle: { color: r.ghost === null ? 'transparent' : withAlpha(r.base, theme.value.dark ? 0.28 : 0.22) },
+    },
+    axisLine: { lineStyle: { width: RING_WIDTH, color: [[1, 'transparent']] } },
+    axisTick: { show: false },
+    splitLine: { show: false },
+    axisLabel: { show: false },
+    pointer: { show: false },
+    title: { show: false },
+    detail: { show: false },
+    data: [{ value: r.ghost ?? 0 }],
+  }))],
 }))
 </script>
 
@@ -146,7 +203,7 @@ const option = computed(() => ({
       <li
         v-for="r in rings"
         :key="r.key"
-        class="flex items-center gap-2 rounded px-1 -mx-1"
+        class="flex flex-wrap items-center gap-x-2 rounded px-1 -mx-1"
         :class="hoverKey === r.key ? 'bg-slate-100 dark:bg-slate-800' : ''"
         @mouseenter="hoverKey = r.key"
         @mouseleave="hoverKey = null"
@@ -164,6 +221,7 @@ const option = computed(() => ({
         <span class="w-16 text-right text-xs text-slate-500 tabular-nums" :title="t('dashboard.resetsIn', { t: r.countdown })">
           {{ r.countdown }}
         </span>
+        <span v-if="r.forecastText" class="basis-full pl-[18px] text-[11px] leading-4" :class="r.forecastClass">{{ r.forecastText }}</span>
       </li>
     </ul>
   </div>

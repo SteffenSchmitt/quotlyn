@@ -45,6 +45,10 @@ function onAutoRefresh(value: string) {
   if (value === "off") settings.update({ autoRefresh: false });
   else settings.update({ autoRefresh: true, intervalSeconds: Number(value) });
 }
+function forecastsFor(accountId: string): Record<string, import("../lib/forecast").Forecast | null> {
+  const windows = usage.latest[accountId]?.windows ?? [];
+  return Object.fromEntries(windows.map((w) => [w.key, usage.forecastFor(accountId, w.key, now.value)]));
+}
 function intervalLabel(seconds: number): string {
   return seconds % 60 === 0
     ? t("dashboard.autoRefreshEveryMin", { n: seconds / 60 })
@@ -116,6 +120,7 @@ function intervalLabel(seconds: number): string {
         :parsed="usage.latest[a.id]"
         :state="usage.pollState[a.id]"
         :thresholds="settings.settings.thresholds"
+        :forecasts="forecastsFor(a.id)"
         :now="now"
         @refresh="usage.refreshAccount(a.id)"
       />
