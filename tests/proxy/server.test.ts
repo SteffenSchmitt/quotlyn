@@ -1,0 +1,131 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import http from 'node:http'
+import type { AddressInfo } from 'node:net'
+import { createProxyServer } from '../../proxy/server.mjs'
+
+type Seen = { auth?: string; beta?: string; version?: string; path?: string; method?: string; body?: string }
+
+let upstream: http.Server
+let proxy: http.Server
+let proxyBase: string
+let seen: Seen = {}
+let upstreamStatus = 200
+let upstreamBody = '{"usage":{"input_tokens":22,"output_tokens":1}}'
+let upstreamHeaders: Record<string, string> = {}
+
+function listen(server: http.Server): Promise<string> {
+  return new Promise((resolve) => {
+    server.listen(0, '127.0.0.1', () => {
+      const { port } = server.address() as AddressInfo
+      resolve(`http://127.0.0.1:${port}`)
+    })
+  })
+}
+
+const RATE_HEADERS = {
+  'anthropic-ratelimit-unified-status': 'allowed',
+  'anthropic-ratelimit-unified-5h-utilization': '0.28',
+  'anthropic-ratelimit-unified-5h-reset': '1789999800',
+  'anthropic-ratelimit-unified-7d-utilization': '0.51',
+  'anthropic-ratelimit-unified-7d-reset': '1790002800',
+  'anthropic-organization-id': 'org-test',
+  'request-id': 'req_test',
+  'cf-ray': 'should-not-pass',
+}
+
+beforeAll(async () => {
+  upstream = http.createServer((req, res) => {
+    let body = ''
+    req.on('data', (c) => (body += c))
+    req.on('end', () => {
+      seen = {
+        auth: req.headers.authorization,
+        beta: req.headers['anthropic-beta'] as string | undefined,
+        version: req.headers['anthropic-version'] as string | undefined,
+        path: req.url,
+        method: req.method,
+        body,
+      }
+      res.writeHead(upstreamStatus, { 'content-type': 'application/json', ...upstreamHeaders })
+      res.end(upstreamBody)
+    })
+  })
+  const upstreamBase = await listen(upstream)
+  proxy = createProxyServer({ upstream: upstreamBase, model: 'test-model' })
+  proxyBase = await listen(proxy)
+})
+
+afterAll(() => {
+  proxy.close()
+  upstream.close()
+})
+
+describe('GET /usage', () => {
+  it('sends a minimal messages request with the bearer token', async () => {
+    upstreamStatus = 200
+    upstreamHeaders = RATE_HEADERS
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer sk-ant-oat-test' } })
+    expect(res.status).toBe(200)
+    expect(seen.method).toBe('POST')
+    expect(seen.path).toBe('/v1/messages')
+    expect(seen.auth).toBe('Bearer sk-ant-oat-test')
+    expect(seen.beta).toBe('oauth-2025-04-20')
+    expect(seen.version).toBe('2023-06-01')
+    expect(JSON.parse(seen.body!)).toEqual({
+      model: 'test-model',
+      max_tokens: 1,
+      messages: [{ role: 'user', content: 'hi' }],
+    })
+  })
+
+  it('returns anthropic headers, usage and fetchedAt as JSON', async () => {
+    upstreamStatus = 200
+    upstreamHeaders = RATE_HEADERS
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    const json = await res.json()
+    expect(json.upstreamStatus).toBe(200)
+    expect(typeof json.fetchedAt).toBe('string')
+    expect(json.headers['anthropic-ratelimit-unified-5h-utilization']).toBe('0.28')
+    expect(json.headers['anthropic-organization-id']).toBe('org-test')
+    expect(json.headers['request-id']).toBe('req_test')
+    expect(json.headers['cf-ray']).toBeUndefined()
+    expect(json.usage).toEqual({ input_tokens: 22, output_tokens: 1 })
+  })
+
+  it('passes upstream errors through with headers and error body', async () => {
+    upstreamStatus = 429
+    upstreamBody = '{"type":"error","error":{"type":"rate_limit_error","message":"limit"}}'
+    upstreamHeaders = { ...RATE_HEADERS, 'anthropic-ratelimit-unified-status': 'rejected', 'retry-after': '30' }
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(429)
+    expect(res.headers.get('retry-after')).toBe('30')
+    const json = await res.json()
+    expect(json.upstreamStatus).toBe(429)
+    expect(json.headers['anthropic-ratelimit-unified-status']).toBe('rejected')
+    expect(json.error).toEqual({ type: 'rate_limit_error', message: 'limit' })
+  })
+
+  it('rejects requests without Authorization with 401 and does not call upstream', async () => {
+    seen = { auth: 'untouched' }
+    const res = await fetch(`${proxyBase}/usage`)
+    expect(res.status).toBe(401)
+    expect(seen.auth).toBe('untouched')
+  })
+})
+
+describe('other routes', () => {
+  it('returns 404 for unknown paths', async () => {
+    const res = await fetch(`${proxyBase}/anything`)
+    expect(res.status).toBe(404)
+  })
+
+  it('returns 405 for POST /usage', async () => {
+    const res = await fetch(`${proxyBase}/usage`, { method: 'POST' })
+    expect(res.status).toBe(405)
+  })
+
+  it('answers /healthz with 200', async () => {
+    const res = await fetch(`${proxyBase}/healthz`)
+    expect(res.status).toBe(200)
+  })
+})
