@@ -93,6 +93,8 @@ const option = computed(() => {
     grid: { left: 48, right: 24, top: 40, bottom: 70 },
     xAxis: {
       type: 'time',
+      min: since,
+      max: nowIso,
       axisLine: { lineStyle: { color: th.axisLine } },
       axisLabel: { color: th.muted },
       splitLine: { show: false },
