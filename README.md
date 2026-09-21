@@ -51,10 +51,16 @@ npm run dev
 ## How it gets the numbers
 
 Tokens from `claude setup-token` only carry the inference scope, so the
-dedicated usage endpoint rejects them. Quotlyn instead sends the cheapest
-possible request (one output token on Haiku) and reads the
-`anthropic-ratelimit-unified-*` headers of the response, which is exactly
-what the Claude CLI shows under `/usage`. Each poll costs roughly ten tokens of
+dedicated usage endpoint rejects them. Quotlyn instead sends a one-token
+Messages request and reads the `anthropic-ratelimit-unified-*` headers of the
+response, which is exactly what the Claude CLI shows under `/usage`.
+
+The probe uses Fable by default, because the model-specific weekly window
+(`7d_oi`, the "Fable" bar in the web UI) only appears on Fable requests. The
+API only serves the larger models to these tokens when the request carries the
+Claude CLI's system prompt, so the probe sends that one line as its system
+prompt. If the Fable probe is rate limited, Quotlyn retries with Haiku and
+flags the missing Fable window on the card. Each poll costs about 35 tokens of
 your quota; the default interval is five minutes and every account is polled
 sequentially with a short gap.
 
@@ -80,8 +86,8 @@ npm run typecheck # vue-tsc
 ```
 
 Set `QUOTLYN_UPSTREAM=http://localhost:PORT` to point the proxy at a mock
-server during development, and `QUOTLYN_PROBE_MODEL` to change the probe
-model.
+server during development, `QUOTLYN_PROBE_MODEL` to change the primary probe
+model and `QUOTLYN_FALLBACK_MODEL` for the retry model.
 
 ## License
 

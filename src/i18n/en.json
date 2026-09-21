@@ -34,7 +34,9 @@
       "status": "Status: {status}",
       "reason": "Reason: {reason}"
     },
-    "overall": "Overall: {status} · binding window: {claim}"
+    "overall": "Overall: {status} · binding window: {claim}",
+    "fallback": "Fable limit reached: the Fable probe was rejected ({status}); values come from a Haiku probe and the Fable window is missing.",
+    "probeModel": "Probe: {model}"
   },
   "lang": {
     "de": "Deutsch",
@@ -146,5 +148,10 @@
       "done": "Imported {imported} account(s), {total} in total.",
       "malformed": "This is not a Quotlyn accounts file."
     }
+  },
+  "windows": {
+    "session": "5 h session",
+    "weekAll": "7 d · all models",
+    "weekFable": "7 d · Fable"
   }
 }

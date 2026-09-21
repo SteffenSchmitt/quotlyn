@@ -16,10 +16,16 @@ import { RANGES, rangeSince, resetMarkersFor, seriesFor, windowKeysIn, type Rang
 import type { UsageSnapshot } from '../storage/historyDb'
 import { useAccountsStore } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
+import { WINDOW_LABEL_KEYS } from '../lib/usageView'
 
 use([LineChart, GridComponent, TooltipComponent, LegendComponent, MarkLineComponent, DataZoomComponent, CanvasRenderer])
 
-const { t } = useI18n()
+const { t, te } = useI18n()
+
+function windowLabel(key: string): string {
+  const k = WINDOW_LABEL_KEYS[key]
+  return k && te(`windows.${k}`) ? t(`windows.${k}`) : key
+}
 const accounts = useAccountsStore()
 const usage = useUsageStore()
 
@@ -95,7 +101,7 @@ const option = computed(() => ({
       <label class="flex items-center gap-2">
         {{ t('history.window') }}
         <select v-model="windowKey" class="rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
-          <option v-for="k in windowKeys" :key="k" :value="k">{{ k }}</option>
+          <option v-for="k in windowKeys" :key="k" :value="k">{{ windowLabel(k) }}</option>
         </select>
       </label>
       <div class="flex items-center gap-2">

@@ -17,6 +17,7 @@ export interface ParsedUsage {
   overage: { status: string | null; disabledReason: string | null }
   raw: Record<string, string>
   usage: { inputTokens: number; outputTokens: number } | null
+  probe: { model: string | null; fallbackUsed: boolean; primaryStatus: number | null }
 }
 
 export class ParseError extends Error {
@@ -43,7 +44,7 @@ function num(s: string | undefined): number | null {
 }
 
 export function parseUsage(body: unknown): ParsedUsage {
-  const b = body as { fetchedAt?: unknown; headers?: unknown; usage?: unknown } | null
+  const b = body as { fetchedAt?: unknown; headers?: unknown; usage?: unknown; probe?: unknown } | null
   if (!b || typeof b !== 'object' || !b.headers || typeof b.headers !== 'object') {
     throw new ParseError('missing headers')
   }
@@ -72,6 +73,13 @@ export function parseUsage(body: unknown): ParsedUsage {
       ? { inputTokens: Number(usageObj.input_tokens ?? 0), outputTokens: Number(usageObj.output_tokens ?? 0) }
       : null
 
+  const probeObj = b.probe as { model?: unknown; fallbackUsed?: unknown; primaryStatus?: unknown } | null | undefined
+  const probe = {
+    model: typeof probeObj?.model === 'string' ? probeObj.model : null,
+    fallbackUsed: probeObj?.fallbackUsed === true,
+    primaryStatus: typeof probeObj?.primaryStatus === 'number' ? probeObj.primaryStatus : null,
+  }
+
   return {
     fetchedAt: typeof b.fetchedAt === 'string' ? b.fetchedAt : new Date().toISOString(),
     windows,
@@ -87,5 +95,6 @@ export function parseUsage(body: unknown): ParsedUsage {
     },
     raw,
     usage,
+    probe,
   }
 }

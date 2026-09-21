@@ -14,6 +14,7 @@ function ok(fetchedAt: string, windows: Array<[string, number, string | null]>):
       overage: { status: null, disabledReason: null },
       raw: {},
       usage: null,
+    probe: { model: null, fallbackUsed: false, primaryStatus: null },
     },
     error: null,
   }

@@ -17,6 +17,7 @@ const okSnap: UsageSnapshot = {
     overage: { status: 'rejected', disabledReason: null },
     raw: { 'anthropic-organization-id': 'org-secret', 'anthropic-ratelimit-unified-status': 'allowed' },
     usage: { inputTokens: 8, outputTokens: 1 },
+    probe: { model: 'claude-fable-5-1', fallbackUsed: false, primaryStatus: 200 },
   },
   error: null,
 }

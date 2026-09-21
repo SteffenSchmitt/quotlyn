@@ -21,6 +21,7 @@ const body = {
     'request-id': 'req_x',
   },
   usage: { input_tokens: 8, output_tokens: 1 },
+  probe: { model: 'claude-fable-5-1', fallbackUsed: false, primaryStatus: 200 },
 }
 
 describe('epochSecondsToIso', () => {
@@ -58,6 +59,12 @@ describe('parseUsage', () => {
     expect(parsed.raw['anthropic-organization-id']).toBe('org-x')
     expect(parsed.usage).toEqual({ inputTokens: 8, outputTokens: 1 })
     expect(parsed.fetchedAt).toBe('2026-09-21T11:34:45.000Z')
+  })
+
+  it('carries probe info and defaults it when missing', () => {
+    expect(parseUsage(body).probe).toEqual({ model: 'claude-fable-5-1', fallbackUsed: false, primaryStatus: 200 })
+    const { probe: _p, ...withoutProbe } = body
+    expect(parseUsage(withoutProbe).probe).toEqual({ model: null, fallbackUsed: false, primaryStatus: null })
   })
 
   it('picks up unknown windows such as 7d-opus', () => {

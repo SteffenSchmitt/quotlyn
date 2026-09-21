@@ -19,6 +19,7 @@ function parsed(...utils: number[]): ParsedUsage {
     overage: { status: null, disabledReason: null },
     raw: {},
     usage: null,
+    probe: { model: null, fallbackUsed: false, primaryStatus: null },
   }
 }
 

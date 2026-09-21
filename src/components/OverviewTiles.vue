@@ -3,14 +3,19 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Account } from '../stores/accounts'
 import type { ParsedUsage } from '../api/usageParser'
-import { criticalWindow, formatCountdown, levelColor, levelFor, sortByHeadroom } from '../lib/usageView'
+import { WINDOW_LABEL_KEYS, criticalWindow, formatCountdown, levelColor, levelFor, sortByHeadroom } from '../lib/usageView'
 
 const props = defineProps<{
   accounts: Account[]
   latest: Record<string, ParsedUsage | undefined>
   now: number
 }>()
-const { t } = useI18n()
+const { t, te } = useI18n()
+
+function windowLabel(key: string): string {
+  const k = WINDOW_LABEL_KEYS[key]
+  return k && te(`windows.${k}`) ? t(`windows.${k}`) : key
+}
 
 const tiles = computed(() =>
   sortByHeadroom(props.accounts, (a) => props.latest[a.id]).map((a) => {
@@ -39,7 +44,7 @@ const tiles = computed(() =>
           <div class="text-sm font-medium">{{ tile.account.name }}</div>
           <div class="text-xs text-slate-500">
             <template v-if="tile.window">
-              {{ tile.window.key }} · {{ t('dashboard.resetsIn', { t: tile.countdown }) }}
+              {{ windowLabel(tile.window.key) }} · {{ t('dashboard.resetsIn', { t: tile.countdown }) }}
             </template>
             <template v-else>{{ t('dashboard.noData') }}</template>
           </div>

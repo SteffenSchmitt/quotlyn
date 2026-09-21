@@ -3,12 +3,17 @@ import { useI18n } from 'vue-i18n'
 import type { Account } from '../stores/accounts'
 import type { ParsedUsage } from '../api/usageParser'
 import type { AccountPollState } from '../scheduler/poller'
-import { formatCountdown } from '../lib/usageView'
+import { WINDOW_LABEL_KEYS, formatCountdown } from '../lib/usageView'
 import UsageGauge from './UsageGauge.vue'
 import RawDataView from './RawDataView.vue'
 
 defineProps<{ account: Account; parsed?: ParsedUsage; state?: AccountPollState; now: number }>()
-const { t, d } = useI18n()
+const { t, d, te } = useI18n()
+
+function windowLabel(key: string): string {
+  const k = WINDOW_LABEL_KEYS[key]
+  return k && te(`windows.${k}`) ? t(`windows.${k}`) : key
+}
 </script>
 
 <template>
@@ -21,12 +26,15 @@ const { t, d } = useI18n()
     <p v-if="state?.lastError" class="mt-1 text-xs text-red-600">{{ state.lastError }}</p>
 
     <template v-if="parsed">
+      <p v-if="parsed.probe.fallbackUsed" class="mt-2 rounded bg-red-50 p-2 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
+        {{ t('dashboard.fallback', { status: parsed.probe.primaryStatus ?? '?' }) }}
+      </p>
       <div class="mt-3 flex flex-wrap justify-around gap-2">
         <UsageGauge
           v-for="w in parsed.windows"
           :key="w.key"
           :utilization="w.utilization"
-          :label="w.key"
+          :label="windowLabel(w.key)"
           :subtitle="t('dashboard.resetsIn', { t: formatCountdown(w.resetsAt, now) })"
         />
       </div>
@@ -47,6 +55,7 @@ const { t, d } = useI18n()
       </div>
       <p v-if="parsed.usage" class="mt-1 text-xs text-slate-400">
         {{ t('dashboard.cost', { i: parsed.usage.inputTokens, o: parsed.usage.outputTokens }) }}
+        <span v-if="parsed.probe.model"> · {{ t('dashboard.probeModel', { model: parsed.probe.model }) }}</span>
       </p>
       <RawDataView :raw="parsed.raw" />
     </template>

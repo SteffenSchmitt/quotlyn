@@ -18,6 +18,7 @@ function snap(accountId: string, fetchedAt: string, ok = true): Omit<UsageSnapsh
           overage: { status: null, disabledReason: null },
           raw: {},
           usage: null,
+    probe: { model: null, fallbackUsed: false, primaryStatus: null },
         }
       : null,
     error: ok ? null : { status: 429, message: 'rate_limited' },

@@ -69,3 +69,10 @@ export function isKnownHeader(name: string): boolean {
 export function maskValue(value: string): string {
   return value.length > 4 ? `${value.slice(0, 4)}…` : '…'
 }
+
+/** i18n key suffix for known window keys; unknown keys fall back to the raw key. */
+export const WINDOW_LABEL_KEYS: Record<string, string> = {
+  '5h': 'session',
+  '7d': 'weekAll',
+  '7d_oi': 'weekFable',
+}

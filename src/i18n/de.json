@@ -34,7 +34,9 @@
       "status": "Status: {status}",
       "reason": "Grund: {reason}"
     },
-    "overall": "Gesamt: {status} · bindendes Fenster: {claim}"
+    "overall": "Gesamt: {status} · bindendes Fenster: {claim}",
+    "fallback": "Fable-Limit erreicht: Die Fable-Probe wurde abgewiesen ({status}); die Werte stammen aus einer Haiku-Probe, das Fable-Fenster fehlt.",
+    "probeModel": "Probe: {model}"
   },
   "lang": {
     "de": "Deutsch",
@@ -146,5 +148,10 @@
       "done": "{imported} Account(s) importiert, insgesamt {total}.",
       "malformed": "Das ist keine Quotlyn-Accounts-Datei."
     }
+  },
+  "windows": {
+    "session": "5 h Sitzung",
+    "weekAll": "7 d · alle Modelle",
+    "weekFable": "7 d · Fable"
   }
 }
