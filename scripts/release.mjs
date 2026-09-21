@@ -175,7 +175,16 @@ if (!flag('--no-push')) {
   const why = ghReady()
   if (why) console.log(`release: no GitHub release (${why})`)
   else {
-    ghReleaseCreate(`v${version}`, message, pending)
-    console.log(`release: GitHub release v${version} created`)
+    // gh occasionally exits non-zero right after creating the entry; the entry is what counts.
+    try {
+      ghReleaseCreate(`v${version}`, message, pending)
+    } catch (err) {
+      console.log(`release: gh release create reported: ${err instanceof Error ? err.message : String(err)}`)
+    }
+    console.log(
+      ghReleaseExists(`v${version}`)
+        ? `release: GitHub release v${version} created`
+        : `release: GitHub release v${version} missing, run npm run release -- --sync-releases`,
+    )
   }
 }
