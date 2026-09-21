@@ -239,7 +239,7 @@
     "export": "„Accounts“ exportiert die verschlüsselte Tresordatei unverändert. Verlaufs-Exporte enthalten nie Tokens.",
     "import": "Accounts aus einer exportierten Tresordatei zusammenführen oder ersetzen. Dafür brauchst du die Passphrase, mit der die Datei erstellt wurde.",
     "remember": "Hält den Tresor für diesen Browser-Tab offen. Beim Schließen des Tabs wird er wieder gesperrt.",
-    "forecast": "Aus den Snapshots des aktuellen Zyklus wird per linearer Regression die Steigung der Auslastung geschätzt und bis 100 % bzw. bis zum Reset verlängert. Beim Sitzungsfenster bestimmt der Rückblick, wie viel Vergangenheit eingeht; Wochenfenster nehmen immer den ganzen Zyklus ab 0 %, weil eine volle Stunde nichts über eine Woche sagt."
+    "forecast": "Aus den Snapshots des aktuellen Zyklus wird per linearer Regression die Steigung der Auslastung geschätzt und bis 100 % bzw. bis zum Reset verlängert. Beim Sitzungsfenster bestimmt der Rückblick, wie viel Vergangenheit eingeht; Wochenfenster nehmen immer den ganzen Zyklus ab 0 %. Der dünne Bogen in jedem Ring ist eine Zyklus-Uhr vom letzten bis zum nächsten Reset und endet dort, wo das Fenster voraussichtlich voll ist."
   },
   "help_page": {
     "title": "So kommst du an einen Token",

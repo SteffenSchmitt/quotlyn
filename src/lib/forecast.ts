@@ -23,8 +23,19 @@ export interface Forecast {
   /** Expected utilization at the reset, capped at 1. */
   atReset: number
   resetsAt: string
+  /** Start of the current cycle: resetsAt minus the window length, or the first snapshot for unknown windows. */
+  cycleStart: string
   /** Snapshots the fit used. */
   points: number
+}
+
+/** Where the exhaustion sits on the cycle clock: 0 at the last reset, 1 at the next (or when the window lasts). */
+export function cyclePosition(f: Forecast): number {
+  if (!f.beforeReset) return 1
+  const start = Date.parse(f.cycleStart)
+  const span = Date.parse(f.resetsAt) - start
+  if (!(span > 0)) return 1
+  return Math.max(0, Math.min(1, (Date.parse(f.exhaustsAt) - start) / span))
 }
 
 const HOUR = 3_600_000
@@ -66,6 +77,7 @@ export function forecastWindow(
   const since = wholeCycle ? -Infinity : nowMs - opts.lookbackMinutes * 60_000
   const points = cycle.filter((p) => p.t >= since)
   if (points.length < opts.minPoints) return null
+  const cycleStart = new Date(length !== undefined ? resetMs - length : cycle[0]!.t).toISOString()
   // The cycle began at 0 %; that origin anchors a whole-cycle fit even with few snapshots.
   const fitPoints =
     wholeCycle && length !== undefined && resetMs - length < points[0]!.t
@@ -81,6 +93,7 @@ export function forecastWindow(
       beforeReset: true,
       atReset: 1,
       resetsAt: last.resetsAt,
+      cycleStart,
       points: points.length,
     }
   }
@@ -98,6 +111,7 @@ export function forecastWindow(
     beforeReset: exhaustMs <= resetMs,
     atReset,
     resetsAt: last.resetsAt,
+    cycleStart,
     points: points.length,
   }
 }

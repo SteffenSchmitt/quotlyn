@@ -10,7 +10,7 @@ function t(key: string, params: Record<string, unknown> = {}): string {
 function f(over: Partial<Forecast>): Forecast {
   return {
     windowKey: '5h', current: 0.4, ratePerHour: 0.2, exhaustsAt: '2026-09-21T15:00:00Z', beforeReset: true,
-    atReset: 1, resetsAt: '2026-09-21T16:00:00Z', points: 4, ...over,
+    atReset: 1, resetsAt: '2026-09-21T16:00:00Z', cycleStart: '2026-09-21T11:00:00Z', points: 4, ...over,
   }
 }
 

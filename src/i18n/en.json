@@ -239,7 +239,7 @@
     "export": "Accounts export the encrypted vault file as is. History exports never contain tokens.",
     "import": "Merge or replace accounts from an exported vault file. You need the passphrase that file was created with.",
     "remember": "Keeps the vault open for this browser tab. Closing the tab locks it again.",
-    "forecast": "The slope of the utilization is fitted by linear regression over the snapshots of the current cycle and extended to 100 % or to the reset. For the session window the look-back decides how much history enters; week windows always use the whole cycle from 0 %, because a busy hour says nothing about a week."
+    "forecast": "The slope of the utilization is fitted by linear regression over the snapshots of the current cycle and extended to 100 % or to the reset. For the session window the look-back decides how much history enters; week windows always use the whole cycle from 0 %. The thin arc inside each ring is a cycle clock from the last reset to the next, ending where the window is expected to run out."
   },
   "help_page": {
     "title": "Getting a token",

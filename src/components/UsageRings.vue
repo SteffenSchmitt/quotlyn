@@ -18,7 +18,7 @@ import {
   type Thresholds,
 } from '../lib/usageView'
 import { useWindowLabels } from '../lib/windowLabels'
-import type { Forecast } from '../lib/forecast'
+import { cyclePosition, type Forecast } from '../lib/forecast'
 import { FORECAST_TONE_CLASS, forecastTone } from '../lib/forecastText'
 
 use([GaugeChart, TooltipComponent, CanvasRenderer])
@@ -39,6 +39,9 @@ const { lines, tag } = useWindowLabels()
 const theme = useChartTheme()
 
 const RING_WIDTH = 11
+/** Thin cycle-clock arc inside each ring: radius offset in % and width in px. */
+const CLOCK_OFFSET = 9
+const CLOCK_WIDTH = 3
 const RING_STEP = 24
 const HOVER_GLOW = 18
 
@@ -66,8 +69,8 @@ const rings = computed(() => {
     const [short, scope] = lines(w.key)
     const forecast = props.forecasts?.[w.key] ?? null
     const percent = Math.min(100, Math.round(w.utilization * 100))
-    // Ghost arc: where the ring is expected to end up, 100 % when it runs out before the reset.
-    const ghost = forecast ? Math.min(100, Math.round((forecast.beforeReset ? 1 : forecast.atReset) * 100)) : null
+    // Cycle clock: a thin arc from the last reset (0) to the next (100 %), ending where the window runs out.
+    const ghost = forecast ? Math.round(cyclePosition(forecast) * 100) : null
     const forecastText = forecast
       ? forecast.beforeReset
         ? t('dashboard.forecast.short.exhausts', { t: formatCountdown(forecast.exhaustsAt, props.now) })
@@ -75,7 +78,7 @@ const rings = computed(() => {
       : null
     return {
       forecast,
-      ghost: ghost !== null && ghost > percent ? ghost : null,
+      ghost,
       forecastText,
       forecastClass: forecast ? FORECAST_TONE_CLASS[forecastTone(forecast, props.now)] : '',
       key: w.key,
@@ -161,24 +164,24 @@ const option = computed(() => ({
       : { show: false },
     data: [{ value: r.percent }],
   })), ...rings.value.map((r) => ({
-    // Forecast ghost beneath the ring; an empty series keeps the indices stable when there is none.
+    // Forecast cycle clock just inside the ring; an empty series keeps the indices stable when there is none.
     type: 'gauge',
     z: 2,
     startAngle: 225,
     endAngle: -45,
     min: 0,
     max: 100,
-    radius: `${r.radius}%`,
+    radius: `${r.radius - CLOCK_OFFSET}%`,
     center: ['50%', '54%'],
     silent: r.ghost === null,
     // progress.show must not toggle between renders (ECharts' gauge diff throws); hide via colour instead.
     progress: {
       show: true,
-      width: RING_WIDTH,
+      width: CLOCK_WIDTH,
       roundCap: true,
-      itemStyle: { color: r.ghost === null ? 'transparent' : withAlpha(r.base, theme.value.dark ? 0.28 : 0.22) },
+      itemStyle: { color: r.ghost === null ? 'transparent' : withAlpha(r.base, theme.value.dark ? 0.75 : 0.65) },
     },
-    axisLine: { lineStyle: { width: RING_WIDTH, color: [[1, 'transparent']] } },
+    axisLine: { lineStyle: { width: CLOCK_WIDTH, color: [[1, r.ghost === null ? 'transparent' : r.style.track]] } },
     axisTick: { show: false },
     splitLine: { show: false },
     axisLabel: { show: false },

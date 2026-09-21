@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { forecastWindow, type ForecastOptions } from '../../src/lib/forecast'
+import { cyclePosition, forecastWindow, type ForecastOptions } from '../../src/lib/forecast'
 import type { UsageSnapshot } from '../../src/storage/historyDb'
 
 const T0 = Date.parse('2026-09-21T10:00:00Z')
@@ -93,5 +93,29 @@ describe('forecastWindow', () => {
   it('returns null without a reset time or for an unknown window', () => {
     expect(forecastWindow([snap(0, 0.1, null), snap(10, 0.2, null), snap(20, 0.3, null)], '5h', OPTS, T0 + 20 * MIN)).toBeNull()
     expect(forecastWindow([snap(0, 0.1), snap(10, 0.2), snap(20, 0.3)], '7d', OPTS, T0 + 20 * MIN)).toBeNull()
+  })
+})
+
+describe('cyclePosition', () => {
+  it('places the exhaustion on the cycle clock, from the last reset (0) to the next (1)', () => {
+    // 7-day window: cycle started at T0, resets at T0 + 7 d, exhaustion at day 4.
+    const reset = new Date(T0 + 7 * 24 * H).toISOString()
+    const snaps = [snap(0, 0.05, reset, '7d'), snap(24 * 60, 0.25, reset, '7d'), snap(48 * 60, 0.5, reset, '7d')]
+    const f = forecastWindow(snaps, '7d', { lookbackMinutes: 60, minPoints: 2 }, T0 + 48 * 60 * MIN)!
+    expect(f.cycleStart).toBe(new Date(T0).toISOString())
+    const expected = (Date.parse(f.exhaustsAt) - T0) / (7 * 24 * H)
+    expect(expected).toBeGreaterThan(4 / 7)
+    expect(expected).toBeLessThan(5 / 7)
+    expect(cyclePosition(f)).toBeCloseTo(expected, 6)
+  })
+  it('is 1 when the window lasts until the reset', () => {
+    const f = forecastWindow([snap(0, 0.24), snap(30, 0.27), snap(60, 0.3)], '5h', OPTS, T0 + 60 * MIN)!
+    expect(f.beforeReset).toBe(false)
+    expect(cyclePosition(f)).toBe(1)
+  })
+  it('falls back to the first snapshot as cycle start for unknown windows', () => {
+    const snaps = [snap(0, 0.1, RESET, 'x'), snap(10, 0.2, RESET, 'x'), snap(20, 0.3, RESET, 'x')]
+    const f = forecastWindow(snaps, 'x', OPTS, T0 + 20 * MIN)!
+    expect(f.cycleStart).toBe(new Date(T0).toISOString())
   })
 })
