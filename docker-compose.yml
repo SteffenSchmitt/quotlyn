@@ -2,8 +2,9 @@ services:
   quotlyn:
     build: .
     ports:
-      - "5173:5173"
-      - "8787:8787"
+      # Host ports are configurable so a host-side `npm run dev` can coexist with the container.
+      - "${QUOTLYN_WEB_PORT:-5173}:5173"
+      - "${QUOTLYN_PROXY_HOST_PORT:-8787}:8787"
     volumes:
       - .:/app
       - quotlyn_node_modules:/app/node_modules

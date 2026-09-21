@@ -85,6 +85,11 @@ npm test          # Vitest
 npm run typecheck # vue-tsc
 ```
 
+When the container is running it owns ports 5173 and 8787 on the host (held by
+Docker Desktop's backend process, so never kill whatever listens there). To run
+the host dev server alongside it, start the container on other ports:
+`QUOTLYN_WEB_PORT=5174 QUOTLYN_PROXY_HOST_PORT=8788 docker compose up`.
+
 Set `QUOTLYN_UPSTREAM=http://localhost:PORT` to point the proxy at a mock
 server during development, `QUOTLYN_PROBE_MODEL` to change the primary probe
 model and `QUOTLYN_FALLBACK_MODEL` for the retry model.
