@@ -11,7 +11,6 @@
     "autoRefreshOff": "Auto-Refresh: aus",
     "autoRefreshEveryMin": "Auto-Refresh: alle {n} min",
     "autoRefreshEverySec": "Auto-Refresh: alle {n} s",
-    "lastFetched": "Zuletzt abgefragt {time}",
     "never": "Noch nicht abgefragt",
     "resetsIn": "Reset in {t}",
     "state": {
@@ -68,7 +67,9 @@
         "exhausted": "erschöpft"
       },
       "exhausted": "Erschöpft, Limit erreicht"
-    }
+    },
+    "lastRead": "Zuletzt gelesen {time}",
+    "attemptFailed": "Abfrage um {time} fehlgeschlagen: {error}"
   },
   "lang": {
     "de": "Deutsch",
@@ -203,7 +204,8 @@
       "lookback": "Rückblick für die Sitzungs-Prognose (Wochenfenster nutzen den ganzen Zyklus)",
       "lookbackCycle": "seit dem letzten Reset",
       "lookbackMin": "letzte {n} min",
-      "minPoints": "Mindestens Datenpunkte"
+      "minPoints": "Mindestens Datenpunkte",
+      "notify": "Benachrichtigen, wenn ein Fenster voraussichtlich in unter einer Stunde erschöpft ist (einmal pro Zyklus)"
     },
     "notificationsMacHint": "Zeigt macOS nur „Mitteilung“ statt des Textes, hilft in den Systemeinstellungen unter Mitteilungen › Google Chrome die Option „Vorschauen einblenden: Immer“."
   },
@@ -289,7 +291,8 @@
       "crit": "Kritisch"
     },
     "body": "{window} bei {percent} % (Schwelle {threshold} %) · Reset in {countdown}",
-    "bodyNoReset": "{window} bei {percent} % (Schwelle {threshold} %)"
+    "bodyNoReset": "{window} bei {percent} % (Schwelle {threshold} %)",
+    "forecastTitle": "{account} · Prognose"
   },
   "theme": {
     "toggle": "Farbschema umschalten",

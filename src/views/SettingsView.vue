@@ -148,6 +148,10 @@ async function runImport() {
             </option>
           </select>
         </label>
+        <label class="flex items-center gap-2 text-sm sm:col-span-2">
+          <input :checked="s.forecast.notify" type="checkbox" :disabled="!s.forecast.enabled" @change="updateForecast({ notify: ($event.target as HTMLInputElement).checked })" />
+          {{ t('settings.forecast.notify') }}
+        </label>
         <label class="text-sm">
           {{ t('settings.forecast.minPoints') }}
           <input

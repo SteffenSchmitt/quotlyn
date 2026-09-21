@@ -11,7 +11,6 @@
     "autoRefreshOff": "Auto-refresh: off",
     "autoRefreshEveryMin": "Auto-refresh: every {n} min",
     "autoRefreshEverySec": "Auto-refresh: every {n} s",
-    "lastFetched": "Last fetched {time}",
     "never": "Not fetched yet",
     "resetsIn": "resets in {t}",
     "state": {
@@ -68,7 +67,9 @@
         "exhausted": "exhausted"
       },
       "exhausted": "Exhausted, limit reached"
-    }
+    },
+    "lastRead": "Last read {time}",
+    "attemptFailed": "Poll at {time} failed: {error}"
   },
   "lang": {
     "de": "Deutsch",
@@ -203,7 +204,8 @@
       "lookback": "Look-back for the session forecast (week windows use the whole cycle)",
       "lookbackCycle": "since the last reset",
       "lookbackMin": "last {n} min",
-      "minPoints": "Minimum data points"
+      "minPoints": "Minimum data points",
+      "notify": "Notify when a window is expected to run out within the hour (once per cycle)"
     },
     "notificationsMacHint": "If macOS shows only “Notification” instead of the text, set “Show previews: Always” for Google Chrome under System Settings › Notifications."
   },
@@ -289,7 +291,8 @@
       "crit": "Critical"
     },
     "body": "{window} at {percent} % (threshold {threshold} %) · resets in {countdown}",
-    "bodyNoReset": "{window} at {percent} % (threshold {threshold} %)"
+    "bodyNoReset": "{window} at {percent} % (threshold {threshold} %)",
+    "forecastTitle": "{account} · Forecast"
   },
   "theme": {
     "toggle": "Toggle colour scheme",

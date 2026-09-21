@@ -10,6 +10,8 @@ import { crossingNotification } from '../notify/notifyText'
 import { i18n } from '../i18n'
 import { windowOneLine } from '../lib/windowLabels'
 import { forecastWindow, type Forecast } from '../lib/forecast'
+import { ForecastWatcher } from '../notify/forecastAlerts'
+import { forecastLine } from '../lib/forecastText'
 import { useAccountsStore } from './accounts'
 import { useSettingsStore } from './settings'
 
@@ -32,6 +34,8 @@ export const useUsageStore = defineStore('usage', () => {
   let poller: Poller | null = null
   let pruneTimer: ReturnType<typeof setInterval> | null = null
   const watcher = new ThresholdWatcher()
+  const forecastWatcher = new ForecastWatcher()
+  const FORECAST_HORIZON_MS = 3_600_000
 
   function targets(): PollTarget[] {
     return accounts.accounts.map((a) => ({ id: a.id, token: a.token }))
@@ -81,8 +85,27 @@ export const useUsageStore = defineStore('usage', () => {
       }
     }
     lastSnapshot[target.id] = snapshot
-    if (snapshot.ok) remember(target.id, snapshot)
+    if (snapshot.ok) {
+      remember(target.id, snapshot)
+      notifyForecasts(target.id)
+    }
     if (db) await db.add(snapshot)
+  }
+
+  function notifyForecasts(accountId: string) {
+    const account = accounts.accounts.find((a) => a.id === accountId)
+    const opts = settingsStore.settings.forecast
+    if (!account || !opts.enabled || !opts.notify) return
+    const now = Date.now()
+    const forecasts = (latest[accountId]?.windows ?? []).map((w) => forecastFor(accountId, w.key, now))
+    const due = forecastWatcher.evaluate(accountId, forecasts, now, FORECAST_HORIZON_MS)
+    if (!settingsStore.settings.notificationsEnabled || !account.notificationsEnabled) return
+    const { t, te } = i18n.global
+    for (const f of due) {
+      const window = windowOneLine((k) => t(k), te, f.windowKey)
+      const line = forecastLine(f, now, (key, params) => t(key, params ?? {}))
+      notify(t('notify.forecastTitle', { account: account.name }), `${window}: ${line}`)
+    }
   }
 
   function remember(accountId: string, snapshot: Omit<UsageSnapshot, 'id'>) {
@@ -182,6 +205,7 @@ export const useUsageStore = defineStore('usage', () => {
 
   async function removeAccountData(id: string) {
     watcher.forget(id)
+    forecastWatcher.forget(id)
     delete latest[id]
     delete pollState[id]
     delete lastSnapshot[id]

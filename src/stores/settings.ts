@@ -10,6 +10,8 @@ export type DashboardSort = 'manual' | 'headroom'
 
 export interface ForecastSettings extends ForecastOptions {
   enabled: boolean
+  /** Notify once per cycle when a window is expected to run out within the hour. */
+  notify: boolean
 }
 
 export interface Settings {
@@ -29,7 +31,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoRefresh: true,
   retentionDays: 30,
   thresholds: { ...DEFAULT_THRESHOLDS },
-  forecast: { enabled: true, ...DEFAULT_FORECAST },
+  forecast: { enabled: true, notify: true, ...DEFAULT_FORECAST },
   notificationsEnabled: false,
   theme: 'system',
   locale: 'auto',
@@ -68,8 +70,9 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
     }
   }
   if (input.forecast && typeof input.forecast === 'object') {
-    const { enabled, lookbackMinutes, minPoints } = input.forecast
+    const { enabled, lookbackMinutes, minPoints, notify } = input.forecast
     if (typeof enabled === 'boolean') out.forecast.enabled = enabled
+    if (notify !== undefined) out.forecast.notify = notify === true
     if ((LOOKBACK_CHOICES as readonly number[]).includes(lookbackMinutes)) out.forecast.lookbackMinutes = lookbackMinutes
     if (typeof minPoints === 'number' && Number.isFinite(minPoints)) {
       out.forecast.minPoints = clamp(Math.round(minPoints), MIN_FORECAST_POINTS, MAX_FORECAST_POINTS)
