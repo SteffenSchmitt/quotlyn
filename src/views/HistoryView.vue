@@ -26,6 +26,7 @@ import { useChartTheme } from "../lib/chartTheme";
 import { withAlpha } from "../lib/palette";
 import type { UsageSnapshot } from "../storage/historyDb";
 import { useAccountsStore } from "../stores/accounts";
+import { useSettingsStore } from "../stores/settings";
 import { useUsageStore } from "../stores/usage";
 import { useWindowLabels } from "../lib/windowLabels";
 
@@ -44,6 +45,7 @@ const { t, d } = useI18n();
 const { oneLine: windowLabel } = useWindowLabels();
 const theme = useChartTheme();
 const accounts = useAccountsStore();
+const settings = useSettingsStore();
 const usage = useUsageStore();
 
 const now = ref(Date.now());
@@ -210,7 +212,8 @@ const option = computed(() => {
           },
         },
         emphasis: { focus: "series" },
-        data: seriesFor(snaps, windowKey.value),
+        // Break the line where more than two and a half polling intervals passed without a reading.
+        data: seriesFor(snaps, windowKey.value, settings.settings.intervalSeconds * 2500),
         // Reset zones only for the first selected account keep the background calm.
         markArea:
           idx === 0

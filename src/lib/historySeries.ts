@@ -8,11 +8,24 @@ export function rangeSince(range: Range, nowMs: number): string {
   return new Date(nowMs - RANGE_MS[range]).toISOString()
 }
 
-export function seriesFor(snapshots: UsageSnapshot[], windowKey: string): Array<[string, number | null]> {
-  return snapshots.map((s) => {
+/**
+ * [fetchedAt, percent] per snapshot; failed polls are null so the line breaks there. With `gapMs`
+ * a null is also inserted between snapshots further apart than that, so a period without polls
+ * (the app was off) does not get bridged by an invented curve.
+ */
+export function seriesFor(snapshots: UsageSnapshot[], windowKey: string, gapMs?: number): Array<[string, number | null]> {
+  const out: Array<[string, number | null]> = []
+  let prevMs: number | null = null
+  for (const s of snapshots) {
+    const ms = Date.parse(s.fetchedAt)
+    if (gapMs !== undefined && prevMs !== null && ms - prevMs > gapMs) {
+      out.push([new Date(Math.round((prevMs + ms) / 2)).toISOString(), null])
+    }
     const w = s.parsed?.windows.find((x) => x.key === windowKey)
-    return [s.fetchedAt, w ? Math.round(w.utilization * 1000) / 10 : null]
-  })
+    out.push([s.fetchedAt, w ? Math.round(w.utilization * 1000) / 10 : null])
+    prevMs = ms
+  }
+  return out
 }
 
 export function resetMarkersFor(snapshots: UsageSnapshot[], windowKey: string): string[] {

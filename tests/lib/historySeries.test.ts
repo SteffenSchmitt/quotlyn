@@ -90,3 +90,23 @@ describe('resetZones', () => {
     ])
   })
 })
+
+describe('seriesFor with a gap limit', () => {
+  it('breaks the line where snapshots are further apart than the limit', () => {
+    const sparse = [
+      ok('2026-09-21T10:00:00.000Z', [['5h', 0.2, R1]]),
+      ok('2026-09-21T10:05:00.000Z', [['5h', 0.25, R1]]),
+      // the app was off for two hours
+      ok('2026-09-21T12:05:00.000Z', [['5h', 0.3, R1]]),
+    ]
+    expect(seriesFor(sparse, '5h', 15 * 60_000)).toEqual([
+      ['2026-09-21T10:00:00.000Z', 20],
+      ['2026-09-21T10:05:00.000Z', 25],
+      ['2026-09-21T11:05:00.000Z', null],
+      ['2026-09-21T12:05:00.000Z', 30],
+    ])
+  })
+  it('keeps the series untouched without a limit', () => {
+    expect(seriesFor(snaps, '7d')).toHaveLength(4)
+  })
+})
