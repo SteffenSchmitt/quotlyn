@@ -9,7 +9,7 @@ renders the current state as gauges, trend charts and a reset timeline.
 
 ## Status
 
-Skeleton in place: app shell, proxy and container work. No account handling yet.
+Accounts can be added, tested and managed; tokens are stored encrypted behind a passphrase. No polling or charts yet.
 
 ## Run locally
 
