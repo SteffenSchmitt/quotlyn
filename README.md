@@ -9,11 +9,12 @@
 </p>
 
 <p align="center">
-  <img alt="Release" src="https://img.shields.io/badge/release-v1.5.0-0f172a">
-  <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-0f172a">
-  <img alt="Vue 3 and TypeScript" src="https://img.shields.io/badge/Vue_3-TypeScript-0f172a">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-0f172a">
-  <img alt="Runs locally" src="https://img.shields.io/badge/runs-locally,_no_cloud-0f172a">
+  <a href="CHANGELOG.md"><img alt="Release" src="https://img.shields.io/badge/release-v1.5.0-0ea5e9?logo=github&logoColor=white"></a>
+  <a href="LICENSE"><img alt="License MIT" src="https://img.shields.io/badge/license-MIT-10b981"></a>
+  <img alt="Vue 3" src="https://img.shields.io/badge/Vue_3-42b883?logo=vuedotjs&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white">
+  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white">
+  <img alt="Runs locally" src="https://img.shields.io/badge/runs-locally,_no_cloud-f59e0b">
 </p>
 
 <p align="center">
@@ -23,7 +24,8 @@
   <a href="#what-you-see">What you see</a> ·
   <a href="#how-it-reads-the-numbers">How it works</a> ·
   <a href="#security">Security</a> ·
-  <a href="#configuration">Configuration</a>
+  <a href="#configuration">Configuration</a> ·
+  <a href="#contributing">Contributing</a>
 </p>
 
 ![Dashboard with one card per account, nested rings per limit window, a forecast line and a traffic light on the card edge](docs/screenshots/dashboard.png)
@@ -147,10 +149,14 @@ A step-by-step guide to obtaining a token, right inside the app.
   each card. Identifying values are masked by default; headers Quotlyn does
   not know yet are flagged as new, so nothing the API adds goes unnoticed.
 - Browser notifications when a window crosses a threshold, once per
-  crossing rather than on every poll. They say which window, how far it
-  is, which threshold it crossed and when it resets.
+  crossing rather than on every poll, and when a window is expected to
+  run out within the hour, once per cycle. They say which window, how far
+  it is and when it resets.
+- The browser tab shows the highest utilization, so a glance at the tab
+  bar is enough.
 - Export of the encrypted account file and of the history as CSV or JSON.
-  Import merges or replaces accounts from an exported file.
+  Import merges or replaces accounts from an exported file, and a history
+  export can be imported again on another browser or machine.
 - German and English interface, a sun/moon switch in the header for light
   and dark theme.
 
@@ -207,18 +213,28 @@ different port so a host-side `npm run dev` can coexist with it.
 ## Development
 
 ```sh
+npm run dev:mock  # the app against a fake API on http://localhost:15173, no token needed
 npm test          # Vitest
 npm run build     # vue-tsc + Vite, the type gate for .vue files
 ```
+
+Vue 3, TypeScript, Pinia, Tailwind, vue-i18n and Apache ECharts. Pure
+logic (parsing, polling, thresholds, forecast, crypto, export) lives in
+framework-free modules with unit tests; components stay thin. Tests and
+build run in CI on every push. The mock API and the screenshot tooling are
+described in [scripts/screenshots/README.md](scripts/screenshots/README.md).
 
 The header shows the version from `package.json`. Releases go through
 `npm run release -- <version|major|minor|patch>`: it runs the checks, bumps
 the version and the badge, regenerates [CHANGELOG.md](CHANGELOG.md) from
 the git tags, commits, tags and pushes.
 
-Vue 3, TypeScript, Pinia, Tailwind, vue-i18n and Apache ECharts. Pure
-logic (parsing, polling, thresholds, forecast, crypto, export) lives in
-framework-free modules with unit tests; components stay thin.
+## Contributing
+
+Issues and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md)
+has the setup, the checks to run and the conventions; the short version:
+run `npm test` and `npm run build`, add a test for logic you touch, add
+both languages for new strings, and never paste a token into an issue.
 
 ## License
 
