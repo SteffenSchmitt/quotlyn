@@ -42,6 +42,8 @@ const RING_WIDTH = 11
 /** Thin cycle-clock arc inside each ring: radius offset in % and width in px. */
 const CLOCK_OFFSET = 9
 const CLOCK_WIDTH = 3
+const CLOCK_COLOR = { dark: 'rgba(226,232,240,0.7)', light: 'rgba(51,65,85,0.55)' }
+const CLOCK_TRACK = { dark: 'rgba(226,232,240,0.14)', light: 'rgba(51,65,85,0.12)' }
 const RING_STEP = 24
 const HOVER_GLOW = 18
 
@@ -179,9 +181,10 @@ const option = computed(() => ({
       show: true,
       width: CLOCK_WIDTH,
       roundCap: true,
-      itemStyle: { color: r.ghost === null ? 'transparent' : withAlpha(r.base, theme.value.dark ? 0.75 : 0.65) },
+      // Neutral, not the ring's hue: the clock is time, not a second reading of the metric.
+      itemStyle: { color: r.ghost === null ? 'transparent' : CLOCK_COLOR[theme.value.dark ? 'dark' : 'light'] },
     },
-    axisLine: { lineStyle: { width: CLOCK_WIDTH, color: [[1, r.ghost === null ? 'transparent' : r.style.track]] } },
+    axisLine: { lineStyle: { width: CLOCK_WIDTH, color: [[1, r.ghost === null ? 'transparent' : CLOCK_TRACK[theme.value.dark ? 'dark' : 'light']]] } },
     axisTick: { show: false },
     splitLine: { show: false },
     axisLabel: { show: false },
