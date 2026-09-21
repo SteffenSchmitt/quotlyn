@@ -1,0 +1,30 @@
+# Local working notes and plans (never published)
+.local/
+
+# AI assistant configuration (never published)
+.claude/
+CLAUDE.md
+AGENTS.md
+.cursor/
+.aider*
+
+# Dependencies and build output
+node_modules/
+dist/
+dist-ssr/
+*.local
+coverage/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Editor and OS noise
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.log
+npm-debug.log*
+pnpm-debug.log*
