@@ -1,5 +1,6 @@
 export const VAULT_KEY = 'quotlyn.vault'
 export const SESSION_KEY_KEY = 'quotlyn.sessionKey'
+export const SETTINGS_KEY = 'quotlyn.settings'
 
 export function readJson<T>(storage: Storage, key: string): T | null {
   const raw = storage.getItem(key)
