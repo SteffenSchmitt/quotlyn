@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InfoTip from '../components/InfoTip.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccountCard from '../components/AccountCard.vue'
@@ -45,10 +46,12 @@ const autoRefresh = computed({
       >
         {{ usage.refreshing ? t('dashboard.refreshing') : t('dashboard.refresh') }}
       </button>
+      <InfoTip :text="t('help.refresh')" />
       <label class="flex items-center gap-2 text-sm">
         <input v-model="autoRefresh" type="checkbox" />
         {{ t('dashboard.autoRefresh') }}
         <span class="text-slate-400">{{ t('dashboard.interval', { n: settings.settings.intervalSeconds }) }}</span>
+        <InfoTip :text="t('help.autoRefresh')" />
       </label>
       <label class="flex items-center gap-2 text-sm">
         {{ t('dashboard.sort.label') }}
@@ -60,6 +63,7 @@ const autoRefresh = computed({
           <option value="manual">{{ t('dashboard.sort.manual') }}</option>
           <option value="headroom">{{ t('dashboard.sort.headroom') }}</option>
         </select>
+        <InfoTip :text="t('help.sort')" />
       </label>
     </div>
 

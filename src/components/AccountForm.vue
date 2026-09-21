@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InfoTip from './InfoTip.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchUsage } from '../api/usageClient'
@@ -76,11 +77,11 @@ function submit() {
       <input v-model="name" required class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" />
     </label>
     <label class="block text-sm">
-      {{ t('accounts.color') }}
+      {{ t('accounts.color') }} <InfoTip :text="t('help.color')" />
       <input v-model="color" type="color" class="mt-1 h-8 w-16 rounded border" />
     </label>
     <label class="block text-sm">
-      {{ t('accounts.token') }}
+      {{ t('accounts.token') }} <InfoTip :text="t('help.token')" />
       <input
         v-model="token"
         type="password"
@@ -91,7 +92,7 @@ function submit() {
       <span v-if="account" class="text-xs text-slate-500">{{ t('accounts.tokenKeep') }}</span>
     </label>
     <label class="block text-sm">
-      {{ t('accounts.primaryWindow') }}
+      {{ t('accounts.primaryWindow') }} <InfoTip :text="t('help.primaryWindow')" />
       <select v-model="primaryWindow" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
         <option v-for="w in PRIMARY_WINDOWS" :key="w" :value="w">{{ t(`accounts.primary.${w}`) }}</option>
       </select>
@@ -99,6 +100,7 @@ function submit() {
     <label class="flex items-center gap-2 text-sm">
       <input v-model="notificationsEnabled" type="checkbox" />
       {{ t('accounts.notifications') }}
+      <InfoTip :text="t('help.notificationsAccount')" />
     </label>
     <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
     <p v-if="testState === 'ok'" class="text-sm text-green-600">{{ testMessage }}</p>

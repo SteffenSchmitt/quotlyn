@@ -169,5 +169,30 @@
       "short": "7 d",
       "scope": "Fable"
     }
+  },
+  "help": {
+    "refresh": "Fragt jetzt alle Accounts nacheinander ab. Accounts mit erreichtem Limit werden mitgenommen, abgelehnte Tokens übersprungen.",
+    "autoRefresh": "Fragt alle Accounts automatisch im Intervall aus den Einstellungen ab. Aus heißt: nur manuell.",
+    "sort": "Reihenfolge der Karten: wie unter Accounts konfiguriert, oder der Account mit der meisten Luft zuerst.",
+    "summary": "Die Hauptmetrik des Accounts: Auslastung eines Fensters und wann es zurückgesetzt wird. Das Fenster wählst du pro Account unter Accounts.",
+    "rings": "Ein Ring pro Limit-Fenster, von außen nach innen: 5 h Sitzung, 7 d alle Modelle, 7 d Fable. Voller Ring = 100 %. Der Glow nimmt zu, je näher ein Fenster an seiner Schwelle ist.",
+    "state": "Ergebnis der letzten Abfrage: OK, lädt, Limit erreicht (die API lehnt ab, bis das Fenster zurückgesetzt wird), pausiert (gedrosselt), Fehler oder Token abgelehnt.",
+    "raw": "Alle Header, die die API geliefert hat, unverändert. Identifizierende Werte sind standardmäßig maskiert; der App unbekannte Header sind als neu markiert.",
+    "cost": "Was eine Probe kostet: die Token der winzigen Anfrage, mit der die Limits gelesen werden, und das Modell, an das sie ging.",
+    "historyWindow": "Welches Limit-Fenster gezeichnet wird.",
+    "historyRange": "Wie weit zurück angezeigt wird. Ältere Snapshots bleiben bis zum Ende der Aufbewahrungsfrist erhalten.",
+    "historyAccounts": "Welche Accounts gezeichnet werden. Jede Linie trägt die Account-Farbe; die getönten Bänder wechseln zwischen den Resets.",
+    "timeline": "Ein Balken pro Account und Fenster, von jetzt bis zum Reset dieses Fensters. Die Füllung zeigt die aktuelle Auslastung.",
+    "token": "Ein langlebiger Token aus `claude setup-token`. Er liegt verschlüsselt in diesem Browser und geht nur an den mitgelieferten Proxy.",
+    "primaryWindow": "Das Fenster, das als große Zahl auf der Karte steht. „Kritischstes“ nimmt das gerade vollste Fenster.",
+    "notificationsAccount": "Ob Schwellwert-Benachrichtigungen für diesen Account ausgelöst werden. Zusätzlich müssen sie in den Einstellungen aktiv sein.",
+    "color": "Für den Kartenrand und die Linie dieses Accounts im Verlauf.",
+    "polling": "Wie oft jeder Account abgefragt wird und wie lange Snapshots bleiben. Eine Probe kostet etwa 35 Token Kontingent.",
+    "thresholds": "Warn- und Kritisch-Schwelle in Prozent. Sie steuern den Glow der Ringe und die Browser-Benachrichtigungen.",
+    "notifications": "Schickt eine Browser-Benachrichtigung, wenn ein Fenster eine Schwelle überschreitet. Einmal pro Überschreitung, nicht bei jeder Abfrage.",
+    "appearance": "Theme und Sprache der Oberfläche.",
+    "export": "Accounts exportieren die verschlüsselte Tresordatei unverändert. Verlaufs-Exporte enthalten nie Tokens.",
+    "import": "Accounts aus einer exportierten Tresordatei zusammenführen oder ersetzen. Du brauchst die Passphrase, mit der die Datei erstellt wurde.",
+    "remember": "Hält den Tresor für diesen Browser-Tab offen. Beim Schließen des Tabs wird er wieder gesperrt."
   }
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InfoTip from '../components/InfoTip.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import VChart from 'vue-echarts'
@@ -171,6 +172,7 @@ const option = computed(() => {
         <select v-model="windowKey" class="rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
           <option v-for="k in windowKeys" :key="k" :value="k">{{ windowLabel(k) }}</option>
         </select>
+        <InfoTip :text="t('help.historyWindow')" />
       </label>
       <div class="flex items-center gap-2">
         {{ t('history.range') }}
@@ -183,9 +185,11 @@ const option = computed(() => {
         >
           {{ t(`history.range${r}`) }}
         </button>
+        <InfoTip :text="t('help.historyRange')" />
       </div>
       <div class="flex flex-wrap items-center gap-3">
         {{ t('history.accounts') }}
+        <InfoTip :text="t('help.historyAccounts')" />
         <label v-for="a in accounts.accounts" :key="a.id" class="flex items-center gap-1">
           <input type="checkbox" :checked="selected.has(a.id)" @change="toggle(a.id)" />
           <span class="h-2 w-2 rounded-full" :style="{ backgroundColor: a.color }" />

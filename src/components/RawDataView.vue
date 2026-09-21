@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InfoTip from './InfoTip.vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isIdentifying, isKnownHeader, maskValue } from '../lib/usageView'
@@ -22,11 +23,12 @@ const rows = computed(() =>
 
 <template>
   <div class="mt-3 border-t pt-2 text-xs dark:border-slate-700">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2">
       <button class="text-slate-500 hover:underline" @click="open = !open">
         {{ open ? '▾' : '▸' }} {{ t('dashboard.raw.toggle') }}
       </button>
-      <label v-if="open" class="flex items-center gap-1 text-slate-500">
+      <InfoTip :text="t('help.raw')" />
+      <label v-if="open" class="ml-auto flex items-center gap-1 text-slate-500">
         <input v-model="mask" type="checkbox" />
         {{ t('dashboard.raw.mask') }}
       </label>

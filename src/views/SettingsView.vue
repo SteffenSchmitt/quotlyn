@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InfoTip from '../components/InfoTip.vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { downloadText, snapshotsToCsv, snapshotsToJson } from '../lib/exportImport'
@@ -91,7 +92,7 @@ async function runImport() {
     <h2 class="text-lg font-semibold">{{ t('settings.title') }}</h2>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.polling') }}</legend>
+      <legend class="px-1 text-sm font-medium">{{ t('settings.polling') }} <InfoTip :text="t('help.polling')" /></legend>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.interval') }}
@@ -122,7 +123,7 @@ async function runImport() {
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.thresholds') }}</legend>
+      <legend class="px-1 text-sm font-medium">{{ t('settings.thresholds') }} <InfoTip :text="t('help.thresholds')" /></legend>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.warn') }}
@@ -137,11 +138,12 @@ async function runImport() {
         <input :checked="s.notificationsEnabled" type="checkbox" @change="toggleNotifications(($event.target as HTMLInputElement).checked)" />
         {{ t('settings.notifications') }}
         <span class="text-xs text-slate-400">{{ t(`settings.permission.${permission}`) }}</span>
+        <InfoTip :text="t('help.notifications')" />
       </label>
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.appearance') }}</legend>
+      <legend class="px-1 text-sm font-medium">{{ t('settings.appearance') }} <InfoTip :text="t('help.appearance')" /></legend>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.theme') }}
@@ -159,7 +161,7 @@ async function runImport() {
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.export.title') }}</legend>
+      <legend class="px-1 text-sm font-medium">{{ t('settings.export.title') }} <InfoTip :text="t('help.export')" /></legend>
       <div class="flex flex-wrap items-center gap-3 text-sm">
         <button class="rounded border px-3 py-1 dark:border-slate-600" @click="exportAccounts">{{ t('settings.export.accounts') }}</button>
         <button class="rounded border px-3 py-1 dark:border-slate-600" @click="exportSnapshots('csv')">{{ t('settings.export.csv') }}</button>
@@ -173,7 +175,7 @@ async function runImport() {
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.import.title') }}</legend>
+      <legend class="px-1 text-sm font-medium">{{ t('settings.import.title') }} <InfoTip :text="t('help.import')" /></legend>
       <div class="space-y-3 text-sm">
         <input type="file" accept="application/json,.json" @change="onFile" />
         <label class="block">

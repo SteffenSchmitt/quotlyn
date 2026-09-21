@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InfoTip from './InfoTip.vue'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAccountsStore } from '../stores/accounts'
@@ -71,6 +72,7 @@ async function submit() {
       <label class="flex items-center gap-2 text-sm">
         <input v-model="remember" type="checkbox" />
         {{ t('vault.remember') }}
+        <InfoTip :text="t('help.remember')" />
       </label>
       <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
       <button
