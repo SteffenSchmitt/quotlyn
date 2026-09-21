@@ -58,6 +58,12 @@ describe('forecastWindow', () => {
     expect(f.ratePerHour).toBeCloseTo(0.6, 5)
   })
 
+  it('tolerates a reset time that drifts by a few minutes within one cycle', () => {
+    const drifted = new Date(T0 + 5 * H + 3 * MIN).toISOString()
+    const f = forecastWindow([snap(0, 0.1), snap(10, 0.2, drifted), snap(20, 0.3)], '5h', OPTS, T0 + 20 * MIN)!
+    expect(f.points).toBe(3)
+  })
+
   it('limits the fit to the lookback, and 0 means the whole cycle', () => {
     const snaps = [snap(0, 0.0), snap(60, 0.1), snap(120, 0.2), snap(130, 0.3), snap(140, 0.4), snap(150, 0.5)]
     const recent = forecastWindow(snaps, '5h', { lookbackMinutes: 30, minPoints: 3 }, T0 + 150 * MIN)!

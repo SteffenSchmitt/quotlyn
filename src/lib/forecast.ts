@@ -40,7 +40,8 @@ export function cyclePosition(f: Forecast): number {
 
 const HOUR = 3_600_000
 const DAY = 24 * HOUR
-const RESET_TOLERANCE = 60_000
+/** Reset times drift by a few seconds between polls; five minutes still keeps cycles apart. */
+const RESET_TOLERANCE = 5 * 60_000
 /** Cycle length per known window key; the cycle starts at resetsAt minus this, at 0 %. */
 const WINDOW_LENGTH_MS: Record<string, number> = { '5h': 5 * HOUR, '7d': 7 * DAY, '7d_oi': 7 * DAY }
 /** Windows longer than this always use the whole cycle: a busy hour says nothing about a week. */
