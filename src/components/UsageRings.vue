@@ -39,13 +39,23 @@ const { lines, tag } = useWindowLabels()
 const theme = useChartTheme()
 
 const RING_WIDTH = 11
-/** Thin cycle-clock arc inside each ring: radius offset in % and width in px. */
-const CLOCK_OFFSET = 9
-const CLOCK_WIDTH = 3
-const CLOCK_COLOR = { dark: 'rgba(226,232,240,0.7)', light: 'rgba(51,65,85,0.55)' }
-const CLOCK_TRACK = { dark: 'rgba(226,232,240,0.14)', light: 'rgba(51,65,85,0.12)' }
 const RING_STEP = 24
 const HOVER_GLOW = 18
+/** Thin cycle-clock arc inside each ring: radius offset in % and width in px. */
+const CLOCK_OFFSET = 9
+const CLOCK_WIDTH = 4
+const CLOCK_ON = { dark: '#f8fafc', light: '#0f172a' }
+const CLOCK_REST = { dark: 'rgba(248,250,252,0.18)', light: 'rgba(15,23,42,0.14)' }
+/** Metric arcs sit at 70 % opacity so the solid, full-contrast clock stands apart from them. */
+const METRIC_ALPHA = 0.7
+
+/** Solid cycle clock as gauge axis segments: full contrast up to the forecast position, faint rest. */
+function clockSegments(position: number | null, dark: boolean): Array<[number, string]> {
+  if (position === null) return [[1, 'transparent']]
+  const on = CLOCK_ON[dark ? 'dark' : 'light']
+  const rest = CLOCK_REST[dark ? 'dark' : 'light']
+  return position >= 1 ? [[1, on]] : [[position, on], [1, rest]]
+}
 
 /** Key of the window whose ring is hovered, in the chart or in the legend. */
 const hoverKey = ref<string | null>(null)
@@ -139,8 +149,8 @@ const option = computed(() => ({
           x2: 1,
           y2: 0,
           colorStops: [
-            { offset: 0, color: withAlpha(r.base, 0.55) },
-            { offset: 1, color: r.base },
+            { offset: 0, color: withAlpha(r.base, 0.55 * METRIC_ALPHA) },
+            { offset: 1, color: withAlpha(r.base, METRIC_ALPHA) },
           ],
         },
         shadowBlur: hoverKey.value === r.key ? Math.max(HOVER_GLOW, r.style.glow) : r.style.glow,
@@ -176,15 +186,10 @@ const option = computed(() => ({
     radius: `${r.radius - CLOCK_OFFSET}%`,
     center: ['50%', '54%'],
     silent: r.ghost === null,
-    // progress.show must not toggle between renders (ECharts' gauge diff throws); hide via colour instead.
-    progress: {
-      show: true,
-      width: CLOCK_WIDTH,
-      roundCap: true,
-      // Neutral, not the ring's hue: the clock is time, not a second reading of the metric.
-      itemStyle: { color: r.ghost === null ? 'transparent' : CLOCK_COLOR[theme.value.dark ? 'dark' : 'light'] },
-    },
-    axisLine: { lineStyle: { width: CLOCK_WIDTH, color: [[1, r.ghost === null ? 'transparent' : CLOCK_TRACK[theme.value.dark ? 'dark' : 'light']]] } },
+    // progress.show must not toggle between renders (ECharts' gauge diff throws); the clock is drawn
+    // by the axis segments alone, so progress stays off for good.
+    progress: { show: false },
+    axisLine: { lineStyle: { width: CLOCK_WIDTH, color: clockSegments(r.ghost === null ? null : r.ghost / 100, theme.value.dark) } },
     axisTick: { show: false },
     splitLine: { show: false },
     axisLabel: { show: false },
