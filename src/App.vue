@@ -8,7 +8,8 @@ import ThemeToggle from './components/ThemeToggle.vue'
 import { useAccountsStore } from './stores/accounts'
 import { useSettingsStore } from './stores/settings'
 import { useUsageStore } from './stores/usage'
-import { worstUtilization } from './lib/usageView'
+import { levelFor, worstUtilization } from './lib/usageView'
+import { applyFavicon, faviconSvg } from './lib/favicon'
 
 const version = __APP_VERSION__
 
@@ -34,13 +35,14 @@ watch(
   { immediate: true },
 )
 
-// Tab title carries the highest utilization, so the state is visible without switching tabs.
+// Tab title and favicon carry the highest utilization, so the state is visible without switching tabs.
 watch(
-  () => worstUtilization(usage.latest),
-  (worst) => {
+  () => [worstUtilization(usage.latest), settings.settings.thresholds] as const,
+  ([worst, thresholds]) => {
     document.title = worst === null ? t('app.title') : `${Math.round(worst * 100)} % · ${t('app.title')}`
+    applyFavicon(faviconSvg(worst, worst === null ? 'ok' : levelFor(worst, thresholds)))
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
 
 watch(

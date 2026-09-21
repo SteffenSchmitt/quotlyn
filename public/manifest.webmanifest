@@ -1,0 +1,14 @@
+{
+  "name": "Quotlyn",
+  "short_name": "Quotlyn",
+  "description": "Usage limits of your Claude Pro and Max subscriptions, side by side.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
