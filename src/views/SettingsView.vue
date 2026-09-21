@@ -6,7 +6,8 @@ import { downloadText, snapshotsToCsv, snapshotsToJson } from '../lib/exportImpo
 import { permissionState, requestPermission, type NotifyPermission } from '../notify/webNotify'
 import { VAULT_KEY, readJson } from '../storage/localStore'
 import { useAccountsStore } from '../stores/accounts'
-import { useSettingsStore, type LocaleSetting, type Theme } from '../stores/settings'
+import { MAX_FORECAST_POINTS, MIN_FORECAST_POINTS, useSettingsStore, type LocaleSetting, type Theme } from '../stores/settings'
+import { LOOKBACK_CHOICES } from '../lib/forecast'
 import { useUsageStore } from '../stores/usage'
 import { VaultError } from '../crypto/vault'
 
@@ -27,6 +28,11 @@ const critPct = computed({
   get: () => Math.round(s.value.thresholds.crit * 100),
   set: (v: number) => settings.update({ thresholds: { warn: s.value.thresholds.warn, crit: v / 100 } }),
 })
+
+const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform)
+function updateForecast(patch: Partial<typeof s.value.forecast>) {
+  settings.update({ forecast: { ...s.value.forecast, ...patch } })
+}
 
 const permission = ref<NotifyPermission>(permissionState())
 async function toggleNotifications(on: boolean) {
@@ -92,8 +98,12 @@ async function runImport() {
     <h2 class="text-lg font-bold">{{ t('settings.title') }}</h2>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.polling') }}<InfoTip :text="t('help.polling')" /></h3>
+      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.groups.polling') }}<InfoTip :text="t('help.polling')" /></h3>
       <div class="grid gap-3 sm:grid-cols-2">
+        <label class="flex items-center gap-2 text-sm sm:col-span-2">
+          <input :checked="s.autoRefresh" type="checkbox" @change="settings.update({ autoRefresh: ($event.target as HTMLInputElement).checked })" />
+          {{ t('dashboard.autoRefresh') }}
+        </label>
         <label class="text-sm">
           {{ t('settings.interval') }}
           <input
@@ -105,6 +115,12 @@ async function runImport() {
             @change="settings.update({ intervalSeconds: Number(($event.target as HTMLInputElement).value) })"
           />
         </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.groups.history') }}<InfoTip :text="t('help.forecast')" /></h3>
+      <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.retention') }}
           <input
@@ -115,15 +131,40 @@ async function runImport() {
             @change="settings.update({ retentionDays: Number(($event.target as HTMLInputElement).value) })"
           />
         </label>
-        <label class="flex items-center gap-2 text-sm">
-          <input :checked="s.autoRefresh" type="checkbox" @change="settings.update({ autoRefresh: ($event.target as HTMLInputElement).checked })" />
-          {{ t('dashboard.autoRefresh') }}
+        <label class="flex items-center gap-2 self-end pb-2 text-sm">
+          <input :checked="s.forecast.enabled" type="checkbox" @change="updateForecast({ enabled: ($event.target as HTMLInputElement).checked })" />
+          {{ t('settings.forecast.enabled') }}
+        </label>
+        <label class="text-sm">
+          {{ t('settings.forecast.lookback') }}
+          <select
+            :value="String(s.forecast.lookbackMinutes)"
+            class="select mt-1 w-full"
+            :disabled="!s.forecast.enabled"
+            @change="updateForecast({ lookbackMinutes: Number(($event.target as HTMLSelectElement).value) })"
+          >
+            <option v-for="m in LOOKBACK_CHOICES" :key="m" :value="String(m)">
+              {{ m === 0 ? t('settings.forecast.lookbackCycle') : t('settings.forecast.lookbackMin', { n: m }) }}
+            </option>
+          </select>
+        </label>
+        <label class="text-sm">
+          {{ t('settings.forecast.minPoints') }}
+          <input
+            :value="s.forecast.minPoints"
+            type="number"
+            :min="MIN_FORECAST_POINTS"
+            :max="MAX_FORECAST_POINTS"
+            class="field mt-1 w-full"
+            :disabled="!s.forecast.enabled"
+            @change="updateForecast({ minPoints: Number(($event.target as HTMLInputElement).value) })"
+          />
         </label>
       </div>
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.thresholds') }}<InfoTip :text="t('help.thresholds')" /></h3>
+      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.groups.alerts') }}<InfoTip :text="t('help.thresholds')" /></h3>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.warn') }}
@@ -140,10 +181,11 @@ async function runImport() {
         <span class="text-xs text-slate-400">{{ t(`settings.permission.${permission}`) }}</span>
         <InfoTip :text="t('help.notifications')" />
       </label>
+      <p v-if="isMac" class="mt-2 text-xs text-slate-500">{{ t('settings.notificationsMacHint') }}</p>
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.appearance') }}<InfoTip :text="t('help.appearance')" /></h3>
+      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.groups.appearance') }}<InfoTip :text="t('help.appearance')" /></h3>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.theme') }}
@@ -161,7 +203,8 @@ async function runImport() {
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.export.title') }}<InfoTip :text="t('help.export')" /></h3>
+      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.groups.data') }}<InfoTip :text="t('help.export')" /></h3>
+      <h4 class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">{{ t('settings.export.title') }}</h4>
       <div class="flex flex-wrap items-center gap-3 text-sm">
         <button class="btn-secondary" @click="exportAccounts">{{ t('settings.export.accounts') }}</button>
         <button class="btn-secondary" @click="exportSnapshots('csv')">{{ t('settings.export.csv') }}</button>
@@ -172,10 +215,10 @@ async function runImport() {
         </label>
       </div>
       <p class="mt-2 text-xs text-slate-500">{{ t('settings.export.hint') }}</p>
-    </fieldset>
 
-    <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.import.title') }}<InfoTip :text="t('help.import')" /></h3>
+      <h4 class="mb-2 mt-5 flex items-center text-xs font-bold uppercase tracking-wide text-slate-500">
+        {{ t('settings.import.title') }}<InfoTip :text="t('help.import')" />
+      </h4>
       <div class="space-y-3 text-sm">
         <input type="file" accept="application/json,.json" class="field-file block" @change="onFile" />
         <label class="block">

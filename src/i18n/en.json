@@ -189,13 +189,21 @@
       "done": "Imported {imported} account(s), {total} in total.",
       "malformed": "This is not a Quotlyn accounts file."
     },
+    "groups": {
+      "polling": "Polling",
+      "history": "History and forecast",
+      "alerts": "Alerts",
+      "appearance": "Appearance",
+      "data": "Data"
+    },
     "forecast": {
       "enabled": "Show forecast",
       "lookback": "Look-back for the session forecast (week windows use the whole cycle)",
       "lookbackCycle": "since the last reset",
       "lookbackMin": "last {n} min",
       "minPoints": "Minimum data points"
-    }
+    },
+    "notificationsMacHint": "If macOS shows only “Notification” instead of the text, set “Show previews: Always” for Google Chrome under System Settings › Notifications."
   },
   "windows": {
     "session": {

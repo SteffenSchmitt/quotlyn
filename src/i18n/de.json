@@ -189,13 +189,21 @@
       "done": "{imported} Account(s) importiert, jetzt {total} insgesamt.",
       "malformed": "Das ist keine Accounts-Datei von Quotlyn."
     },
+    "groups": {
+      "polling": "Abfragen",
+      "history": "Verlauf und Vorhersage",
+      "alerts": "Warnungen",
+      "appearance": "Darstellung",
+      "data": "Daten"
+    },
     "forecast": {
       "enabled": "Vorhersage anzeigen",
       "lookback": "Rückblick für die Sitzungs-Prognose (Wochenfenster nutzen den ganzen Zyklus)",
       "lookbackCycle": "seit dem letzten Reset",
       "lookbackMin": "letzte {n} min",
       "minPoints": "Mindestens Datenpunkte"
-    }
+    },
+    "notificationsMacHint": "Zeigt macOS nur „Mitteilung“ statt des Textes, hilft in den Systemeinstellungen unter Mitteilungen › Google Chrome die Option „Vorschauen einblenden: Immer“."
   },
   "windows": {
     "session": {
