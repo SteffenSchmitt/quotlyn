@@ -36,6 +36,27 @@ export function criticalWindow(parsed: ParsedUsage | undefined): UsageWindow | n
   return parsed.windows.reduce((max, w) => (w.utilization > max.utilization ? w : max))
 }
 
+export type StatusLevel = Level | 'none'
+export interface AccountStatus {
+  /** Worst level across all windows; 'none' without data, 'crit' while the API reports the limit as reached. */
+  level: StatusLevel
+  /** The window that decides the level, or null without data. */
+  window: UsageWindow | null
+  limited: boolean
+}
+
+/** Traffic-light status of an account: the worst window wins. */
+export function accountStatus(
+  parsed: ParsedUsage | undefined,
+  thresholds: Thresholds = DEFAULT_THRESHOLDS,
+  pollStatus?: string,
+): AccountStatus {
+  const limited = pollStatus === 'limited'
+  const window = criticalWindow(parsed)
+  if (!window) return { level: limited ? 'crit' : 'none', window: null, limited }
+  return { level: limited ? 'crit' : levelFor(window.utilization, thresholds), window, limited }
+}
+
 export function headroom(parsed: ParsedUsage | undefined): number {
   if (!parsed) return -1
   const w = criticalWindow(parsed)
@@ -75,6 +96,26 @@ export const WINDOW_LABEL_KEYS: Record<string, string> = {
   '5h': 'session',
   '7d': 'weekAll',
   '7d_oi': 'weekFable',
+}
+
+/** Window key a representative-claim header value refers to; null when unknown. */
+export function claimWindowKey(claim: string | null | undefined): string | null {
+  switch (claim) {
+    case 'five_hour':
+      return '5h'
+    case 'seven_day':
+      return '7d'
+    case 'seven_day_oi':
+    case 'seven_day_opus':
+      return '7d_oi'
+    default:
+      return null
+  }
+}
+
+/** "seven_day_overage_included" → "seven day overage included" for values without a translation. */
+export function humanizeToken(value: string): string {
+  return value.replace(/_/g, ' ')
 }
 
 export type PrimaryWindow = 'critical' | '5h' | '7d' | '7d_oi'

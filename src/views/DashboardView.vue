@@ -125,6 +125,7 @@ function intervalLabel(seconds: number): string {
         :account="a"
         :parsed="usage.latest[a.id]"
         :state="usage.pollState[a.id]"
+        :thresholds="settings.settings.thresholds"
         :now="now"
       />
     </div>

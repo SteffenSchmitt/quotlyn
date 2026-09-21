@@ -10,6 +10,9 @@ import {
   maskValue,
   primaryWindowFor,
   sortByHeadroom,
+  accountStatus,
+  claimWindowKey,
+  humanizeToken,
 } from '../../src/lib/usageView'
 
 function parsed(...utils: number[]): ParsedUsage {
@@ -115,5 +118,47 @@ describe('primaryWindowFor', () => {
   it('falls back to critical when the chosen window is missing', () => {
     expect(primaryWindowFor(p, '7d_oi')!.key).toBe('7d')
     expect(primaryWindowFor(undefined, '5h')).toBeNull()
+  })
+})
+
+describe('accountStatus', () => {
+  const T = { warn: 0.8, crit: 0.95 }
+  it('is none without data', () => {
+    expect(accountStatus(undefined, T)).toEqual({ level: 'none', window: null, limited: false })
+  })
+  it('takes the worst window, not the first', () => {
+    const s = accountStatus(parsed(0.1, 0.85, 0.5), T)
+    expect(s.level).toBe('warn')
+    expect(s.window?.key).toBe('w1')
+  })
+  it('is ok when every window is below warn', () => {
+    expect(accountStatus(parsed(0.1, 0.79), T).level).toBe('ok')
+  })
+  it('honours custom thresholds', () => {
+    expect(accountStatus(parsed(0.5), { warn: 0.4, crit: 0.6 }).level).toBe('warn')
+  })
+  it('forces crit while the API reports the limit as reached', () => {
+    const s = accountStatus(parsed(0.1), T, 'limited')
+    expect(s.level).toBe('crit')
+    expect(s.limited).toBe(true)
+  })
+})
+
+describe('claimWindowKey', () => {
+  it('maps representative claims to window keys', () => {
+    expect(claimWindowKey('five_hour')).toBe('5h')
+    expect(claimWindowKey('seven_day')).toBe('7d')
+    expect(claimWindowKey('seven_day_oi')).toBe('7d_oi')
+    expect(claimWindowKey('seven_day_opus')).toBe('7d_oi')
+  })
+  it('returns null for unknown or missing claims', () => {
+    expect(claimWindowKey('seven_day_overage_included')).toBeNull()
+    expect(claimWindowKey(null)).toBeNull()
+  })
+})
+
+describe('humanizeToken', () => {
+  it('turns snake_case header values into readable words', () => {
+    expect(humanizeToken('seven_day_overage_included')).toBe('seven day overage included')
   })
 })

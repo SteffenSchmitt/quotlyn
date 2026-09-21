@@ -5,16 +5,28 @@ import { useI18n } from 'vue-i18n'
 import type { Account } from '../stores/accounts'
 import type { ParsedUsage } from '../api/usageParser'
 import type { AccountPollState } from '../scheduler/poller'
-import { computed } from 'vue'
-import { formatCountdown, primaryWindowFor } from '../lib/usageView'
+import { computed, ref } from 'vue'
+import {
+  accountStatus,
+  claimWindowKey,
+  DEFAULT_THRESHOLDS,
+  formatCountdown,
+  humanizeToken,
+  levelColor,
+  primaryWindowFor,
+  type Thresholds,
+} from '../lib/usageView'
 import { windowColor } from '../lib/palette'
 import { isDark } from '../lib/theme'
 import { useWindowLabels } from '../lib/windowLabels'
 import UsageRings from './UsageRings.vue'
 import RawDataView from './RawDataView.vue'
 
-const props = defineProps<{ account: Account; parsed?: ParsedUsage; state?: AccountPollState; now: number }>()
-const { t, d } = useI18n()
+const props = withDefaults(
+  defineProps<{ account: Account; parsed?: ParsedUsage; state?: AccountPollState; thresholds?: Thresholds; now: number }>(),
+  { thresholds: () => DEFAULT_THRESHOLDS },
+)
+const { t, te, d } = useI18n()
 const { oneLine } = useWindowLabels()
 
 const summary = computed(() => {
@@ -28,13 +40,71 @@ const summary = computed(() => {
     countdown: formatCountdown(w.resetsAt, props.now),
   }
 })
+
+const NONE_COLOR = '#94a3b8'
+
+/** Traffic light on the right edge: worst window decides, limit reached is always red. */
+const status = computed(() => accountStatus(props.parsed, props.thresholds, props.state?.status))
+const statusColor = computed(() => (status.value.level === 'none' ? NONE_COLOR : levelColor(status.value.level)))
+const statusLines = computed(() => {
+  const { level, window, limited } = status.value
+  const pct = (n: number) => Math.round(n * 100)
+  const head = limited
+    ? t('dashboard.status.limited')
+    : level === 'none'
+      ? t('dashboard.status.none')
+      : level === 'ok'
+        ? t('dashboard.status.ok', { threshold: pct(props.thresholds.warn) })
+        : t(`dashboard.status.${level}`, {
+            window: oneLine(window!.key),
+            percent: pct(window!.utilization),
+            threshold: pct(props.thresholds[level]),
+          })
+  const others = (props.parsed?.windows ?? [])
+    .filter((w) => limited || level === 'ok' || w.key !== window?.key)
+    .map((w) => `${oneLine(w.key)} ${pct(w.utilization)} %`)
+  return others.length ? [head, t('dashboard.status.others'), ...others] : [head]
+})
+const statusOpen = ref(false)
+
+/** Plain-language API verdict; raw header values stay in the raw data view. */
+const apiStatus = computed(() => {
+  const v = props.parsed?.overall.status
+  if (!v) return null
+  return te(`dashboard.apiStatus.${v}`) ? t(`dashboard.apiStatus.${v}`) : humanizeToken(v)
+})
+const bindingWindow = computed(() => {
+  const c = props.parsed?.overall.representativeClaim
+  if (!c) return null
+  const key = claimWindowKey(c)
+  if (key) return oneLine(key)
+  return te(`dashboard.claim.${c}`) ? t(`dashboard.claim.${c}`) : humanizeToken(c)
+})
 </script>
 
 <template>
   <article
-    class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
-    :style="{ borderLeft: `4px solid ${account.color}` }"
+    class="relative rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
+    :style="{ borderLeft: `4px solid ${account.color}`, borderRight: `4px solid ${statusColor}` }"
   >
+    <div
+      class="absolute -right-1 inset-y-0 w-4 cursor-help rounded-r-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+      tabindex="0"
+      role="img"
+      :aria-label="`${t('dashboard.status.label')}: ${statusLines.join(' ')}`"
+      @mouseenter="statusOpen = true"
+      @mouseleave="statusOpen = false"
+      @focus="statusOpen = true"
+      @blur="statusOpen = false"
+    >
+      <span
+        v-if="statusOpen"
+        role="tooltip"
+        class="absolute right-2 top-3 z-20 w-max max-w-64 rounded-md bg-slate-900 px-2.5 py-1.5 text-left text-xs font-normal leading-snug text-white shadow-lg dark:bg-slate-100 dark:text-slate-900"
+      >
+        <span v-for="(line, i) in statusLines" :key="i" class="block" :class="i === 1 ? 'mt-1 opacity-80' : i > 1 ? 'pl-2 opacity-80' : ''">{{ line }}</span>
+      </span>
+    </div>
     <header>
       <div class="flex items-start gap-3">
         <h3 class="min-w-0 flex-1 truncate font-bold">{{ account.name }}</h3>
@@ -60,20 +130,19 @@ const summary = computed(() => {
         :parsed="parsed"
         :now="now"
         :limited="state?.status === 'limited'"
+        :thresholds="thresholds"
         :primary-window="account.primaryWindow"
       />
-      <p class="mt-2 text-xs text-slate-500">
-        {{
-          t('dashboard.overall', {
-            status: parsed.overall.status ?? '–',
-            claim: parsed.overall.representativeClaim ?? '–',
-          })
-        }}
+      <p class="mt-2 h-4 truncate text-xs leading-4 text-slate-500">
+        {{ apiStatus ?? '–' }}<span v-if="bindingWindow"> · {{ t('dashboard.binding', { window: bindingWindow }) }}</span>
       </p>
-      <p v-if="parsed.usage" class="mt-1 flex items-center text-xs text-slate-400">
+      <p class="mt-1 flex h-4 items-center text-xs leading-4 text-slate-400">
         <span class="min-w-0 truncate">
-          {{ t('dashboard.cost', { i: parsed.usage.inputTokens, o: parsed.usage.outputTokens }) }}
-          <span v-if="parsed.probe.model"> · {{ t('dashboard.probeModel', { model: parsed.probe.model }) }}</span>
+          <template v-if="parsed.usage">
+            {{ t('dashboard.cost', { i: parsed.usage.inputTokens, o: parsed.usage.outputTokens }) }}
+            <span v-if="parsed.probe.model"> · {{ t('dashboard.probeModel', { model: parsed.probe.model }) }}</span>
+          </template>
+          <template v-else>–</template>
         </span>
         <InfoTip :text="t('help.cost')" />
       </p>

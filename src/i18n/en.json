@@ -30,7 +30,6 @@
       "new": "new"
     },
     "noData": "No data yet",
-    "overall": "Overall: {status} · binding window: {claim}",
     "fallback": "Fable limit reached: the Fable probe was rejected ({status}); values come from a Haiku probe and the Fable window is missing.",
     "probeModel": "Probe: {model}",
     "limitedHint": "The API rejects requests until the binding window resets; the numbers below are still current.",
@@ -39,7 +38,25 @@
       "manual": "as configured",
       "headroom": "most room first"
     },
-    "emptyHelp": "Add an account to get started. Need a token?"
+    "emptyHelp": "Add an account to get started. Need a token?",
+    "status": {
+      "none": "No data yet",
+      "ok": "Every window below {threshold} %",
+      "warn": "{window} at {percent} % (warn from {threshold} %)",
+      "crit": "{window} at {percent} % (critical from {threshold} %)",
+      "limited": "Limit reached, the API rejects requests",
+      "others": "Other windows:",
+      "label": "Usage status"
+    },
+    "apiStatus": {
+      "allowed": "Requests allowed",
+      "allowed_warning": "Allowed, close to the limit",
+      "rejected": "Requests rejected"
+    },
+    "claim": {
+      "seven_day_overage_included": "7 d incl. overage"
+    },
+    "binding": "binding: {window}"
   },
   "lang": {
     "de": "Deutsch",
@@ -195,7 +212,7 @@
     "notificationsAccount": "Whether threshold notifications fire for this account. Notifications must also be enabled in Settings.",
     "color": "Used for the card edge and this account's line in the history chart.",
     "polling": "How often each account is probed and how long snapshots are kept. Each probe costs about 35 tokens of quota.",
-    "thresholds": "Warn and critical levels in percent. They drive the ring glow and the browser notifications.",
+    "thresholds": "Warn and critical levels in percent. They drive the ring glow, the traffic light on the right edge of each card and the browser notifications.",
     "notifications": "Sends a browser notification when a window crosses a threshold. Fires once per crossing, not on every poll.",
     "appearance": "Theme and language of the interface.",
     "export": "Accounts export the encrypted vault file as is. History exports never contain tokens.",

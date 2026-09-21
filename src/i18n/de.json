@@ -30,7 +30,6 @@
       "new": "neu"
     },
     "noData": "Noch keine Daten",
-    "overall": "Status: {status} · maßgebliches Fenster: {claim}",
     "fallback": "Fable-Limit erreicht: Die Fable-Abfrage wurde abgelehnt ({status}). Die Werte stammen aus einer Haiku-Abfrage, das Fable-Fenster fehlt deshalb.",
     "probeModel": "Modell: {model}",
     "limitedHint": "Die API lehnt Anfragen ab, bis sich das maßgebliche Fenster zurücksetzt. Die Zahlen unten sind trotzdem aktuell.",
@@ -39,7 +38,25 @@
       "manual": "wie festgelegt",
       "headroom": "größter Spielraum zuerst"
     },
-    "emptyHelp": "Lege einen Account an, um loszulegen. Du brauchst noch einen Token?"
+    "emptyHelp": "Lege einen Account an, um loszulegen. Du brauchst noch einen Token?",
+    "status": {
+      "none": "Noch keine Daten",
+      "ok": "Alle Fenster unter {threshold} %",
+      "warn": "{window} bei {percent} % (Warnung ab {threshold} %)",
+      "crit": "{window} bei {percent} % (kritisch ab {threshold} %)",
+      "limited": "Limit erreicht, die API lehnt Anfragen ab",
+      "others": "Weitere Fenster:",
+      "label": "Nutzungsstatus"
+    },
+    "apiStatus": {
+      "allowed": "Anfragen erlaubt",
+      "allowed_warning": "Erlaubt, nahe am Limit",
+      "rejected": "Anfragen abgelehnt"
+    },
+    "claim": {
+      "seven_day_overage_included": "7 d inkl. Overage"
+    },
+    "binding": "maßgeblich: {window}"
   },
   "lang": {
     "de": "Deutsch",
@@ -195,7 +212,7 @@
     "notificationsAccount": "Ob dieser Account Schwellwert-Benachrichtigungen auslöst. Zusätzlich müssen sie in den Einstellungen eingeschaltet sein.",
     "color": "Farbe für den Kartenrand und die Linie dieses Accounts im Verlauf.",
     "polling": "Wie oft jeder Account abgefragt wird und wie lange Snapshots aufbewahrt werden. Eine Abfrage kostet rund 35 Token vom Kontingent.",
-    "thresholds": "Warn- und Kritisch-Schwelle in Prozent. Sie steuern das Leuchten der Ringe und die Browser-Benachrichtigungen.",
+    "thresholds": "Warn- und Kritisch-Schwelle in Prozent. Sie steuern das Leuchten der Ringe, die Ampel am rechten Kartenrand und die Browser-Benachrichtigungen.",
     "notifications": "Schickt eine Browser-Benachrichtigung, sobald ein Fenster eine Schwelle überschreitet. Einmal pro Überschreitung, nicht bei jeder Abfrage.",
     "appearance": "Theme und Sprache der Oberfläche.",
     "export": "„Accounts“ exportiert die verschlüsselte Tresordatei unverändert. Verlaufs-Exporte enthalten nie Tokens.",
