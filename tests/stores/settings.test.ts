@@ -55,9 +55,12 @@ describe('settings store', () => {
     const t = useSettingsStore()
     t.load()
     expect(t.settings).toMatchObject({ theme: 'dark', locale: 'en', notificationsEnabled: true })
-    t.update({ theme: 'weird' as never, locale: 'fr' as never })
+    t.update({ theme: 'weird' as never, locale: 'fr' as never, dashboardSort: 'nope' as never })
     expect(t.settings.theme).toBe('dark')
     expect(t.settings.locale).toBe('en')
+    expect(t.settings.dashboardSort).toBe('manual')
+    t.update({ dashboardSort: 'headroom' })
+    expect(t.settings.dashboardSort).toBe('headroom')
   })
 
   it('ignores unknown or malformed stored values', () => {

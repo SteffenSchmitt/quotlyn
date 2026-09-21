@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccountCard from '../components/AccountCard.vue'
-import OverviewTiles from '../components/OverviewTiles.vue'
+import { sortByHeadroom } from '../lib/usageView'
 import { useAccountsStore } from '../stores/accounts'
 import { useSettingsStore } from '../stores/settings'
 import { useUsageStore } from '../stores/usage'
@@ -22,6 +22,12 @@ onMounted(() => {
 onUnmounted(() => {
   if (tick) clearInterval(tick)
 })
+
+const orderedAccounts = computed(() =>
+  settings.settings.dashboardSort === 'headroom'
+    ? sortByHeadroom(accounts.accounts, (a) => usage.latest[a.id])
+    : accounts.accounts,
+)
 
 const autoRefresh = computed({
   get: () => settings.settings.autoRefresh,
@@ -44,15 +50,24 @@ const autoRefresh = computed({
         {{ t('dashboard.autoRefresh') }}
         <span class="text-slate-400">{{ t('dashboard.interval', { n: settings.settings.intervalSeconds }) }}</span>
       </label>
+      <label class="flex items-center gap-2 text-sm">
+        {{ t('dashboard.sort.label') }}
+        <select
+          :value="settings.settings.dashboardSort"
+          class="rounded border px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-800"
+          @change="settings.update({ dashboardSort: ($event.target as HTMLSelectElement).value as 'manual' | 'headroom' })"
+        >
+          <option value="manual">{{ t('dashboard.sort.manual') }}</option>
+          <option value="headroom">{{ t('dashboard.sort.headroom') }}</option>
+        </select>
+      </label>
     </div>
 
     <p v-if="accounts.accounts.length === 0" class="text-slate-500">{{ t('dashboard.empty') }}</p>
 
-    <OverviewTiles v-if="accounts.accounts.length > 1" :accounts="accounts.accounts" :latest="usage.latest" :now="now" />
-
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       <AccountCard
-        v-for="a in accounts.accounts"
+        v-for="a in orderedAccounts"
         :key="a.id"
         :account="a"
         :parsed="usage.latest[a.id]"

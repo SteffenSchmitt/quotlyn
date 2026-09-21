@@ -5,6 +5,7 @@ import { DEFAULT_THRESHOLDS, type Thresholds } from '../lib/usageView'
 
 export type Theme = 'system' | 'light' | 'dark'
 export type LocaleSetting = 'auto' | 'de' | 'en'
+export type DashboardSort = 'manual' | 'headroom'
 
 export interface Settings {
   intervalSeconds: number
@@ -14,6 +15,7 @@ export interface Settings {
   notificationsEnabled: boolean
   theme: Theme
   locale: LocaleSetting
+  dashboardSort: DashboardSort
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -24,10 +26,12 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationsEnabled: false,
   theme: 'system',
   locale: 'auto',
+  dashboardSort: 'manual',
 }
 export const MIN_INTERVAL_SECONDS = 60
 const THEMES: Theme[] = ['system', 'light', 'dark']
 const LOCALES: LocaleSetting[] = ['auto', 'de', 'en']
+const SORTS: DashboardSort[] = ['manual', 'headroom']
 
 export const settingsDeps = {
   storage: (): Storage => localStorage,
@@ -57,6 +61,7 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
   if (typeof input.notificationsEnabled === 'boolean') out.notificationsEnabled = input.notificationsEnabled
   if (input.theme && THEMES.includes(input.theme)) out.theme = input.theme
   if (input.locale && LOCALES.includes(input.locale)) out.locale = input.locale
+  if (input.dashboardSort && SORTS.includes(input.dashboardSort)) out.dashboardSort = input.dashboardSort
   return out
 }
 

@@ -16,16 +16,12 @@ import { RANGES, rangeSince, resetMarkersFor, seriesFor, windowKeysIn, type Rang
 import type { UsageSnapshot } from '../storage/historyDb'
 import { useAccountsStore } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
-import { WINDOW_LABEL_KEYS } from '../lib/usageView'
+import { useWindowLabels } from '../lib/windowLabels'
 
 use([LineChart, GridComponent, TooltipComponent, LegendComponent, MarkLineComponent, DataZoomComponent, CanvasRenderer])
 
-const { t, te } = useI18n()
-
-function windowLabel(key: string): string {
-  const k = WINDOW_LABEL_KEYS[key]
-  return k && te(`windows.${k}`) ? t(`windows.${k}`) : key
-}
+const { t } = useI18n()
+const { oneLine: windowLabel } = useWindowLabels()
 const accounts = useAccountsStore()
 const usage = useUsageStore()
 

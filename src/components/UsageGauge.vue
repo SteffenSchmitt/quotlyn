@@ -10,8 +10,8 @@ import { isDark } from '../lib/theme'
 use([GaugeChart, CanvasRenderer])
 
 const props = withDefaults(
-  defineProps<{ utilization: number; label: string; subtitle?: string; thresholds?: Thresholds }>(),
-  { subtitle: '', thresholds: () => DEFAULT_THRESHOLDS },
+  defineProps<{ utilization: number; label: string; sublabel?: string; subtitle?: string; thresholds?: Thresholds }>(),
+  { sublabel: '', subtitle: '', thresholds: () => DEFAULT_THRESHOLDS },
 )
 
 const color = computed(() => levelColor(levelFor(props.utilization, props.thresholds)))
@@ -52,7 +52,10 @@ const option = computed(() => ({
 <template>
   <div class="flex flex-col items-center">
     <VChart :option="option" autoresize :style="{ width: '112px', height: '112px' }" />
-    <div class="-mt-2 text-sm font-medium">{{ label }}</div>
-    <div v-if="subtitle" class="text-xs text-slate-500">{{ subtitle }}</div>
+    <div class="-mt-2 text-center text-sm font-medium leading-tight">
+      <div>{{ label }}</div>
+      <div v-if="sublabel">{{ sublabel }}</div>
+    </div>
+    <div v-if="subtitle" class="mt-0.5 text-xs text-slate-500">{{ subtitle }}</div>
   </div>
 </template>

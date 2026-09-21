@@ -28,7 +28,6 @@
       "mask": "Identifizierende Werte maskieren",
       "new": "neu"
     },
-    "overview": "Übersicht",
     "noData": "Noch keine Daten",
     "overageBlock": {
       "title": "Extra Usage",
@@ -38,7 +37,12 @@
     "overall": "Gesamt: {status} · bindendes Fenster: {claim}",
     "fallback": "Fable-Limit erreicht: Die Fable-Probe wurde abgewiesen ({status}); die Werte stammen aus einer Haiku-Probe, das Fable-Fenster fehlt.",
     "probeModel": "Probe: {model}",
-    "limitedHint": "Die API lehnt Anfragen ab, bis das bindende Fenster zurückgesetzt wird; die Zahlen unten sind trotzdem aktuell."
+    "limitedHint": "Die API lehnt Anfragen ab, bis das bindende Fenster zurückgesetzt wird; die Zahlen unten sind trotzdem aktuell.",
+    "sort": {
+      "label": "Reihenfolge",
+      "manual": "wie konfiguriert",
+      "headroom": "meiste Luft zuerst"
+    }
   },
   "lang": {
     "de": "Deutsch",
@@ -152,8 +156,17 @@
     }
   },
   "windows": {
-    "session": "5 h Sitzung",
-    "weekAll": "7 d · alle Modelle",
-    "weekFable": "7 d · Fable"
+    "session": {
+      "short": "5 h",
+      "scope": "Sitzung"
+    },
+    "weekAll": {
+      "short": "7 d",
+      "scope": "alle Modelle"
+    },
+    "weekFable": {
+      "short": "7 d",
+      "scope": "Fable"
+    }
   }
 }

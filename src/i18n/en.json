@@ -28,7 +28,6 @@
       "mask": "Mask identifying values",
       "new": "new"
     },
-    "overview": "Overview",
     "noData": "No data yet",
     "overageBlock": {
       "title": "Extra usage",
@@ -38,7 +37,12 @@
     "overall": "Overall: {status} · binding window: {claim}",
     "fallback": "Fable limit reached: the Fable probe was rejected ({status}); values come from a Haiku probe and the Fable window is missing.",
     "probeModel": "Probe: {model}",
-    "limitedHint": "The API rejects requests until the binding window resets; the numbers below are still current."
+    "limitedHint": "The API rejects requests until the binding window resets; the numbers below are still current.",
+    "sort": {
+      "label": "Order",
+      "manual": "as configured",
+      "headroom": "most room first"
+    }
   },
   "lang": {
     "de": "Deutsch",
@@ -152,8 +156,17 @@
     }
   },
   "windows": {
-    "session": "5 h session",
-    "weekAll": "7 d · all models",
-    "weekFable": "7 d · Fable"
+    "session": {
+      "short": "5 h",
+      "scope": "session"
+    },
+    "weekAll": {
+      "short": "7 d",
+      "scope": "all models"
+    },
+    "weekFable": {
+      "short": "7 d",
+      "scope": "Fable"
+    }
   }
 }

@@ -3,17 +3,26 @@ import { useI18n } from 'vue-i18n'
 import type { Account } from '../stores/accounts'
 import type { ParsedUsage } from '../api/usageParser'
 import type { AccountPollState } from '../scheduler/poller'
-import { WINDOW_LABEL_KEYS, formatCountdown } from '../lib/usageView'
+import { computed } from 'vue'
+import { criticalWindow, formatCountdown, levelColor, levelFor } from '../lib/usageView'
+import { useWindowLabels } from '../lib/windowLabels'
 import UsageGauge from './UsageGauge.vue'
 import RawDataView from './RawDataView.vue'
 
-defineProps<{ account: Account; parsed?: ParsedUsage; state?: AccountPollState; now: number }>()
-const { t, d, te } = useI18n()
+const props = defineProps<{ account: Account; parsed?: ParsedUsage; state?: AccountPollState; now: number }>()
+const { t, d } = useI18n()
+const { lines, oneLine } = useWindowLabels()
 
-function windowLabel(key: string): string {
-  const k = WINDOW_LABEL_KEYS[key]
-  return k && te(`windows.${k}`) ? t(`windows.${k}`) : key
-}
+const summary = computed(() => {
+  const w = criticalWindow(props.parsed)
+  if (!w) return null
+  return {
+    label: oneLine(w.key),
+    percent: Math.round(w.utilization * 100),
+    color: levelColor(levelFor(w.utilization)),
+    countdown: formatCountdown(w.resetsAt, props.now),
+  }
+})
 </script>
 
 <template>
@@ -40,7 +49,8 @@ function windowLabel(key: string): string {
           v-for="w in parsed.windows"
           :key="w.key"
           :utilization="w.utilization"
-          :label="windowLabel(w.key)"
+          :label="lines(w.key)[0]"
+          :sublabel="lines(w.key)[1]"
           :subtitle="t('dashboard.resetsIn', { t: formatCountdown(w.resetsAt, now) })"
         />
       </div>
