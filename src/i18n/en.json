@@ -206,28 +206,23 @@
       "items": [
         {
           "h": "Install the Claude CLI",
-          "p": "If you do not have it yet, install Claude Code and start it once.",
-          "code": "npm install -g @anthropic-ai/claude-code\nclaude"
+          "p": "If you do not have it yet, install Claude Code and start it once."
         },
         {
           "h": "Sign in with the account you want to watch",
-          "p": "On first start the CLI opens the browser for sign-in. If the CLI is already signed in with a different account, run /logout inside the CLI, then /login, and pick the right account in the browser.",
-          "code": "/logout\n/login"
+          "p": "On first start the CLI opens the browser for sign-in. If the CLI is already signed in with a different account, run /logout inside the CLI, then /login, and pick the right account in the browser."
         },
         {
           "h": "Create the long-lived token",
-          "p": "Run the command below in your terminal (not inside the CLI session). It opens the browser again, asks for approval and prints a token that starts with sk-ant-oat01-.",
-          "code": "claude setup-token"
+          "p": "Run the command below in your terminal (not inside the CLI session). It opens the browser again, asks for approval and prints a token that starts with sk-ant-oat01-."
         },
         {
           "h": "Add the account in Quotlyn",
-          "p": "Open Accounts, choose a name and colour, paste the token and press Test token. A green line with the current percentages means everything works.",
-          "code": ""
+          "p": "Open Accounts, choose a name and colour, paste the token and press Test token. A green line with the current percentages means everything works."
         },
         {
           "h": "Repeat for every account",
-          "p": "Sign out of the CLI, sign in with the next account and create its token the same way.",
-          "code": ""
+          "p": "Sign out of the CLI, sign in with the next account and create its token the same way."
         }
       ]
     },

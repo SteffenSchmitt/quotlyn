@@ -9,11 +9,15 @@ interface Step {
   code: string
 }
 
+// Commands are language-independent and must not pass through the message compiler
+// (vue-i18n treats "@" and "{" as syntax).
+const CODES = ['npm install -g @anthropic-ai/claude-code\nclaude', '/logout\n/login', 'claude setup-token', '', '']
+
 function steps(): Step[] {
-  return (tm('help_page.steps.items') as Array<Record<string, unknown>>).map((s) => ({
+  return (tm('help_page.steps.items') as Array<Record<string, unknown>>).map((s, i) => ({
     h: rt(s.h as never),
     p: rt(s.p as never),
-    code: rt(s.code as never),
+    code: CODES[i] ?? '',
   }))
 }
 function notes(): string[] {
