@@ -62,7 +62,9 @@ and cards can be ordered as configured or by remaining room.
 slope of each window and tells you when it will be full, or how full it
 will be at the reset. The session window uses a configurable look-back, the
 week windows the whole cycle from 0 %. The cards show it as a line under
-the lead metric, as a faint ghost arc on each ring and in the ring legend.
+the lead metric, in the ring legend, and as a thin cycle clock inside each
+ring: the clock runs from the last reset to the next and ends where the
+window is expected to run out.
 History continues each line as a dashed projection, the timeline marks the
 expected exhaustion with a diamond. The forecast can be switched off.
 
