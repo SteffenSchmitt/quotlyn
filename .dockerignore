@@ -1,0 +1,6 @@
+node_modules
+dist
+.git
+.local
+.claude
+CLAUDE.md
