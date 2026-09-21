@@ -71,7 +71,8 @@ const message =
     .map((s) => s.replace(/^[a-z]+(\([^)]*\))?!?: /, ''))
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join('; ')
-const today = new Date().toISOString().slice(0, 10)
+// Local date, like git's %cs for the older sections.
+const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 10)
 
 // --- changelog -----------------------------------------------------------------------------------
 function section(version, date, message, subjects) {
