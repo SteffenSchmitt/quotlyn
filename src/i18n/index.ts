@@ -13,4 +13,8 @@ export const i18n = createI18n({
   locale: detectLocale(),
   fallbackLocale: 'en',
   messages: { de, en },
+  datetimeFormats: {
+    de: { time: { hour: '2-digit', minute: '2-digit', second: '2-digit' } },
+    en: { time: { hour: '2-digit', minute: '2-digit', second: '2-digit' } },
+  },
 })

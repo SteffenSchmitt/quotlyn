@@ -5,9 +5,23 @@
   },
   "dashboard": {
     "empty": "No accounts yet.",
-    "ping": "Ping proxy",
-    "proxyOk": "Proxy reachable",
-    "proxyFail": "Proxy unreachable"
+    "refresh": "Refresh now",
+    "refreshing": "Refreshing…",
+    "autoRefresh": "Auto-refresh",
+    "interval": "every {n} s",
+    "lastFetched": "Last fetched {time}",
+    "never": "Not fetched yet",
+    "resetsIn": "resets in {t}",
+    "state": {
+      "idle": "Idle",
+      "fetching": "Fetching…",
+      "ok": "OK",
+      "error": "Error",
+      "paused": "Paused (rate limited)",
+      "disabled": "Token rejected"
+    },
+    "overage": "Extra usage: {status}",
+    "cost": "Probe cost: {i} in / {o} out tokens"
   },
   "lang": {
     "de": "Deutsch",

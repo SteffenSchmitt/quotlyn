@@ -5,9 +5,23 @@
   },
   "dashboard": {
     "empty": "Noch keine Accounts.",
-    "ping": "Proxy prüfen",
-    "proxyOk": "Proxy erreichbar",
-    "proxyFail": "Proxy nicht erreichbar"
+    "refresh": "Jetzt aktualisieren",
+    "refreshing": "Aktualisiere…",
+    "autoRefresh": "Auto-Refresh",
+    "interval": "alle {n} s",
+    "lastFetched": "Zuletzt {time}",
+    "never": "Noch nicht abgefragt",
+    "resetsIn": "Reset in {t}",
+    "state": {
+      "idle": "Bereit",
+      "fetching": "Lade…",
+      "ok": "OK",
+      "error": "Fehler",
+      "paused": "Pausiert (Rate-Limit)",
+      "disabled": "Token abgelehnt"
+    },
+    "overage": "Extra Usage: {status}",
+    "cost": "Probe-Kosten: {i} in / {o} out Token"
   },
   "lang": {
     "de": "Deutsch",
