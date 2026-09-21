@@ -8,6 +8,8 @@ import { useAccountsStore } from './stores/accounts'
 import { useSettingsStore } from './stores/settings'
 import { useUsageStore } from './stores/usage'
 
+const version = __APP_VERSION__
+
 const { t, locale } = useI18n()
 const locales: Locale[] = ['de', 'en']
 const store = useAccountsStore()
@@ -47,6 +49,7 @@ watch(
         <div>
           <h1 class="text-lg font-bold">{{ t('app.title') }}</h1>
           <p class="text-xs text-slate-500">{{ t('app.tagline') }}</p>
+          <p class="text-xs text-slate-400 tabular-nums">v{{ version }}</p>
         </div>
         <nav v-if="store.status === 'unlocked'" class="flex gap-4 text-sm">
           <RouterLink to="/" class="hover:underline" active-class="font-bold">{{ t('nav.dashboard') }}</RouterLink>

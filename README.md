@@ -153,6 +153,9 @@ npm test          # Vitest
 npm run typecheck # vue-tsc
 ```
 
+The header shows the version from `package.json`; bump it with every change
+to the app.
+
 Vue 3, TypeScript, Pinia, Tailwind, vue-i18n and Apache ECharts. Pure
 logic (parsing, polling, thresholds, crypto, export) lives in framework-free
 modules with unit tests; components stay thin.
