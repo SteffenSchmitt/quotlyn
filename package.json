@@ -1,8 +1,33 @@
 {
   "name": "quotlyn",
-  "private": true,
   "version": "1.5.0",
+  "description": "Usage limits of several Claude Pro and Max subscriptions, side by side, on your own machine: nested rings, history, forecast and reset timeline.",
+  "keywords": [
+    "claude",
+    "anthropic",
+    "claude-code",
+    "usage",
+    "rate-limit",
+    "dashboard",
+    "vue",
+    "self-hosted",
+    "docker"
+  ],
+  "homepage": "https://github.com/SteffenSchmitt/quotlyn#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SteffenSchmitt/quotlyn.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SteffenSchmitt/quotlyn/issues"
+  },
+  "author": "Steffen Schmitt",
+  "license": "MIT",
+  "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "concurrently -n web,proxy -c cyan,magenta \"npm:dev:web\" \"npm:dev:proxy\"",
     "dev:web": "vite --host 0.0.0.0 --port 5173",
@@ -11,7 +36,11 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "release": "node scripts/release.mjs"
+    "release": "node scripts/release.mjs",
+    "mock:upstream": "node scripts/screenshots/mock-upstream.mjs",
+    "mock:proxy": "QUOTLYN_UPSTREAM=http://localhost:18999 QUOTLYN_PROXY_PORT=18787 node proxy/server.mjs",
+    "mock:web": "QUOTLYN_PROXY_PORT=18787 vite --port 15173 --strictPort",
+    "dev:mock": "concurrently -n mock,proxy,web -c yellow,magenta,cyan \"npm:mock:upstream\" \"npm:mock:proxy\" \"npm:mock:web\""
   },
   "dependencies": {
     "@fontsource/lato": "^5.3.0",
@@ -30,11 +59,11 @@
     "@vue/tsconfig": "^0.9.1",
     "concurrently": "^10.0.5",
     "fake-indexeddb": "^6.2.5",
+    "playwright-core": "^1.63.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "^3.2.7",
     "vue-tsc": "^3.3.11"
-  },
-  "license": "MIT"
+  }
 }
