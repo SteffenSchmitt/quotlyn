@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="CHANGELOG.md"><img alt="Release" src="https://img.shields.io/badge/release-v1.10.2-0ea5e9?logo=github&logoColor=white"></a>
+  <a href="CHANGELOG.md"><img alt="Release" src="https://img.shields.io/badge/release-v1.10.3-0ea5e9?logo=github&logoColor=white"></a>
   <a href="LICENSE"><img alt="License MIT" src="https://img.shields.io/badge/license-MIT-10b981"></a>
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue_3-42b883?logo=vuedotjs&logoColor=white">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white">
