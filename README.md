@@ -36,7 +36,7 @@ claude setup-token
 Then:
 
 ```sh
-git clone git@github.com:SteffenSchmitt/quotlyn.git
+git clone https://github.com/SteffenSchmitt/quotlyn.git
 cd quotlyn
 docker compose up --build
 ```
