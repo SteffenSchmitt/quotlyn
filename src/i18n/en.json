@@ -21,7 +21,20 @@
       "disabled": "Token rejected"
     },
     "overage": "Extra usage: {status}",
-    "cost": "Probe cost: {i} in / {o} out tokens"
+    "cost": "Probe cost: {i} in / {o} out tokens",
+    "raw": {
+      "toggle": "Raw headers",
+      "mask": "Mask identifying values",
+      "new": "new"
+    },
+    "overview": "Overview",
+    "noData": "No data yet",
+    "overageBlock": {
+      "title": "Extra usage",
+      "status": "Status: {status}",
+      "reason": "Reason: {reason}"
+    },
+    "overall": "Overall: {status} · binding window: {claim}"
   },
   "lang": {
     "de": "Deutsch",

@@ -21,7 +21,20 @@
       "disabled": "Token abgelehnt"
     },
     "overage": "Extra Usage: {status}",
-    "cost": "Probe-Kosten: {i} in / {o} out Token"
+    "cost": "Probe-Kosten: {i} in / {o} out Token",
+    "raw": {
+      "toggle": "Rohdaten (Header)",
+      "mask": "Identifizierende Werte maskieren",
+      "new": "neu"
+    },
+    "overview": "Übersicht",
+    "noData": "Noch keine Daten",
+    "overageBlock": {
+      "title": "Extra Usage",
+      "status": "Status: {status}",
+      "reason": "Grund: {reason}"
+    },
+    "overall": "Gesamt: {status} · bindendes Fenster: {claim}"
   },
   "lang": {
     "de": "Deutsch",
