@@ -77,7 +77,7 @@
     "name": "Name",
     "color": "Farbe",
     "token": "Token (sk-ant-oat…)",
-    "tokenKeep": "Leer lassen, um den aktuellen Token zu behalten.",
+    "tokenSet": "Gesetzt · wird durch Speichern nicht geändert",
     "notifications": "Benachrichtigungen",
     "save": "Speichern",
     "cancel": "Abbrechen",
