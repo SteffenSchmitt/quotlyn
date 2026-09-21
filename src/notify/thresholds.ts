@@ -6,6 +6,7 @@ export interface Crossing {
   windowKey: string
   level: 'warn' | 'crit'
   utilization: number
+  resetsAt: string | null
 }
 
 const RANK: Record<Level, number> = { ok: 0, warn: 1, crit: 2 }
@@ -20,7 +21,7 @@ export class ThresholdWatcher {
       const level = levelFor(w.utilization, thresholds)
       const prev = this.last.get(key) ?? 'ok'
       if (RANK[level] > RANK[prev] && level !== 'ok') {
-        out.push({ accountId, windowKey: w.key, level, utilization: w.utilization })
+        out.push({ accountId, windowKey: w.key, level, utilization: w.utilization, resetsAt: w.resetsAt })
       }
       this.last.set(key, level)
     }

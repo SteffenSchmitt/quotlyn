@@ -240,5 +240,14 @@
       ]
     },
     "docs": "Claude Code documentation"
+  },
+  "notify": {
+    "title": "{account} · {level}",
+    "level": {
+      "warn": "Warning",
+      "crit": "Critical"
+    },
+    "body": "{window} at {percent} % (threshold {threshold} %) · resets in {countdown}",
+    "bodyNoReset": "{window} at {percent} % (threshold {threshold} %)"
   }
 }

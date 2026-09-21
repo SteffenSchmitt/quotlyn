@@ -240,5 +240,14 @@
       ]
     },
     "docs": "Dokumentation zu Claude Code"
+  },
+  "notify": {
+    "title": "{account} · {level}",
+    "level": {
+      "warn": "Warnung",
+      "crit": "Kritisch"
+    },
+    "body": "{window} bei {percent} % (Schwelle {threshold} %) · Reset in {countdown}",
+    "bodyNoReset": "{window} bei {percent} % (Schwelle {threshold} %)"
   }
 }

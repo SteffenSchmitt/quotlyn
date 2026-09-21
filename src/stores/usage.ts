@@ -6,6 +6,9 @@ import { Poller, type AccountPollState, type PollTarget } from '../scheduler/pol
 import { HistoryDb, type UsageSnapshot } from '../storage/historyDb'
 import { ThresholdWatcher } from '../notify/thresholds'
 import { notify } from '../notify/webNotify'
+import { crossingNotification } from '../notify/notifyText'
+import { i18n } from '../i18n'
+import { windowOneLine } from '../lib/windowLabels'
 import { useAccountsStore } from './accounts'
 import { useSettingsStore } from './settings'
 
@@ -80,8 +83,18 @@ export const useUsageStore = defineStore('usage', () => {
     const account = accounts.accounts.find((a) => a.id === accountId)
     const crossings = watcher.evaluate(accountId, parsed.windows, settingsStore.settings.thresholds)
     if (!account || !settingsStore.settings.notificationsEnabled || !account.notificationsEnabled) return
+    const { t, te } = i18n.global
+    const now = Date.now()
     for (const c of crossings) {
-      notify(`Quotlyn · ${account.name}`, `${c.windowKey}: ${Math.round(c.utilization * 100)} % (${c.level})`)
+      const text = crossingNotification(
+        c,
+        account.name,
+        settingsStore.settings.thresholds,
+        now,
+        (key, params) => t(key, params ?? {}),
+        (key) => windowOneLine((k) => t(k), te, key),
+      )
+      notify(text.title, text.body)
     }
   }
 
