@@ -5,6 +5,7 @@ type T = (key: string, params?: Record<string, unknown>) => string
 
 /** One short sentence for a forecast, e.g. "full in 1h 20m (+12 %/h)". */
 export function forecastLine(f: Forecast, nowMs: number, t: T): string {
+  if (f.current >= 1) return t('dashboard.forecast.exhausted')
   const rate = Math.round(f.ratePerHour * 100)
   if (f.beforeReset) return t('dashboard.forecast.exhausts', { t: formatCountdown(f.exhaustsAt, nowMs), rate })
   return t('dashboard.forecast.lasts', { p: Math.round(f.atReset * 100), rate })

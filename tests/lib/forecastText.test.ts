@@ -25,6 +25,12 @@ describe('forecastLine', () => {
   })
 })
 
+describe('forecastLine at 100 %', () => {
+  it('says exhausted instead of a zero countdown', () => {
+    expect(forecastLine(f({ current: 1, ratePerHour: 0, exhaustsAt: '2026-09-21T12:00:00Z' }), NOW, t)).toBe('dashboard.forecast.exhausted')
+  })
+})
+
 describe('forecastTone', () => {
   it('is crit within an hour of exhaustion, warn before the reset, ok otherwise', () => {
     expect(forecastTone(f({ exhaustsAt: '2026-09-21T12:30:00Z' }), NOW)).toBe('crit')

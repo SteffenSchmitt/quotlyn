@@ -64,8 +64,10 @@
       "lasts": "lasts until the reset, then ≈ {p} % (+{rate} %/h)",
       "short": {
         "exhausts": "Exhausted in: {t}",
-        "lasts": "≈ {p} % at reset"
-      }
+        "lasts": "≈ {p} % at reset",
+        "exhausted": "exhausted"
+      },
+      "exhausted": "Exhausted, limit reached"
     }
   },
   "lang": {

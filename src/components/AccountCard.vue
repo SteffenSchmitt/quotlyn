@@ -83,6 +83,15 @@ const statusLines = computed(() => {
 })
 const statusOpen = ref(false)
 
+/** Error, fallback or limit hint for the notice line; the most urgent one wins. */
+const notice = computed(() => {
+  if (props.state?.lastError) return { text: props.state.lastError, cls: 'text-red-600 dark:text-red-400' }
+  if (props.parsed?.probe.fallbackUsed)
+    return { text: t('dashboard.fallback', { status: props.parsed.probe.primaryStatus ?? '?' }), cls: 'text-red-600 dark:text-red-400' }
+  if (props.state?.status === 'limited') return { text: t('dashboard.limitedHint'), cls: 'text-slate-500' }
+  return null
+})
+
 /** Plain-language API verdict; raw header values stay in the raw data view. */
 const apiStatus = computed(() => {
   const v = props.parsed?.overall.status
@@ -138,13 +147,10 @@ const bindingWindow = computed(() => {
         {{ forecastText?.text }}
       </p>
     </header>
-    <p v-if="state?.lastError" class="mt-1 text-xs text-red-600">{{ state.lastError }}</p>
-    <p v-if="state?.status === 'limited'" class="mt-1 text-xs text-slate-500">{{ t('dashboard.limitedHint') }}</p>
+    <!-- One reserved line for the last error, the fallback warning or the limit hint, so cards stay aligned. -->
+    <p class="mt-1 h-4 truncate text-xs leading-4" :class="notice?.cls" :title="notice?.text">{{ notice?.text }}</p>
 
     <template v-if="parsed">
-      <p v-if="parsed.probe.fallbackUsed" class="mt-2 rounded bg-red-50 p-2 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
-        {{ t('dashboard.fallback', { status: parsed.probe.primaryStatus ?? '?' }) }}
-      </p>
       <UsageRings
         class="mt-3"
         :parsed="parsed"

@@ -84,9 +84,11 @@ const rings = computed(() => {
     // Cycle clock: a thin arc from the last reset (0) to the next (100 %), ending where the window runs out.
     const ghost = forecast ? Math.round(cyclePosition(forecast) * 100) : null
     const forecastText = forecast
-      ? forecast.beforeReset
-        ? t('dashboard.forecast.short.exhausts', { t: formatCountdown(forecast.exhaustsAt, props.now) })
-        : t('dashboard.forecast.short.lasts', { p: Math.round(forecast.atReset * 100) })
+      ? forecast.current >= 1
+        ? t('dashboard.forecast.short.exhausted')
+        : forecast.beforeReset
+          ? t('dashboard.forecast.short.exhausts', { t: formatCountdown(forecast.exhaustsAt, props.now) })
+          : t('dashboard.forecast.short.lasts', { p: Math.round(forecast.atReset * 100) })
       : null
     return {
       forecast,
@@ -232,7 +234,8 @@ const option = computed(() => ({
         <span class="w-16 text-right text-xs text-slate-500 tabular-nums" :title="t('dashboard.resetsIn', { t: r.countdown })">
           {{ r.countdown }}
         </span>
-        <span v-if="r.forecastText" class="basis-full pl-[18px] text-[11px] leading-4" :class="r.forecastClass">{{ r.forecastText }}</span>
+        <!-- Always present so every card's legend has the same height, forecast or not. -->
+        <span class="h-4 basis-full truncate pl-[18px] text-[11px] leading-4" :class="r.forecastClass">{{ r.forecastText }}</span>
       </li>
     </ul>
   </div>
