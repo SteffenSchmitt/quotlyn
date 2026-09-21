@@ -28,7 +28,10 @@
   <a href="#contributing">Contributing</a>
 </p>
 
-![Dashboard with one card per account, nested rings per limit window, a forecast line and a traffic light on the card edge](docs/screenshots/dashboard.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/dashboard.png">
+  <img src="docs/screenshots/light/dashboard.png" alt="Dashboard with one card per account, nested rings per limit window, a forecast line and a traffic light on the card edge">
+</picture>
 
 ## Why Quotlyn
 
@@ -86,6 +89,67 @@ Each window has a utilization from 0 to 100 % and a reset time. When a
 window is used up the API rejects requests until it resets; Quotlyn shows
 that as *Limit reached* with the current numbers rather than as an error.
 
+## Features at a glance
+
+<table>
+  <tr>
+    <td width="50%"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-card.png">
+  <img src="docs/screenshots/light/feature-card.png" alt="Account card with traffic light edge, forecast line and rings">
+</picture></td>
+    <td width="50%"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-rings.png">
+  <img src="docs/screenshots/light/feature-rings.png" alt="Nested rings with the cycle clock inside each ring">
+</picture></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>One card per account.</b> Lead metric, reset countdown, forecast line, and a traffic light on the right edge by the most used window. Poll a single account with the arrow in the footer.</td>
+    <td valign="top"><b>Three rings, one clock each.</b> Session, week and week-Fable as nested rings; the thin clock inside each ring runs from the last reset to the next and ends where the window is expected to run out.</td>
+  </tr>
+  <tr>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-recommendation.png">
+  <img src="docs/screenshots/light/feature-recommendation.png" alt="Recommendation strip naming the account for now and for the week">
+</picture></td>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-status.png">
+  <img src="docs/screenshots/light/feature-status.png" alt="Status strip tooltip explaining the traffic light">
+</picture></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Which account now.</b> The account with the most session headroom and the one with the widest weekly window, each with its forecast, as stars on the cards and a collapsible strip.</td>
+    <td valign="top"><b>Why the colour.</b> Hover the card edge for the window that decides, the threshold it crossed and every other window.</td>
+  </tr>
+  <tr>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-history.png">
+  <img src="docs/screenshots/light/feature-history.png" alt="History chart with dashed projections to the expected exhaustion">
+</picture></td>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-timeline.png">
+  <img src="docs/screenshots/light/feature-timeline.png" alt="Timeline with full-width bars and a clock line beneath each">
+</picture></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>History with projection.</b> Every reading as a line, reset bands, and a dashed continuation to the expected exhaustion or the reset. Gaps stay gaps.</td>
+    <td valign="top"><b>Reset timeline.</b> Capacity, utilization and time to the reset per window, the same clock beneath each bar, sortable by soonest exhaustion or by window.</td>
+  </tr>
+  <tr>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-settings-forecast.png">
+  <img src="docs/screenshots/light/feature-settings-forecast.png" alt="Forecast settings: look-back, minimum points, notification">
+</picture></td>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-settings-alerts.png">
+  <img src="docs/screenshots/light/feature-settings-alerts.png" alt="Alert settings: thresholds and notifications">
+</picture></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Forecast, your way.</b> Look-back for the session forecast, minimum data points, and a notification when a window is expected to run out within the hour.</td>
+    <td valign="top"><b>Alerts.</b> Warn and critical thresholds drive rings, traffic light and browser notifications, once per crossing, plus a note when a used-up window is free again.</td>
+  </tr>
+</table>
+
 ## What you see
 
 ### Dashboard
@@ -99,12 +163,18 @@ amber or red by the most used window, always red while the limit is
 reached. Hover it to see why. Each card can be polled on its own, and cards
 can be ordered as configured or by remaining room.
 
+Above the cards Quotlyn names the account to use next: an amber star for
+the session with the most headroom, a sky-blue one for the account whose
+tighter weekly window has the most room, each with its forecast.
+
 ### Forecast
 
 From the readings of the current cycle Quotlyn fits the slope of each
 window and tells you when it will be full, or how full it will be at the
 reset. The session window uses a configurable look-back, the weekly windows
 the whole cycle from 0 %, because a busy hour says nothing about a week.
+Once a previous week is in the history, the weekly forecast also blends in
+what happened over the same remaining span last week.
 
 On the cards the forecast is a line under the lead metric and a thin white
 clock inside each ring: the clock runs from the last reset to the next and
@@ -115,12 +185,18 @@ window lasts. The forecast can be switched off.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/history.png" alt="History chart with one line per account, reset bands and a dashed projection"></td>
-    <td width="50%"><img src="docs/screenshots/timeline.png" alt="Timeline with one full-width bar per account and window"></td>
+    <td width="50%"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/history.png">
+  <img src="docs/screenshots/light/history.png" alt="History chart with one line per account, reset bands and a dashed projection">
+</picture></td>
+    <td width="50%"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/timeline.png">
+  <img src="docs/screenshots/light/timeline.png" alt="Timeline with one full-width bar per account and window">
+</picture></td>
   </tr>
   <tr>
     <td valign="top"><b>History.</b> Utilization over time per account and window, for the last 24 hours, 7 or 30 days. Shaded bands mark the periods between resets; each line continues as a dashed projection to the expected exhaustion or the reset.</td>
-    <td valign="top"><b>Reset timeline.</b> One bar per account and window: the bar is the full capacity, the fill the current utilization, the time to the reset at its end. The line beneath is the same clock as in the rings, from now to the reset. Handy for deciding which account to use next.</td>
+    <td valign="top"><b>Reset timeline.</b> One bar per account and window: the bar is the full capacity, the fill the current utilization, the time to the reset at its end. The line beneath is the same clock as in the rings, from now to the reset. Order the rows as configured, by soonest exhaustion or by window.</td>
   </tr>
 </table>
 
@@ -128,8 +204,14 @@ window lasts. The forecast can be switched off.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/accounts.png" alt="Account form with token test"></td>
-    <td width="50%"><img src="docs/screenshots/settings.png" alt="Settings page with five groups"></td>
+    <td width="50%"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/accounts.png">
+  <img src="docs/screenshots/light/accounts.png" alt="Account form with token test">
+</picture></td>
+    <td width="50%"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/settings.png">
+  <img src="docs/screenshots/light/settings.png" alt="Settings page with five groups">
+</picture></td>
   </tr>
   <tr>
     <td valign="top"><b>Accounts.</b> Name, colour, token, lead metric and per-account notifications. Reorder with the arrows, test a token before saving.</td>
@@ -141,7 +223,10 @@ window lasts. The forecast can be switched off.
 
 A step-by-step guide to obtaining a token, right inside the app.
 
-![Help page](docs/screenshots/help.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/help.png">
+  <img src="docs/screenshots/light/help.png" alt="Help page">
+</picture>
 
 ### Also included
 
@@ -149,11 +234,12 @@ A step-by-step guide to obtaining a token, right inside the app.
   each card. Identifying values are masked by default; headers Quotlyn does
   not know yet are flagged as new, so nothing the API adds goes unnoticed.
 - Browser notifications when a window crosses a threshold, once per
-  crossing rather than on every poll, and when a window is expected to
-  run out within the hour, once per cycle. They say which window, how far
-  it is and when it resets.
-- The browser tab shows the highest utilization, so a glance at the tab
-  bar is enough.
+  crossing rather than on every poll, when a window is expected to run out
+  within the hour, once per cycle, and when a used-up window is free
+  again. They say which window, how far it is and when it resets.
+- The browser tab shows the highest utilization in its title and in the
+  favicon, so a glance at the tab bar is enough. Quotlyn can be installed
+  as a standalone app from the browser.
 - Export of the encrypted account file and of the history as CSV or JSON.
   Import merges or replaces accounts from an exported file, and a history
   export can be imported again on another browser or machine.
@@ -216,12 +302,13 @@ different port so a host-side `npm run dev` can coexist with it.
 npm run dev:mock  # the app against a fake API on http://localhost:15173, no token needed
 npm test          # Vitest
 npm run build     # vue-tsc + Vite, the type gate for .vue files
+npm run smoke     # every page in a headless browser against the mock, fails on page errors
 ```
 
 Vue 3, TypeScript, Pinia, Tailwind, vue-i18n and Apache ECharts. Pure
 logic (parsing, polling, thresholds, forecast, crypto, export) lives in
-framework-free modules with unit tests; components stay thin. Tests and
-build run in CI on every push. The mock API and the screenshot tooling are
+framework-free modules with unit tests; components stay thin. Tests,
+build and the smoke test run in CI on every push. The mock API and the screenshot tooling are
 described in [scripts/screenshots/README.md](scripts/screenshots/README.md).
 
 The header shows the version from `package.json`. Releases go through

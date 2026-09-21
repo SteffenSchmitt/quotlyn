@@ -6,6 +6,7 @@ const { chromium } = require('playwright-core')
 const { readFileSync } = require('node:fs')
 const out = process.argv[2]
 const file = process.argv[3]
+const theme = process.argv[4] === 'light' ? 'light' : 'dark'
 const base = 'http://localhost:15173'
 const COLORS = ['#eab308', '#f97316', '#ec4899', '#22d3ee', '#a3e635']
 ;(async () => {
@@ -26,7 +27,7 @@ const COLORS = ['#eab308', '#f97316', '#ec4899', '#22d3ee', '#a3e635']
   await page.click('button[type=submit]')
   await page.waitForSelector('nav')
   await page.goto(base + '/settings'); await page.waitForTimeout(300)
-  await page.selectOption('select:has(option[value="dark"])', 'dark')
+  await page.selectOption('select:has(option[value="dark"])', theme)
   await page.goto(base + '/accounts')
   for (const [i, name] of names.entries()) {
     await page.click('text=Add account'); await page.waitForSelector('form')
@@ -74,6 +75,28 @@ const COLORS = ['#eab308', '#f97316', '#ec4899', '#22d3ee', '#a3e635']
   }, { snaps, shiftMs })
   console.log('seeded:', seeded)
 
+  /** Page shot clipped to the content: header plus main, a little padding below the last element. */
+  async function shot(name) {
+    const height = await page.evaluate(() => {
+      const main = document.querySelector('main')
+      const last = main ? [...main.querySelectorAll('*')].reduce((m, el) => Math.max(m, el.getBoundingClientRect().bottom), 0) : 0
+      return Math.ceil(last + window.scrollY + 24)
+    })
+    await page.setViewportSize({ width: 1440, height: Math.max(600, Math.min(height, 4000)) })
+    await page.waitForTimeout(400)
+    await page.screenshot({ path: `${out}/${name}.png`, clip: { x: 0, y: 0, width: 1440, height: Math.max(600, Math.min(height, 4000)) } })
+    await page.setViewportSize({ width: 1440, height: 900 })
+  }
+  /** Element crop with a little margin around it. */
+  async function crop(selector, name, pad = 8) {
+    const box = await page.locator(selector).first().boundingBox()
+    if (!box) return console.log('crop missing:', selector)
+    await page.screenshot({
+      path: `${out}/${name}.png`,
+      clip: { x: Math.max(0, box.x - pad), y: Math.max(0, box.y - pad), width: box.width + 2 * pad, height: box.height + 2 * pad },
+    })
+  }
+
   await page.goto(base + '/')
   for (let i = 0; i < 30; i++) {
     await page.waitForTimeout(1000)
@@ -81,18 +104,33 @@ const COLORS = ['#eab308', '#f97316', '#ec4899', '#22d3ee', '#a3e635']
     if (!text.includes('Not fetched yet') && !text.includes('Fetching')) break
   }
   await page.waitForTimeout(800)
-  await page.screenshot({ path: `${out}/dashboard.png`, fullPage: true })
+  await shot('dashboard')
+  // Feature crops from the dashboard: recommendation strip, one card, rings of the busiest card, the status strip tooltip.
+  await crop('main section[class*="rounded-lg"]', 'feature-recommendation')
+  await crop('article >> nth=0', 'feature-card')
+  await crop('article >> nth=2 >> div.flex.items-center.gap-4', 'feature-rings')
+  await page.hover('article >> nth=2 >> [role="img"]'); await page.waitForTimeout(400)
+  await crop('article >> nth=2', 'feature-status', 8)
+  await page.mouse.move(0, 0)
   await page.goto(base + '/history'); await page.waitForTimeout(1500)
-  await page.screenshot({ path: `${out}/history.png`, fullPage: true })
+  await shot('history')
+  {
+    // The right third of the chart: the last hours and the dashed projections.
+    const box = await page.locator('canvas').first().boundingBox()
+    if (box) await page.screenshot({ path: `${out}/feature-history.png`, clip: { x: box.x + box.width * 0.62, y: box.y, width: box.width * 0.38, height: box.height * 0.82 } })
+  }
   await page.goto(base + '/timeline'); await page.waitForTimeout(1200)
-  await page.screenshot({ path: `${out}/timeline.png`, fullPage: true })
+  await shot('timeline')
+  await crop('main div.rounded-lg', 'feature-timeline', 0)
   await page.goto(base + '/accounts'); await page.waitForTimeout(500)
   await page.click(`text=${names[0]}`); await page.waitForSelector('form'); await page.waitForTimeout(300)
-  await page.screenshot({ path: `${out}/accounts.png`, fullPage: true })
+  await shot('accounts')
   await page.goto(base + '/settings'); await page.waitForTimeout(500)
-  await page.screenshot({ path: `${out}/settings.png`, fullPage: true })
+  await shot('settings')
+  await crop('fieldset >> nth=1', 'feature-settings-forecast')
+  await crop('fieldset >> nth=2', 'feature-settings-alerts')
   await page.goto(base + '/help'); await page.waitForTimeout(500)
-  await page.screenshot({ path: `${out}/help.png`, fullPage: true })
+  await shot('help')
   await b.close()
   console.log('done', out)
 })().catch((e) => { console.error(e); process.exit(1) })

@@ -24,10 +24,14 @@ node scripts/screenshots/docs-shoot.cjs out
 node scripts/screenshots/replay-upstream.mjs history.json # real export, instead of the mock
 QUOTLYN_UPSTREAM=http://localhost:18999 QUOTLYN_PROXY_PORT=18787 node proxy/server.mjs
 QUOTLYN_PROXY_PORT=18787 npx vite --port 15173
-node scripts/screenshots/docs-shoot-live.cjs out history.json
+node scripts/screenshots/docs-shoot-live.cjs out history.json dark     # docs/screenshots
+node scripts/screenshots/docs-shoot-live.cjs out-light history.json light  # docs/screenshots/light
 ```
 
-Both scripts drive the installed Google Chrome through playwright-core (a dev dependency), dark
-theme, 1440 × 900 at 2×, and write the six images the README uses; copy them to `docs/screenshots/`.
+Both scripts drive the installed Google Chrome through playwright-core (a dev dependency) at
+1440 px wide and 2×. The live script clips every page to its content and also writes the
+`feature-*.png` crops the README's feature table uses; run it once per theme and copy the results
+to `docs/screenshots/` (dark) and `docs/screenshots/light/`. The README shows the dark set to
+viewers with a dark colour scheme and the light set otherwise.
 
 `shoot.cjs` takes QA shots instead: light and dark, narrow viewport, hover states, raw headers.
