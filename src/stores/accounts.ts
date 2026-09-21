@@ -151,6 +151,50 @@ export const useAccountsStore = defineStore('accounts', () => {
     await persist()
   }
 
+  function isAccount(x: unknown): x is Account {
+    const a = x as Partial<Account> | null
+    return (
+      !!a &&
+      typeof a.id === 'string' &&
+      typeof a.name === 'string' &&
+      typeof a.color === 'string' &&
+      typeof a.token === 'string'
+    )
+  }
+
+  async function importVault(
+    blob: unknown,
+    passphrase: string,
+    mode: 'merge' | 'replace',
+  ): Promise<{ imported: number; total: number }> {
+    if (!key || !salt) throw new Error('vault_locked')
+    const opened = await openVault(passphrase, blob as VaultBlob)
+    const data = opened.data as Partial<VaultData> | null
+    if (!data || !Array.isArray(data.accounts) || !data.accounts.every(isAccount)) {
+      throw new Error('invalid_vault_data')
+    }
+    const imported: Account[] = data.accounts.map((a) => ({
+      ...a,
+      notificationsEnabled: a.notificationsEnabled ?? true,
+    }))
+    let merged: Account[]
+    if (mode === 'replace') {
+      merged = [...imported].sort((a, b) => a.order - b.order)
+    } else {
+      const byId = new Map(accounts.value.map((a) => [a.id, a]))
+      const seen = new Set<string>()
+      merged = accounts.value.map((a) => {
+        const inc = imported.find((i) => i.id === a.id)
+        if (inc) seen.add(inc.id)
+        return inc ? { ...inc, order: a.order } : a
+      })
+      for (const inc of imported) if (!seen.has(inc.id) && !byId.has(inc.id)) merged.push(inc)
+    }
+    renumber(merged)
+    await persist()
+    return { imported: imported.length, total: list.value.length }
+  }
+
   async function moveAccount(id: string, direction: -1 | 1) {
     const sorted = [...accounts.value]
     const from = sorted.findIndex((a) => a.id === id)
@@ -175,5 +219,6 @@ export const useAccountsStore = defineStore('accounts', () => {
     updateAccount,
     removeAccount,
     moveAccount,
+    importVault,
   }
 })

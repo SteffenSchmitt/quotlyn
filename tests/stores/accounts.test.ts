@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { accountsDeps, useAccountsStore } from '../../src/stores/accounts'
 import { MemoryStorage, VAULT_KEY, SESSION_KEY_KEY } from '../../src/storage/localStore'
-import { VaultError } from '../../src/crypto/vault'
+import { VaultError, sealVault } from '../../src/crypto/vault'
 
 let storage: MemoryStorage
 let session: MemoryStorage
@@ -140,5 +140,58 @@ describe('remember session', () => {
     await store.setRememberSession(true)
     store.lock()
     expect(session.getItem(SESSION_KEY_KEY)).toBeNull()
+  })
+})
+
+describe('importVault', () => {
+  async function unlockedWith(names: string[]) {
+    const store = useAccountsStore()
+    await store.init()
+    await store.createVault('pass')
+    for (const n of names) await store.addAccount({ name: n, color: '#000', token: `t-${n}` })
+    return store
+  }
+
+  it('merges by id, imported wins, and renumbers', async () => {
+    const store = await unlockedWith(['A', 'B'])
+    const existing = store.accounts[0]!
+    const blob = await sealVault(
+      'other',
+      { accounts: [{ ...existing, name: 'A2', token: 't-A2', order: 5 }, { id: 'new', name: 'C', color: '#111', token: 't-C', notificationsEnabled: true, order: 9 }] },
+      { iterations: 1000 },
+    )
+    const result = await store.importVault(blob, 'other', 'merge')
+    expect(result).toEqual({ imported: 2, total: 3 })
+    expect(store.accounts.map((a) => a.name)).toEqual(['A2', 'B', 'C'])
+    expect(store.accounts.map((a) => a.order)).toEqual([0, 1, 2])
+    expect(store.accounts[0]!.token).toBe('t-A2')
+  })
+
+  it('replaces everything in replace mode', async () => {
+    const store = await unlockedWith(['A'])
+    const blob = await sealVault('other', { accounts: [{ id: 'x', name: 'X', color: '#111', token: 't', notificationsEnabled: false, order: 0 }] }, { iterations: 1000 })
+    await store.importVault(blob, 'other', 'replace')
+    expect(store.accounts.map((a) => a.name)).toEqual(['X'])
+  })
+
+  it('rejects wrong passphrase and malformed data without changing anything', async () => {
+    const store = await unlockedWith(['A'])
+    const blob = await sealVault('other', { accounts: [] }, { iterations: 1000 })
+    await expect(store.importVault(blob, 'wrong', 'merge')).rejects.toBeInstanceOf(VaultError)
+    await expect(store.importVault({ nope: 1 }, 'other', 'merge')).rejects.toBeInstanceOf(VaultError)
+    const junk = await sealVault('other', { accounts: 'nope' }, { iterations: 1000 })
+    await expect(store.importVault(junk, 'other', 'merge')).rejects.toThrow('invalid_vault_data')
+    expect(store.accounts.map((a) => a.name)).toEqual(['A'])
+  })
+
+  it('persists the imported set under the current passphrase', async () => {
+    const store = await unlockedWith([])
+    const blob = await sealVault('other', { accounts: [{ id: 'x', name: 'X', color: '#111', token: 't', notificationsEnabled: true, order: 0 }] }, { iterations: 1000 })
+    await store.importVault(blob, 'other', 'merge')
+    setActivePinia(createPinia())
+    const again = useAccountsStore()
+    await again.init()
+    await again.unlock('pass')
+    expect(again.accounts.map((a) => a.name)).toEqual(['X'])
   })
 })
