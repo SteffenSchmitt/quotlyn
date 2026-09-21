@@ -45,35 +45,35 @@ watch(
     <header class="flex flex-wrap items-center justify-between gap-y-2 border-b bg-white dark:border-slate-800 dark:bg-slate-900 px-6 py-3">
       <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
         <div>
-          <h1 class="text-xl font-semibold">{{ t('app.title') }}</h1>
-          <p class="text-sm text-slate-500">{{ t('app.tagline') }}</p>
+          <h1 class="text-lg font-bold">{{ t('app.title') }}</h1>
+          <p class="text-xs text-slate-500">{{ t('app.tagline') }}</p>
         </div>
         <nav v-if="store.status === 'unlocked'" class="flex gap-4 text-sm">
-          <RouterLink to="/" class="hover:underline" active-class="font-semibold">{{ t('nav.dashboard') }}</RouterLink>
-          <RouterLink to="/history" class="hover:underline" active-class="font-semibold">
+          <RouterLink to="/" class="hover:underline" active-class="font-bold">{{ t('nav.dashboard') }}</RouterLink>
+          <RouterLink to="/history" class="hover:underline" active-class="font-bold">
             {{ t('nav.history') }}
           </RouterLink>
-          <RouterLink to="/timeline" class="hover:underline" active-class="font-semibold">
+          <RouterLink to="/timeline" class="hover:underline" active-class="font-bold">
             {{ t('nav.timeline') }}
           </RouterLink>
-          <RouterLink to="/accounts" class="hover:underline" active-class="font-semibold">
+          <RouterLink to="/accounts" class="hover:underline" active-class="font-bold">
             {{ t('nav.accounts') }}
           </RouterLink>
-          <RouterLink to="/settings" class="hover:underline" active-class="font-semibold">
+          <RouterLink to="/settings" class="hover:underline" active-class="font-bold">
             {{ t('nav.settings') }}
           </RouterLink>
-          <RouterLink to="/help" class="hover:underline" active-class="font-semibold">
+          <RouterLink to="/help" class="hover:underline" active-class="font-bold">
             {{ t('nav.help') }}
           </RouterLink>
         </nav>
       </div>
       <div class="flex items-center gap-3">
-        <button v-if="store.status === 'unlocked'" class="rounded border px-2 py-1 text-sm dark:border-slate-600" @click="store.lock()">
+        <button v-if="store.status === 'unlocked'" class="btn-secondary" @click="store.lock()">
           {{ t('vault.lock') }}
         </button>
         <select
           :value="locale"
-          class="rounded border px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
+          class="field w-auto"
           @change="settings.update({ locale: ($event.target as HTMLSelectElement).value as 'de' | 'en' })"
         >
           <option v-for="l in locales" :key="l" :value="l">{{ t(`lang.${l}`) }}</option>

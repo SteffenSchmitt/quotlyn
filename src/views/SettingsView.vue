@@ -89,10 +89,10 @@ async function runImport() {
 
 <template>
   <section class="max-w-2xl space-y-6">
-    <h2 class="text-lg font-semibold">{{ t('settings.title') }}</h2>
+    <h2 class="text-lg font-bold">{{ t('settings.title') }}</h2>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.polling') }} <InfoTip :text="t('help.polling')" /></legend>
+      <legend class="px-1 text-sm font-bold">{{ t('settings.polling') }}<InfoTip :text="t('help.polling')" /></legend>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.interval') }}
@@ -101,7 +101,7 @@ async function runImport() {
             type="number"
             min="60"
             step="30"
-            class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800"
+            class="field mt-1"
             @change="settings.update({ intervalSeconds: Number(($event.target as HTMLInputElement).value) })"
           />
         </label>
@@ -111,7 +111,7 @@ async function runImport() {
             :value="s.retentionDays"
             type="number"
             min="1"
-            class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800"
+            class="field mt-1"
             @change="settings.update({ retentionDays: Number(($event.target as HTMLInputElement).value) })"
           />
         </label>
@@ -123,37 +123,36 @@ async function runImport() {
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.thresholds') }} <InfoTip :text="t('help.thresholds')" /></legend>
+      <legend class="px-1 text-sm font-bold">{{ t('settings.thresholds') }}<InfoTip :text="t('help.thresholds')" /></legend>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.warn') }}
-          <input v-model.number="warnPct" type="number" min="5" max="99" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" />
+          <input v-model.number="warnPct" type="number" min="5" max="99" class="field mt-1" />
         </label>
         <label class="text-sm">
           {{ t('settings.crit') }}
-          <input v-model.number="critPct" type="number" min="6" max="100" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" />
+          <input v-model.number="critPct" type="number" min="6" max="100" class="field mt-1" />
         </label>
       </div>
       <label class="mt-3 flex items-center gap-2 text-sm">
         <input :checked="s.notificationsEnabled" type="checkbox" @change="toggleNotifications(($event.target as HTMLInputElement).checked)" />
-        {{ t('settings.notifications') }}
+        <span>{{ t('settings.notifications') }}<InfoTip :text="t('help.notifications')" /></span>
         <span class="text-xs text-slate-400">{{ t(`settings.permission.${permission}`) }}</span>
-        <InfoTip :text="t('help.notifications')" />
       </label>
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.appearance') }} <InfoTip :text="t('help.appearance')" /></legend>
+      <legend class="px-1 text-sm font-bold">{{ t('settings.appearance') }}<InfoTip :text="t('help.appearance')" /></legend>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="text-sm">
           {{ t('settings.theme') }}
-          <select :value="s.theme" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" @change="settings.update({ theme: ($event.target as HTMLSelectElement).value as Theme })">
+          <select :value="s.theme" class="field mt-1" @change="settings.update({ theme: ($event.target as HTMLSelectElement).value as Theme })">
             <option v-for="th in themes" :key="th" :value="th">{{ t(`settings.themes.${th}`) }}</option>
           </select>
         </label>
         <label class="text-sm">
           {{ t('settings.language') }}
-          <select :value="s.locale" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" @change="settings.update({ locale: ($event.target as HTMLSelectElement).value as LocaleSetting })">
+          <select :value="s.locale" class="field mt-1" @change="settings.update({ locale: ($event.target as HTMLSelectElement).value as LocaleSetting })">
             <option v-for="l in locales" :key="l" :value="l">{{ t(`settings.locales.${l}`) }}</option>
           </select>
         </label>
@@ -161,11 +160,11 @@ async function runImport() {
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.export.title') }} <InfoTip :text="t('help.export')" /></legend>
+      <legend class="px-1 text-sm font-bold">{{ t('settings.export.title') }}<InfoTip :text="t('help.export')" /></legend>
       <div class="flex flex-wrap items-center gap-3 text-sm">
-        <button class="rounded border px-3 py-1 dark:border-slate-600" @click="exportAccounts">{{ t('settings.export.accounts') }}</button>
-        <button class="rounded border px-3 py-1 dark:border-slate-600" @click="exportSnapshots('csv')">{{ t('settings.export.csv') }}</button>
-        <button class="rounded border px-3 py-1 dark:border-slate-600" @click="exportSnapshots('json')">{{ t('settings.export.json') }}</button>
+        <button class="btn-secondary" @click="exportAccounts">{{ t('settings.export.accounts') }}</button>
+        <button class="btn-secondary" @click="exportSnapshots('csv')">{{ t('settings.export.csv') }}</button>
+        <button class="btn-secondary" @click="exportSnapshots('json')">{{ t('settings.export.json') }}</button>
         <label class="flex items-center gap-1">
           <input v-model="includeIdentifying" type="checkbox" />
           {{ t('settings.export.identifying') }}
@@ -175,18 +174,18 @@ async function runImport() {
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <legend class="px-1 text-sm font-medium">{{ t('settings.import.title') }} <InfoTip :text="t('help.import')" /></legend>
+      <legend class="px-1 text-sm font-bold">{{ t('settings.import.title') }}<InfoTip :text="t('help.import')" /></legend>
       <div class="space-y-3 text-sm">
-        <input type="file" accept="application/json,.json" @change="onFile" />
+        <input type="file" accept="application/json,.json" class="field-file block" @change="onFile" />
         <label class="block">
           {{ t('settings.import.passphrase') }}
-          <input v-model="importPassphrase" type="password" autocomplete="off" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" />
+          <input v-model="importPassphrase" type="password" autocomplete="off" class="field mt-1" />
         </label>
         <div class="flex gap-4">
           <label class="flex items-center gap-1"><input v-model="importMode" type="radio" value="merge" /> {{ t('settings.import.merge') }}</label>
           <label class="flex items-center gap-1"><input v-model="importMode" type="radio" value="replace" /> {{ t('settings.import.replace') }}</label>
         </div>
-        <button class="rounded bg-slate-800 px-3 py-1 text-white disabled:opacity-50" :disabled="!importFile || !importPassphrase" @click="runImport">
+        <button class="btn-primary" :disabled="!importFile || !importPassphrase" @click="runImport">
           {{ t('settings.import.run') }}
         </button>
         <p v-if="importResult" class="text-green-600">{{ importResult }}</p>

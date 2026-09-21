@@ -24,10 +24,11 @@ const rows = computed(() =>
 <template>
   <div class="mt-3 border-t pt-2 text-xs dark:border-slate-700">
     <div class="flex items-center justify-between gap-2">
-      <button class="text-slate-500 hover:underline" @click="open = !open">
-        {{ open ? '▾' : '▸' }} {{ t('dashboard.raw.toggle') }}
-      </button>
-      <InfoTip :text="t('help.raw')" />
+      <span>
+        <button class="text-slate-500 hover:underline" @click="open = !open">
+          {{ open ? '▾' : '▸' }} {{ t('dashboard.raw.toggle') }}
+        </button><InfoTip :text="t('help.raw')" />
+      </span>
       <label v-if="open" class="ml-auto flex items-center gap-1 text-slate-500">
         <input v-model="mask" type="checkbox" />
         {{ t('dashboard.raw.mask') }}

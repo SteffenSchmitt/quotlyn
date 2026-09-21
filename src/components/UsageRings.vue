@@ -58,6 +58,7 @@ const headline = computed(() => {
 })
 
 const option = computed(() => ({
+  textStyle: { fontFamily: theme.value.font },
   animationDuration: 600,
   animationEasing: 'cubicOut',
   series: rings.value.map((r, i) => ({
@@ -113,7 +114,10 @@ const option = computed(() => ({
 
 <template>
   <div class="flex items-center gap-4">
-    <VChart :option="option" autoresize :style="{ width: '168px', height: '168px', flex: '0 0 auto' }" />
+    <div class="relative shrink-0">
+      <VChart :option="option" autoresize :style="{ width: '168px', height: '168px' }" />
+      <span class="absolute right-0 top-0"><slot name="corner" /></span>
+    </div>
     <ul class="min-w-0 flex-1 space-y-2 text-sm">
       <li v-for="r in rings" :key="r.key" class="flex items-center gap-2">
         <span
@@ -122,10 +126,10 @@ const option = computed(() => ({
           :style="{ backgroundColor: r.base, boxShadow: r.style.glow ? `0 0 ${r.style.glow}px ${r.style.glowColor}` : 'none' }"
         />
         <span class="min-w-0 flex-1 truncate">
-          <span class="font-medium">{{ r.short }}</span>
-          <span v-if="r.scope" class="text-slate-500"> {{ r.scope }}</span>
+          <span class="font-bold">{{ r.short }}</span>
+          <span v-if="r.scope" class="ml-1 text-slate-500">{{ r.scope }}</span>
         </span>
-        <span class="tabular-nums" :class="headline && headline.key === r.key ? 'font-semibold' : ''">{{ r.percent }} %</span>
+        <span class="tabular-nums" :class="headline && headline.key === r.key ? 'font-bold' : ''">{{ r.percent }} %</span>
         <span class="w-16 text-right text-xs text-slate-500 tabular-nums" :title="t('dashboard.resetsIn', { t: r.countdown })">
           {{ r.countdown }}
         </span>

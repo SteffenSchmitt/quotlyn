@@ -39,31 +39,31 @@ const autoRefresh = computed({
 <template>
   <section class="space-y-6">
     <div class="flex flex-wrap items-center gap-4">
-      <button
-        class="rounded bg-slate-800 px-3 py-1 text-white dark:bg-slate-200 dark:text-slate-900 disabled:opacity-50"
-        :disabled="usage.refreshing || accounts.accounts.length === 0"
-        @click="usage.refreshNow()"
-      >
-        {{ usage.refreshing ? t('dashboard.refreshing') : t('dashboard.refresh') }}
-      </button>
-      <InfoTip :text="t('help.refresh')" />
+      <span class="flex items-center">
+        <button
+          class="btn-primary"
+          :disabled="usage.refreshing || accounts.accounts.length === 0"
+          @click="usage.refreshNow()"
+        >
+          {{ usage.refreshing ? t('dashboard.refreshing') : t('dashboard.refresh') }}
+        </button>
+        <InfoTip :text="t('help.refresh')" />
+      </span>
       <label class="flex items-center gap-2 text-sm">
         <input v-model="autoRefresh" type="checkbox" />
-        {{ t('dashboard.autoRefresh') }}
+        <span>{{ t('dashboard.autoRefresh') }}<InfoTip :text="t('help.autoRefresh')" /></span>
         <span class="text-slate-400">{{ t('dashboard.interval', { n: settings.settings.intervalSeconds }) }}</span>
-        <InfoTip :text="t('help.autoRefresh')" />
       </label>
       <label class="flex items-center gap-2 text-sm">
-        {{ t('dashboard.sort.label') }}
+        <span>{{ t('dashboard.sort.label') }}<InfoTip :text="t('help.sort')" /></span>
         <select
           :value="settings.settings.dashboardSort"
-          class="rounded border px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-800"
+          class="field w-auto"
           @change="settings.update({ dashboardSort: ($event.target as HTMLSelectElement).value as 'manual' | 'headroom' })"
         >
           <option value="manual">{{ t('dashboard.sort.manual') }}</option>
           <option value="headroom">{{ t('dashboard.sort.headroom') }}</option>
         </select>
-        <InfoTip :text="t('help.sort')" />
       </label>
     </div>
 

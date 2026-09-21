@@ -33,8 +33,8 @@ async function onDelete(account: Account) {
 <template>
   <section class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-lg font-semibold">{{ t('accounts.title') }}</h2>
-      <button v-if="!adding" class="rounded bg-slate-800 px-3 py-1 text-white dark:bg-slate-200 dark:text-slate-900" @click="adding = true">
+      <h2 class="text-lg font-bold">{{ t('accounts.title') }}</h2>
+      <button v-if="!adding" class="btn-primary" @click="adding = true">
         {{ t('accounts.add') }}
       </button>
     </div>
@@ -53,19 +53,19 @@ async function onDelete(account: Account) {
         />
         <div v-else-if="confirmingId === account.id" class="flex items-center gap-3">
           <span class="flex-1 text-sm">{{ t('accounts.confirmDelete', { name: account.name }) }}</span>
-          <button class="rounded bg-red-600 px-2 py-0.5 text-sm text-white" @click="onDelete(account)">
+          <button class="btn-danger-solid" @click="onDelete(account)">
             {{ t('accounts.yes') }}
           </button>
-          <button class="rounded border px-2 py-0.5 text-sm dark:border-slate-600" @click="confirmingId = null">{{ t('accounts.no') }}</button>
+          <button class="btn-secondary" @click="confirmingId = null">{{ t('accounts.no') }}</button>
         </div>
-        <div v-else class="flex items-center gap-3">
-          <span class="h-4 w-4 rounded-full" :style="{ backgroundColor: account.color }" />
-          <button type="button" class="flex-1 text-left font-medium hover:underline" :title="t('accounts.edit')" @click="editingId = account.id">
+        <div v-else class="flex items-center gap-2 text-sm">
+          <span class="h-3 w-3 rounded-full" :style="{ backgroundColor: account.color }" />
+          <button type="button" class="min-w-0 flex-1 truncate text-left font-bold hover:underline" :title="t('accounts.edit')" @click="editingId = account.id">
             {{ account.name }}
           </button>
-          <span class="text-xs text-slate-400">{{ account.token.slice(0, 14) }}…</span>
+          <span class="mr-1 font-mono text-xs text-slate-400">{{ account.token.slice(0, 14) }}…</span>
           <button
-            class="rounded border px-2 py-0.5 text-sm dark:border-slate-600 disabled:opacity-40"
+            class="btn-icon"
             :disabled="index === 0"
             :title="t('accounts.up')"
             @click="store.moveAccount(account.id, -1)"
@@ -73,17 +73,17 @@ async function onDelete(account: Account) {
             ↑
           </button>
           <button
-            class="rounded border px-2 py-0.5 text-sm dark:border-slate-600 disabled:opacity-40"
+            class="btn-icon"
             :disabled="index === store.accounts.length - 1"
             :title="t('accounts.down')"
             @click="store.moveAccount(account.id, 1)"
           >
             ↓
           </button>
-          <button class="rounded border px-2 py-0.5 text-sm dark:border-slate-600" @click="editingId = account.id">
+          <button class="btn-secondary" @click="editingId = account.id">
             {{ t('accounts.edit') }}
           </button>
-          <button class="rounded border px-2 py-0.5 text-sm dark:border-slate-600 text-red-600" @click="confirmingId = account.id">
+          <button class="btn-danger" @click="confirmingId = account.id">
             {{ t('accounts.delete') }}
           </button>
         </div>

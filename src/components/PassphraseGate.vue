@@ -50,7 +50,7 @@ async function submit() {
 <template>
   <slot v-if="store.status === 'unlocked'" />
   <div v-else-if="ready" class="mx-auto mt-16 max-w-sm rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-6 shadow-sm">
-    <h2 class="text-lg font-semibold">
+    <h2 class="text-lg font-bold">
       {{ store.status === 'no_vault' ? t('vault.createTitle') : t('vault.unlockTitle') }}
     </h2>
     <p v-if="store.status === 'no_vault'" class="mt-1 text-sm text-slate-500">{{ t('vault.createHint') }}</p>
@@ -61,24 +61,23 @@ async function submit() {
           v-model="passphrase"
           type="password"
           autocomplete="current-password"
-          class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800"
+          class="field mt-1"
           autofocus
         />
       </label>
       <label v-if="store.status === 'no_vault'" class="block text-sm">
         {{ t('vault.confirm') }}
-        <input v-model="confirm" type="password" autocomplete="new-password" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" />
+        <input v-model="confirm" type="password" autocomplete="new-password" class="field mt-1" />
       </label>
       <label class="flex items-center gap-2 text-sm">
         <input v-model="remember" type="checkbox" />
-        {{ t('vault.remember') }}
-        <InfoTip :text="t('help.remember')" />
+        <span>{{ t('vault.remember') }}<InfoTip :text="t('help.remember')" /></span>
       </label>
       <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
       <button
         type="submit"
         :disabled="busy"
-        class="w-full rounded bg-slate-800 px-3 py-1.5 text-white dark:bg-slate-200 dark:text-slate-900 disabled:opacity-50"
+        class="btn-primary w-full"
       >
         {{ busy ? t('vault.working') : store.status === 'no_vault' ? t('vault.create') : t('vault.unlock') }}
       </button>

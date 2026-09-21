@@ -55,7 +55,7 @@ const option = computed(() => {
   const colorOf = (b: TimelineBar) => windowColor(b.windowKey, allKeys.value, th.dark)
   return {
     backgroundColor: 'transparent',
-    textStyle: { color: th.text },
+    textStyle: { color: th.text, fontFamily: th.font },
     tooltip: {
       ...th.tooltip,
       formatter: (p: { data: TimelineBar }) =>
@@ -145,9 +145,7 @@ const option = computed(() => {
 
 <template>
   <section class="space-y-4">
-    <h2 class="flex items-center gap-2 text-lg font-semibold">
-      {{ t('timeline.title') }} <InfoTip :text="t('help.timeline')" />
-    </h2>
+    <h2 class="text-lg font-bold">{{ t('timeline.title') }}<InfoTip :text="t('help.timeline')" /></h2>
     <div class="rounded-lg border bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
       <VChart
         v-if="hasData"

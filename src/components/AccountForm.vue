@@ -74,44 +74,43 @@ function submit() {
   <form class="space-y-3 rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-4" @submit.prevent="submit">
     <label class="block text-sm">
       {{ t('accounts.name') }}
-      <input v-model="name" required class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800" />
+      <input v-model="name" required class="field mt-1" />
     </label>
     <label class="block text-sm">
-      {{ t('accounts.color') }} <InfoTip :text="t('help.color')" />
-      <input v-model="color" type="color" class="mt-1 h-8 w-16 rounded border" />
+      {{ t('accounts.color') }}<InfoTip :text="t('help.color')" />
+      <input v-model="color" type="color" class="mt-1 block h-8 w-12 cursor-pointer rounded-md border border-slate-300 bg-white p-0.5 dark:border-slate-600 dark:bg-slate-800" />
     </label>
     <label class="block text-sm">
-      {{ t('accounts.token') }} <InfoTip :text="t('help.token')" />
+      {{ t('accounts.token') }}<InfoTip :text="t('help.token')" />
       <input
         v-model="token"
         type="password"
         autocomplete="off"
         spellcheck="false"
         :placeholder="account?.token ? t('accounts.tokenSet') : ''"
-        class="mt-1 w-full rounded border px-2 py-1 font-mono placeholder:font-sans dark:border-slate-700 dark:bg-slate-800"
+        class="field mt-1 font-mono placeholder:font-sans"
       />
       <RouterLink to="/help" class="ml-2 text-xs text-sky-700 underline dark:text-sky-400">{{ t('accounts.howTo') }}</RouterLink>
     </label>
     <label class="block text-sm">
-      {{ t('accounts.primaryWindow') }} <InfoTip :text="t('help.primaryWindow')" />
-      <select v-model="primaryWindow" class="mt-1 w-full rounded border px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
+      {{ t('accounts.primaryWindow') }}<InfoTip :text="t('help.primaryWindow')" />
+      <select v-model="primaryWindow" class="field mt-1">
         <option v-for="w in PRIMARY_WINDOWS" :key="w" :value="w">{{ t(`accounts.primary.${w}`) }}</option>
       </select>
     </label>
     <label class="flex items-center gap-2 text-sm">
       <input v-model="notificationsEnabled" type="checkbox" />
-      {{ t('accounts.notifications') }}
-      <InfoTip :text="t('help.notificationsAccount')" />
+      <span>{{ t('accounts.notifications') }}<InfoTip :text="t('help.notificationsAccount')" /></span>
     </label>
     <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
     <p v-if="testState === 'ok'" class="text-sm text-green-600">{{ testMessage }}</p>
     <p v-if="testState === 'fail'" class="text-sm text-red-600">{{ testMessage }}</p>
     <div class="flex gap-2">
-      <button type="submit" class="rounded bg-slate-800 px-3 py-1 text-white dark:bg-slate-200 dark:text-slate-900">{{ t('accounts.save') }}</button>
-      <button type="button" class="rounded border px-3 py-1 dark:border-slate-600" :disabled="testState === 'busy'" @click="test">
+      <button type="submit" class="btn-primary">{{ t('accounts.save') }}</button>
+      <button type="button" class="btn-secondary" :disabled="testState === 'busy'" @click="test">
         {{ testState === 'busy' ? t('accounts.testing') : t('accounts.test') }}
       </button>
-      <button type="button" class="rounded px-3 py-1 text-slate-500" @click="emit('cancel')">
+      <button type="button" class="btn-ghost" @click="emit('cancel')">
         {{ t('accounts.cancel') }}
       </button>
     </div>
