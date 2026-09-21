@@ -46,8 +46,8 @@ const CLOCK_OFFSET = 9
 const CLOCK_WIDTH = 4
 const CLOCK_ON = { dark: '#f8fafc', light: '#0f172a' }
 const CLOCK_REST = { dark: 'rgba(248,250,252,0.18)', light: 'rgba(15,23,42,0.14)' }
-/** Metric arcs sit at 70 % opacity so the solid, full-contrast clock stands apart from them. */
-const METRIC_ALPHA = 0.7
+/** Metric arcs sit at 85 % opacity so the solid, full-contrast clock stands apart from them. */
+const METRIC_ALPHA = 0.85
 
 /** Solid cycle clock as gauge axis segments: full contrast up to the forecast position, faint rest. */
 function clockSegments(position: number | null, dark: boolean): Array<[number, string]> {
