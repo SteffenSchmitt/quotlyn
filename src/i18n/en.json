@@ -1,0 +1,10 @@
+{
+  "app": { "title": "Quotlyn", "tagline": "Usage limits at a glance" },
+  "dashboard": {
+    "empty": "No accounts yet.",
+    "ping": "Ping proxy",
+    "proxyOk": "Proxy reachable",
+    "proxyFail": "Proxy unreachable"
+  },
+  "lang": { "de": "Deutsch", "en": "English" }
+}
