@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import InfoTip from "../components/InfoTip.vue";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AccountCard from "../components/AccountCard.vue";
@@ -58,56 +57,47 @@ function intervalLabel(seconds: number): string {
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <h2 class="text-lg font-bold">{{ t("nav.dashboard") }}</h2>
       <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-        <span class="flex items-center">
-          <select
-            :value="autoRefreshValue"
-            class="select"
-            :aria-label="t('dashboard.autoRefresh')"
-            @change="onAutoRefresh(($event.target as HTMLSelectElement).value)"
-          >
-            <option value="off">{{ t("dashboard.autoRefreshOff") }}</option>
-            <option v-for="s in intervalOptions" :key="s" :value="String(s)">
-              {{ intervalLabel(s) }}
-            </option>
-          </select>
-          <InfoTip :text="t('help.autoRefresh')" />
-        </span>
-        <span class="flex items-center">
-          <select
-            :value="settings.settings.dashboardSort"
-            class="select"
-            :aria-label="t('dashboard.sort.label')"
-            @change="
-              settings.update({
-                dashboardSort: ($event.target as HTMLSelectElement).value as
-                  'manual' | 'headroom',
-              })
-            "
-          >
-            <option value="manual">
-              {{ t("dashboard.sort.label") }}: {{ t("dashboard.sort.manual") }}
-            </option>
-            <option value="headroom">
-              {{ t("dashboard.sort.label") }}:
-              {{ t("dashboard.sort.headroom") }}
-            </option>
-          </select>
-          <InfoTip :text="t('help.sort')" />
-        </span>
-        <span class="flex items-center">
-          <button
-            class="btn-primary"
-            :disabled="usage.refreshing || accounts.accounts.length === 0"
-            @click="usage.refreshNow()"
-          >
-            {{
-              usage.refreshing
-                ? t("dashboard.refreshing")
-                : t("dashboard.refresh")
-            }}
-          </button>
-          <InfoTip :text="t('help.refresh')" />
-        </span>
+        <select
+          :value="autoRefreshValue"
+          class="select"
+          :aria-label="t('dashboard.autoRefresh')"
+          @change="onAutoRefresh(($event.target as HTMLSelectElement).value)"
+        >
+          <option value="off">{{ t("dashboard.autoRefreshOff") }}</option>
+          <option v-for="s in intervalOptions" :key="s" :value="String(s)">
+            {{ intervalLabel(s) }}
+          </option>
+        </select>
+        <select
+          :value="settings.settings.dashboardSort"
+          class="select"
+          :aria-label="t('dashboard.sort.label')"
+          @change="
+            settings.update({
+              dashboardSort: ($event.target as HTMLSelectElement).value as
+                'manual' | 'headroom',
+            })
+          "
+        >
+          <option value="manual">
+            {{ t("dashboard.sort.label") }}: {{ t("dashboard.sort.manual") }}
+          </option>
+          <option value="headroom">
+            {{ t("dashboard.sort.label") }}:
+            {{ t("dashboard.sort.headroom") }}
+          </option>
+        </select>
+        <button
+          class="btn-primary"
+          :disabled="usage.refreshing || accounts.accounts.length === 0"
+          @click="usage.refreshNow()"
+        >
+          {{
+            usage.refreshing
+              ? t("dashboard.refreshing")
+              : t("dashboard.refresh")
+          }}
+        </button>
       </div>
     </div>
 

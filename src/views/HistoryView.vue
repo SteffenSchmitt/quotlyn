@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import InfoTip from "../components/InfoTip.vue";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import VChart from "vue-echarts";
@@ -221,7 +220,6 @@ const option = computed(() => {
               {{ windowLabel(k) }}
             </option>
           </select>
-          <InfoTip :text="t('help.historyWindow')" />
         </label>
         <div class="flex items-center gap-2">
           {{ t("history.range") }}
@@ -233,7 +231,6 @@ const option = computed(() => {
           >
             {{ t(`history.range${r}`) }}
           </button>
-          <InfoTip :text="t('help.historyRange')" />
         </div>
         <div class="flex flex-wrap items-center gap-3">
           {{ t("history.accounts") }}
@@ -253,7 +250,6 @@ const option = computed(() => {
             />
             {{ a.name }}
           </label>
-          <InfoTip :text="t('help.historyAccounts')" />
         </div>
       </div>
     </div>

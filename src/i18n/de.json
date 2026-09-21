@@ -197,16 +197,10 @@
     }
   },
   "help": {
-    "refresh": "Fragt alle Accounts jetzt nacheinander ab. Accounts am Limit werden mit abgefragt, abgelehnte Tokens übersprungen.",
-    "autoRefresh": "Fragt alle Accounts automatisch im gewählten Intervall ab. „Aus“ heißt: nur von Hand.",
-    "sort": "Reihenfolge der Karten: wie unter Accounts festgelegt oder der Account mit dem größten Spielraum zuerst.",
     "summary": "Die Hauptmetrik dieses Accounts: Auslastung eines Fensters und wann es sich zurücksetzt. Welches Fenster das ist, legst du pro Account fest.",
     "state": "Ergebnis der letzten Abfrage: OK, wird abgefragt, Limit erreicht (die API lehnt ab, bis sich das Fenster zurücksetzt), pausiert (gedrosselt), Fehler oder Token abgelehnt.",
     "raw": "Alle Header, die die API geliefert hat, unverändert. Identifizierende Werte sind standardmäßig maskiert, unbekannte Header als neu markiert.",
     "cost": "Was eine Abfrage kostet: die Token der winzigen Anfrage, mit der die Limits gelesen werden, und das Modell, an das sie ging.",
-    "historyWindow": "Welches Limit-Fenster angezeigt wird.",
-    "historyRange": "Wie weit der Verlauf zurückreicht. Ältere Snapshots bleiben bis zum Ende der Aufbewahrung erhalten.",
-    "historyAccounts": "Welche Accounts angezeigt werden. Jede Linie hat die Farbe ihres Accounts, die getönten Bänder markieren die Abschnitte zwischen zwei Resets.",
     "timeline": "Ein Balken pro Account und Fenster, von jetzt bis zum Reset des Fensters. Die Füllung zeigt die aktuelle Auslastung.",
     "token": "Ein langlebiger Token aus `claude setup-token`. Er liegt verschlüsselt in diesem Browser und geht nur an den mitgelieferten Proxy.",
     "primaryWindow": "Das Fenster, das als große Zahl auf der Karte steht. „Am stärksten genutzt“ nimmt jeweils das vollste Fenster.",
