@@ -69,7 +69,14 @@
       "exhausted": "Exhausted, limit reached"
     },
     "lastRead": "Last read {time}",
-    "attemptFailed": "Poll at {time} failed: {error}"
+    "attemptFailed": "Poll at {time} failed: {error}",
+    "recommend": {
+      "title": "Recommendation",
+      "now": "Now",
+      "week": "This week",
+      "both": "Now and this week",
+      "none": "none, every window at its limit"
+    }
   },
   "lang": {
     "de": "Deutsch",

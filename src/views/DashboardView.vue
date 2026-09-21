@@ -3,11 +3,15 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AccountCard from "../components/AccountCard.vue";
 import { sortByHeadroom } from "../lib/usageView";
+import { recommend } from "../lib/recommend";
+import { forecastLine } from "../lib/forecastText";
+import { useWindowLabels } from "../lib/windowLabels";
 import { useAccountsStore } from "../stores/accounts";
 import { useSettingsStore } from "../stores/settings";
 import { useUsageStore } from "../stores/usage";
 
 const { t } = useI18n();
+const { oneLine } = useWindowLabels();
 const accounts = useAccountsStore();
 const settings = useSettingsStore();
 const usage = useUsageStore();
@@ -48,6 +52,26 @@ function onAutoRefresh(value: string) {
 function forecastsFor(accountId: string): Record<string, import("../lib/forecast").Forecast | null> {
   const windows = usage.latest[accountId]?.windows ?? [];
   return Object.fromEntries(windows.map((w) => [w.key, usage.forecastFor(accountId, w.key, now.value)]));
+}
+/** Which account to use next, for the session and for the week, from live values and forecasts. */
+const recommendation = computed(() => {
+  const forecasts = Object.fromEntries(accounts.accounts.map((a) => [a.id, forecastsFor(a.id)]));
+  const status = Object.fromEntries(accounts.accounts.map((a) => [a.id, usage.pollState[a.id]?.status]));
+  return recommend(accounts.accounts, usage.latest, forecasts, status);
+});
+function pickText(pick: { accountId: string; windowKey: string; utilization: number; forecast: import("../lib/forecast").Forecast | null } | null): string {
+  if (!pick) return t("dashboard.recommend.none");
+  const name = accounts.accounts.find((a) => a.id === pick.accountId)?.name ?? "?";
+  const base = `${name} · ${oneLine(pick.windowKey)} ${Math.round(pick.utilization * 100)} %`;
+  return pick.forecast ? `${base} · ${forecastLine(pick.forecast, now.value, (k, p) => t(k, p ?? {}))}` : base;
+}
+function badgeFor(accountId: string): string | null {
+  const r = recommendation.value;
+  const both = r.now?.accountId === accountId && r.week?.accountId === accountId;
+  if (both) return t("dashboard.recommend.both");
+  if (r.now?.accountId === accountId) return t("dashboard.recommend.now");
+  if (r.week?.accountId === accountId) return t("dashboard.recommend.week");
+  return null;
 }
 function intervalLabel(seconds: number): string {
   return seconds % 60 === 0
@@ -112,6 +136,21 @@ function intervalLabel(seconds: number): string {
       }}</RouterLink>
     </p>
 
+    <div
+      v-if="accounts.accounts.length > 1 && (recommendation.now || recommendation.week)"
+      class="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-lg border bg-white px-4 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+    >
+      <span class="font-bold">{{ t("dashboard.recommend.title") }}</span>
+      <span class="flex items-center gap-2">
+        <span class="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-white dark:bg-slate-200 dark:text-slate-900">{{ t("dashboard.recommend.now") }}</span>
+        <span class="text-slate-600 dark:text-slate-300">{{ pickText(recommendation.now) }}</span>
+      </span>
+      <span class="flex items-center gap-2">
+        <span class="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-white dark:bg-slate-200 dark:text-slate-900">{{ t("dashboard.recommend.week") }}</span>
+        <span class="text-slate-600 dark:text-slate-300">{{ pickText(recommendation.week) }}</span>
+      </span>
+    </div>
+
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       <AccountCard
         v-for="a in orderedAccounts"
@@ -121,6 +160,7 @@ function intervalLabel(seconds: number): string {
         :state="usage.pollState[a.id]"
         :thresholds="settings.settings.thresholds"
         :forecasts="forecastsFor(a.id)"
+        :badge="badgeFor(a.id)"
         :now="now"
         @refresh="usage.refreshAccount(a.id)"
       />

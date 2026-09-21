@@ -69,7 +69,14 @@
       "exhausted": "Erschöpft, Limit erreicht"
     },
     "lastRead": "Zuletzt gelesen {time}",
-    "attemptFailed": "Abfrage um {time} fehlgeschlagen: {error}"
+    "attemptFailed": "Abfrage um {time} fehlgeschlagen: {error}",
+    "recommend": {
+      "title": "Empfehlung",
+      "now": "Jetzt",
+      "week": "Diese Woche",
+      "both": "Jetzt und diese Woche",
+      "none": "keine, alle Fenster am Limit"
+    }
   },
   "lang": {
     "de": "Deutsch",

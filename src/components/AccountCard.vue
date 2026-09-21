@@ -32,6 +32,8 @@ const props = withDefaults(
     thresholds?: Thresholds
     /** Forecast per window key, from the usage store. */
     forecasts?: Record<string, Forecast | null>
+    /** "Now", "Week" or both: this account is the recommendation. */
+    badge?: string | null
     now: number
   }>(),
   { thresholds: () => DEFAULT_THRESHOLDS },
@@ -135,7 +137,14 @@ const bindingWindow = computed(() => {
     </div>
     <header>
       <div class="flex items-start gap-3">
-        <h3 class="min-w-0 flex-1 truncate font-bold">{{ account.name }}</h3>
+        <h3 class="min-w-0 flex-1 truncate font-bold">
+          {{ account.name }}
+          <span
+            v-if="badge"
+            class="ml-1.5 inline-block rounded bg-slate-800 px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide text-white dark:bg-slate-200 dark:text-slate-900"
+            >{{ badge }}</span
+          >
+        </h3>
         <div v-if="summary" class="flex items-center gap-2 text-xl font-bold tabular-nums">
           <span class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: summary.color }" />
           {{ summary.percent }} %
