@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="Release" src="https://img.shields.io/badge/release-v1.3.11-0f172a">
+  <img alt="Release" src="https://img.shields.io/badge/release-v1.3.12-0f172a">
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-0f172a">
   <img alt="Vue 3 and TypeScript" src="https://img.shields.io/badge/Vue_3-TypeScript-0f172a">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-0f172a">
