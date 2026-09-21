@@ -267,5 +267,10 @@
     },
     "body": "{window} bei {percent} % (Schwelle {threshold} %) · Reset in {countdown}",
     "bodyNoReset": "{window} bei {percent} % (Schwelle {threshold} %)"
+  },
+  "theme": {
+    "toggle": "Farbschema umschalten",
+    "toLight": "Zum hellen Design wechseln",
+    "toDark": "Zum dunklen Design wechseln"
   }
 }

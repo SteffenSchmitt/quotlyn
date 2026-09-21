@@ -267,5 +267,10 @@
     },
     "body": "{window} at {percent} % (threshold {threshold} %) · resets in {countdown}",
     "bodyNoReset": "{window} at {percent} % (threshold {threshold} %)"
+  },
+  "theme": {
+    "toggle": "Toggle colour scheme",
+    "toLight": "Switch to the light theme",
+    "toDark": "Switch to the dark theme"
   }
 }

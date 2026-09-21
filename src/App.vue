@@ -4,6 +4,7 @@ import { applyTheme, watchSystemTheme } from './lib/theme'
 import { useI18n } from 'vue-i18n'
 import type { Locale } from './i18n'
 import PassphraseGate from './components/PassphraseGate.vue'
+import ThemeToggle from './components/ThemeToggle.vue'
 import { useAccountsStore } from './stores/accounts'
 import { useSettingsStore } from './stores/settings'
 import { useUsageStore } from './stores/usage'
@@ -81,6 +82,7 @@ watch(
         >
           <option v-for="l in locales" :key="l" :value="l">{{ t(`lang.${l}`) }}</option>
         </select>
+        <ThemeToggle />
       </div>
     </header>
     <main class="p-6">
