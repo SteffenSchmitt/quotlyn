@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CustomChart } from 'echarts/charts'
-import { GridComponent, MarkLineComponent, TooltipComponent } from 'echarts/components'
+import { GridComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { useChartTheme } from '../lib/chartTheme'
 import { windowColor, withAlpha } from '../lib/palette'
@@ -15,7 +15,7 @@ import { useWindowLabels } from '../lib/windowLabels'
 import { useAccountsStore } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
 
-use([CustomChart, GridComponent, TooltipComponent, MarkLineComponent, CanvasRenderer])
+use([CustomChart, GridComponent, TooltipComponent, CanvasRenderer])
 
 const { t, d } = useI18n()
 const { oneLine } = useWindowLabels()
@@ -34,7 +34,15 @@ onUnmounted(() => {
   if (tick) clearInterval(tick)
 })
 
+/** Same treatment as the rings: metric at 85 % opacity, the forecast as a solid full-contrast time line. */
+const METRIC_ALPHA = 0.85
+const CLOCK_HEIGHT = 3
+const CLOCK_ON = { dark: '#f8fafc', light: '#0f172a' }
+const CLOCK_REST = { dark: 'rgba(248,250,252,0.18)', light: 'rgba(15,23,42,0.14)' }
+
 const NAME_COL = 200
+/** Room to the right of the bars for "44 % · resets in 6d 22h". */
+const END_LABEL = 190
 const WINDOW_COL = 120
 const LABEL_GUTTER = 12
 
@@ -57,8 +65,10 @@ const hasData = computed(() => model.value.bars.length > 0)
 const option = computed(() => {
   const th = theme.value
   const { rows, bars } = model.value
-  const max = Math.max(now.value + 3_600_000, ...bars.map((b) => b.endMs))
   const colorOf = (b: TimelineBar) => windowColor(b.windowKey, allKeys.value, th.dark)
+  // Every bar spans the full width: the bar is the window's capacity, the fill its utilization.
+  // The time line beneath runs from now (left) to the reset (right).
+  const countdown = (b: TimelineBar) => formatCountdown(new Date(b.endMs).toISOString(), now.value)
   return {
     backgroundColor: 'transparent',
     textStyle: { color: th.text, fontFamily: th.font },
@@ -66,19 +76,20 @@ const option = computed(() => {
       ...th.tooltip,
       formatter: (p: { data: TimelineBar }) =>
         `${p.data.accountName} · ${oneLine(p.data.windowKey)}<br/>` +
-        `${Math.round(p.data.utilization * 100)} % · ${t('dashboard.resetsIn', { t: formatCountdown(new Date(p.data.endMs).toISOString(), now.value) })}<br/>` +
+        `${Math.round(p.data.utilization * 100)} % · ${t('dashboard.resetsIn', { t: countdown(p.data) })}<br/>` +
         d(new Date(p.data.endMs), 'datetime') +
         (p.data.exhaustsAtMs !== null
-          ? `<br/><span style="color:${th.crit}">${t('timeline.exhausts', { time: d(new Date(p.data.exhaustsAtMs), 'datetime') })}</span>`
+          ? `<br/>${t('timeline.exhausts', { time: d(new Date(p.data.exhaustsAtMs), 'datetime') })}`
           : ''),
     },
-    grid: { left: LABEL_GUTTER + NAME_COL + WINDOW_COL, right: 56, top: 16, bottom: 36 },
+    grid: { left: LABEL_GUTTER + NAME_COL + WINDOW_COL, right: END_LABEL, top: 16, bottom: 36 },
     xAxis: {
-      type: 'time',
-      min: now.value - 1_800_000,
-      max: max + 1_800_000,
+      type: 'value',
+      min: 0,
+      max: 1,
+      interval: 0.25,
       axisLine: { lineStyle: { color: th.axisLine } },
-      axisLabel: { color: th.muted },
+      axisLabel: { color: th.muted, formatter: (v: number) => `${Math.round(v * 100)} %` },
       splitLine: { lineStyle: { color: th.grid, type: 'dashed' } },
     },
     yAxis: {
@@ -106,7 +117,7 @@ const option = computed(() => {
     series: [
       {
         type: 'custom',
-        data: bars.map((b) => ({ ...b, value: [b.startMs, b.endMs, b.row] })),
+        data: bars.map((b) => ({ ...b, value: [0, 1, b.row] })),
         encode: { x: [0, 1], y: 2 },
         renderItem: (
           params: { dataIndex: number },
@@ -114,56 +125,65 @@ const option = computed(() => {
         ) => {
           const bar = bars[params.dataIndex]
           if (!bar) return null
-          const [x0, y] = api.coord([bar.startMs, bar.row])
-          const [x1] = api.coord([bar.endMs, bar.row])
+          const [x0, y] = api.coord([0, bar.row])
+          const [x1] = api.coord([1, bar.row])
+          const span = Math.max(1, bar.endMs - bar.startMs)
           const height = Math.min(18, api.size([0, 1])[1] * 0.5)
           const width = Math.max(2, x1 - x0)
           const fill = Math.max(0, Math.min(1, bar.utilization)) * width
           const color = colorOf(bar)
-          const marker =
-            bar.exhaustsAtMs === null
-              ? []
-              : [
-                  {
-                    // Forecast exhaustion: a diamond on the bar at the expected time.
-                    type: 'polygon',
-                    shape: {
-                      points: [
-                        [api.coord([bar.exhaustsAtMs, bar.row])[0], y - height / 2 - 3],
-                        [api.coord([bar.exhaustsAtMs, bar.row])[0] + 5, y],
-                        [api.coord([bar.exhaustsAtMs, bar.row])[0], y + height / 2 + 3],
-                        [api.coord([bar.exhaustsAtMs, bar.row])[0] - 5, y],
-                      ],
-                    },
-                    style: { fill: th.crit, stroke: th.dark ? '#0f172a' : '#ffffff', lineWidth: 1 },
-                  },
-                ]
+          // Forecast time line under the bar: solid up to the expected exhaustion, faint for the rest;
+          // solid all the way when the window lasts until the reset. Nothing without a forecast.
+          const clockY = y + height / 2 + 2
+          const on = CLOCK_ON[th.dark ? 'dark' : 'light']
+          const rest = CLOCK_REST[th.dark ? 'dark' : 'light']
+          const clock =
+            bar.exhaustsAtMs !== null
+              ? (() => {
+                  const xe = x0 + ((bar.exhaustsAtMs - bar.startMs) / span) * (x1 - x0)
+                  return [
+                    { type: 'rect', shape: { x: x0, y: clockY, width: Math.max(0, x1 - x0), height: CLOCK_HEIGHT, r: 1.5 }, style: { fill: rest } },
+                    { type: 'rect', shape: { x: x0, y: clockY, width: Math.max(2, xe - x0), height: CLOCK_HEIGHT, r: 1.5 }, style: { fill: on } },
+                  ]
+                })()
+              : bar.lasts
+                ? [{ type: 'rect', shape: { x: x0, y: clockY, width: Math.max(2, x1 - x0), height: CLOCK_HEIGHT, r: 1.5 }, style: { fill: on } }]
+                : []
           return {
             type: 'group',
             children: [
               { type: 'rect', shape: { x: x0, y: y - height / 2, width, height, r: height / 2 }, style: { fill: withAlpha(color, 0.18) } },
-              { type: 'rect', shape: { x: x0, y: y - height / 2, width: fill, height, r: height / 2 }, style: { fill: color } },
+              {
+                type: 'rect',
+                shape: { x: x0, y: y - height / 2, width: fill, height, r: height / 2 },
+                style: {
+                  fill: {
+                    type: 'linear',
+                    x: 0,
+                    y: 0,
+                    x2: 1,
+                    y2: 0,
+                    colorStops: [
+                      { offset: 0, color: withAlpha(color, 0.55 * METRIC_ALPHA) },
+                      { offset: 1, color: withAlpha(color, METRIC_ALPHA) },
+                    ],
+                  },
+                },
+              },
               {
                 type: 'text',
                 style: {
                   x: x0 + width + 8,
                   y,
-                  text: `${Math.round(bar.utilization * 100)} %`,
+                  text: `${Math.round(bar.utilization * 100)} % · ${t('dashboard.resetsIn', { t: countdown(bar) })}`,
                   fill: th.muted,
                   fontSize: 11,
                   verticalAlign: 'middle',
                 },
               },
-              ...marker,
+              ...clock,
             ],
           }
-        },
-        markLine: {
-          symbol: ['none', 'none'],
-          silent: true,
-          lineStyle: { color: th.now, type: 'solid', width: 1 },
-          label: { formatter: t('timeline.now'), position: 'insideEndTop', color: th.muted, fontSize: 10 },
-          data: [{ xAxis: now.value }],
         },
       },
     ],

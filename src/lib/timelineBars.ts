@@ -9,6 +9,8 @@ export interface TimelineBar {
   utilization: number
   /** Forecast exhaustion inside the bar, or null when there is none or it comes after the reset. */
   exhaustsAtMs: number | null
+  /** True when a forecast exists and says the window lasts until the reset. */
+  lasts: boolean
 }
 
 /** The part of a forecast the timeline needs. */
@@ -52,6 +54,7 @@ export function timelineBars(
         endMs: Math.max(endMs, nowMs),
         utilization: w.utilization,
         exhaustsAtMs: Number.isFinite(exhaustsAtMs) ? Math.max(nowMs, exhaustsAtMs) : null,
+        lasts: f !== null && !f.beforeReset,
       })
     }
   }

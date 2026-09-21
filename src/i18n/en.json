@@ -141,7 +141,6 @@
   "timeline": {
     "title": "Reset timeline",
     "empty": "No data yet.",
-    "now": "now",
     "exhausts": "expected full {time}"
   },
   "settings": {
@@ -227,7 +226,7 @@
     "state": "What the last poll did: OK, fetching, limit reached (the API rejects requests until the window resets), paused (throttled), error, or token rejected.",
     "raw": "Every header the API returned, unchanged. Identifying values are masked by default; headers the app does not know yet are marked as new.",
     "cost": "What one probe costs: the tokens of the tiny request used to read the limits, and the model it was sent to.",
-    "timeline": "One bar per account and window, from now until that window resets. The fill shows the current utilization.",
+    "timeline": "One bar per account and window. The bar is the full capacity (100 %), the fill the current utilization. The white line beneath is the time from now (left) to the reset (right) and ends where the window is expected to run out; all the way means it lasts.",
     "token": "A long-lived token from `claude setup-token`. It is stored encrypted in this browser and only ever sent to the bundled proxy.",
     "primaryWindow": "The window shown as the big number on the card. 'Most used' picks whichever window is fullest right now.",
     "notificationsAccount": "Whether threshold notifications fire for this account. Notifications must also be enabled in Settings.",
