@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ParsedUsage } from '../../src/api/usageParser'
-import { barLabel, timelineBars } from '../../src/lib/timelineBars'
+import { barLabel, sortBars, timelineBars } from '../../src/lib/timelineBars'
 
 function parsed(windows: Array<[string, number, string | null]>): ParsedUsage {
   return {
@@ -68,5 +68,32 @@ describe('barLabel', () => {
   it('shows percent and countdown, and says exhausted at 100 %', () => {
     expect(barLabel(0.44, '6d 22h', t)).toBe('44 % · dashboard.resetsIn{6d 22h}')
     expect(barLabel(1, '3d 19h', t)).toBe('timeline.exhausted{} · dashboard.resetsIn{3d 19h}')
+  })
+})
+
+describe('sortBars', () => {
+  const rows = [
+    { label: 'A/5h', accountId: 'a', windowKey: '5h' },
+    { label: 'A/7d', accountId: 'a', windowKey: '7d' },
+    { label: 'B/5h', accountId: 'b', windowKey: '5h' },
+    { label: 'B/7d', accountId: 'b', windowKey: '7d' },
+  ]
+  const bars = [
+    { row: 0, accountName: 'A', windowKey: '5h', startMs: 0, endMs: 10, utilization: 0.2, exhaustsAtMs: null, lasts: true },
+    { row: 1, accountName: 'A', windowKey: '7d', startMs: 0, endMs: 100, utilization: 0.9, exhaustsAtMs: 30, lasts: false },
+    { row: 2, accountName: 'B', windowKey: '5h', startMs: 0, endMs: 10, utilization: 0.95, exhaustsAtMs: 5, lasts: false },
+    { row: 3, accountName: 'B', windowKey: '7d', startMs: 0, endMs: 100, utilization: 0.1, exhaustsAtMs: null, lasts: false },
+  ]
+  it('keeps account order by default', () => {
+    expect(sortBars(rows, bars, 'accounts').rows.map((r) => r.label)).toEqual(['A/5h', 'A/7d', 'B/5h', 'B/7d'])
+  })
+  it('puts the soonest exhaustion first, then the highest utilization', () => {
+    const { rows: r, bars: b } = sortBars(rows, bars, 'exhaustion')
+    expect(r.map((x) => x.label)).toEqual(['B/5h', 'A/7d', 'A/5h', 'B/7d'])
+    expect(b.map((x) => x.row)).toEqual([0, 1, 2, 3])
+    expect(b[0]!.accountName).toBe('B')
+  })
+  it('groups by window, accounts in order within a group', () => {
+    expect(sortBars(rows, bars, 'window').rows.map((r) => r.label)).toEqual(['A/5h', 'B/5h', 'A/7d', 'B/7d'])
   })
 })

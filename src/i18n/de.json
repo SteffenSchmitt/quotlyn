@@ -74,7 +74,8 @@
       "title": "Empfehlung",
       "now": "Jetzt",
       "week": "Diese Woche",
-      "both": "Jetzt und diese Woche",
+      "starNow": "Empfehlung für jetzt",
+      "starWeek": "Empfehlung für diese Woche",
       "none": "keine, alle Fenster am Limit"
     }
   },
@@ -152,7 +153,13 @@
     "title": "Reset-Timeline",
     "empty": "Noch keine Daten.",
     "exhausts": "Erschöpft am: {time}",
-    "exhausted": "Erschöpft"
+    "exhausted": "Erschöpft",
+    "sort": {
+      "label": "Reihenfolge",
+      "accounts": "wie festgelegt",
+      "exhaustion": "früheste Erschöpfung zuerst",
+      "window": "nach Fenster"
+    }
   },
   "settings": {
     "title": "Einstellungen",

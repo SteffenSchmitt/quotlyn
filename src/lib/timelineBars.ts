@@ -70,3 +70,30 @@ export function barLabel(
   const head = utilization >= 1 ? t('timeline.exhausted') : `${Math.round(utilization * 100)} %`
   return `${head} · ${t('dashboard.resetsIn', { t: countdown })}`
 }
+
+export type TimelineSort = 'accounts' | 'exhaustion' | 'window'
+export const TIMELINE_SORTS: TimelineSort[] = ['accounts', 'exhaustion', 'window']
+
+/**
+ * Reorders rows and bars: as configured, by soonest forecast exhaustion (then highest utilization),
+ * or grouped by window with accounts in order inside each group. Bars get their new row index.
+ */
+export function sortBars(rows: TimelineRow[], bars: TimelineBar[], sort: TimelineSort): { rows: TimelineRow[]; bars: TimelineBar[] } {
+  const order = bars.map((_, i) => i)
+  if (sort === 'exhaustion') {
+    order.sort((x, y) => {
+      const a = bars[x]!
+      const b = bars[y]!
+      const ea = a.exhaustsAtMs ?? Infinity
+      const eb = b.exhaustsAtMs ?? Infinity
+      return ea - eb || b.utilization - a.utilization || x - y
+    })
+  } else if (sort === 'window') {
+    const keys = [...new Set(bars.map((b) => b.windowKey))]
+    order.sort((x, y) => keys.indexOf(bars[x]!.windowKey) - keys.indexOf(bars[y]!.windowKey) || x - y)
+  }
+  return {
+    rows: order.map((i) => rows[bars[i]!.row]!),
+    bars: order.map((i, row) => ({ ...bars[i]!, row })),
+  }
+}

@@ -10,10 +10,11 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { useChartTheme } from '../lib/chartTheme'
 import { windowColor, withAlpha } from '../lib/palette'
 import { formatCountdown } from '../lib/usageView'
-import { barLabel, timelineBars, type TimelineBar } from '../lib/timelineBars'
+import { barLabel, sortBars, timelineBars, TIMELINE_SORTS, type TimelineBar, type TimelineSort } from '../lib/timelineBars'
 import { useWindowLabels } from '../lib/windowLabels'
 import { useAccountsStore } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
+import { useSettingsStore } from '../stores/settings'
 
 use([CustomChart, GridComponent, TooltipComponent, CanvasRenderer])
 
@@ -22,6 +23,7 @@ const { oneLine } = useWindowLabels()
 const theme = useChartTheme()
 const accounts = useAccountsStore()
 const usage = useUsageStore()
+const settings = useSettingsStore()
 
 const now = ref(Date.now())
 let tick: ReturnType<typeof setInterval> | null = null
@@ -50,15 +52,16 @@ function truncate(text: string, max = 28): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text
 }
 
-const model = computed(() =>
-  timelineBars(
+const model = computed(() => {
+  const built = timelineBars(
     accounts.accounts,
     usage.latest,
     now.value,
     (name, key) => `${name}\u0001${oneLine(key)}`,
     (id, key) => usage.forecastFor(id, key, now.value),
-  ),
-)
+  )
+  return sortBars(built.rows, built.bars, settings.settings.timelineSort)
+})
 const allKeys = computed(() => [...new Set(model.value.bars.map((b) => b.windowKey))])
 const hasData = computed(() => model.value.bars.length > 0)
 
@@ -193,7 +196,17 @@ const option = computed(() => {
 
 <template>
   <section class="space-y-4">
-    <h2 class="flex items-center text-lg font-bold">{{ t('timeline.title') }}<InfoTip :text="t('help.timeline')" /></h2>
+    <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <h2 class="flex items-center text-lg font-bold">{{ t('timeline.title') }}<InfoTip :text="t('help.timeline')" /></h2>
+      <select
+        :value="settings.settings.timelineSort"
+        class="select"
+        :aria-label="t('timeline.sort.label')"
+        @change="settings.update({ timelineSort: ($event.target as HTMLSelectElement).value as TimelineSort })"
+      >
+        <option v-for="s in TIMELINE_SORTS" :key="s" :value="s">{{ t('timeline.sort.label') }}: {{ t(`timeline.sort.${s}`) }}</option>
+      </select>
+    </div>
     <div class="rounded-lg border bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
       <VChart
         v-if="hasData"

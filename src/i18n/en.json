@@ -74,7 +74,8 @@
       "title": "Recommendation",
       "now": "Now",
       "week": "This week",
-      "both": "Now and this week",
+      "starNow": "Recommended for now",
+      "starWeek": "Recommended for this week",
       "none": "none, every window at its limit"
     }
   },
@@ -152,7 +153,13 @@
     "title": "Reset timeline",
     "empty": "No data yet.",
     "exhausts": "Exhausted at: {time}",
-    "exhausted": "Exhausted"
+    "exhausted": "Exhausted",
+    "sort": {
+      "label": "Order",
+      "accounts": "as configured",
+      "exhaustion": "soonest exhaustion first",
+      "window": "by window"
+    }
   },
   "settings": {
     "title": "Settings",

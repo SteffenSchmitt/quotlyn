@@ -3,6 +3,7 @@ import { reactive } from 'vue'
 import { SETTINGS_KEY, readJson, writeJson } from '../storage/localStore'
 import { DEFAULT_THRESHOLDS, type Thresholds } from '../lib/usageView'
 import { DEFAULT_FORECAST, LOOKBACK_CHOICES, type ForecastOptions } from '../lib/forecast'
+import { TIMELINE_SORTS, type TimelineSort } from '../lib/timelineBars'
 
 export type Theme = 'system' | 'light' | 'dark'
 export type LocaleSetting = 'auto' | 'de' | 'en'
@@ -26,6 +27,7 @@ export interface Settings {
   theme: Theme
   locale: LocaleSetting
   dashboardSort: DashboardSort
+  timelineSort: TimelineSort
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -39,6 +41,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   locale: 'auto',
   dashboardSort: 'manual',
+  timelineSort: 'accounts',
 }
 export const MIN_INTERVAL_SECONDS = 60
 export const MIN_FORECAST_POINTS = 2
@@ -86,6 +89,7 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
   if (input.theme && THEMES.includes(input.theme)) out.theme = input.theme
   if (input.locale && LOCALES.includes(input.locale)) out.locale = input.locale
   if (input.dashboardSort && SORTS.includes(input.dashboardSort)) out.dashboardSort = input.dashboardSort
+  if (input.timelineSort && TIMELINE_SORTS.includes(input.timelineSort)) out.timelineSort = input.timelineSort
   return out
 }
 
