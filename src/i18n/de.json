@@ -60,10 +60,10 @@
     "refreshAccount": "Diesen Account jetzt abfragen",
     "forecast": {
       "label": "Prognose",
-      "exhausts": "voraussichtlich voll in {t} (+{rate} %/h)",
+      "exhausts": "Erschöpft in: {t} (+{rate} %/h)",
       "lasts": "reicht bis zum Reset, dann ≈ {p} % (+{rate} %/h)",
       "short": {
-        "exhausts": "voll in {t}",
+        "exhausts": "erschöpft in {t}",
         "lasts": "≈ {p} % beim Reset"
       }
     }
