@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InfoTip from '../components/InfoTip.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import VChart from 'vue-echarts'
@@ -74,13 +75,14 @@ const option = computed(() => {
     series: [
       {
         type: 'custom',
-        data: bars,
-        encode: { x: ['startMs', 'endMs'], y: 'row' },
+        data: bars.map((b) => ({ ...b, value: [b.startMs, b.endMs, b.row] })),
+        encode: { x: [0, 1], y: 2 },
         renderItem: (
-          _params: unknown,
-          api: { value: (i: number | string) => number; coord: (v: [number, number]) => [number, number]; size: (v: [number, number]) => [number, number] },
+          params: { dataIndex: number },
+          api: { coord: (v: [number, number]) => [number, number]; size: (v: [number, number]) => [number, number] },
         ) => {
-          const bar = bars[api.value('row')]!
+          const bar = bars[params.dataIndex]
+          if (!bar) return null
           const [x0, y] = api.coord([bar.startMs, bar.row])
           const [x1] = api.coord([bar.endMs, bar.row])
           const height = Math.min(18, api.size([0, 1])[1] * 0.5)
@@ -121,7 +123,9 @@ const option = computed(() => {
 
 <template>
   <section class="space-y-4">
-    <h2 class="text-lg font-semibold">{{ t('timeline.title') }}</h2>
+    <h2 class="flex items-center gap-2 text-lg font-semibold">
+      {{ t('timeline.title') }} <InfoTip :text="t('help.timeline')" />
+    </h2>
     <div class="rounded-lg border bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
       <VChart
         v-if="hasData"
