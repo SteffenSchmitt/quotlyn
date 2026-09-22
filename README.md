@@ -9,11 +9,17 @@
 </p>
 
 <p align="center">
-  <a href="CHANGELOG.md"><img alt="Release" src="https://img.shields.io/badge/release-v1.12.1-0ea5e9?logo=github&logoColor=white"></a>
-  <a href="LICENSE"><img alt="License MIT" src="https://img.shields.io/badge/license-MIT-10b981"></a>
+  <a href="https://github.com/SteffenSchmitt/quotlyn/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/SteffenSchmitt/quotlyn/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white"></a>
+  <a href="https://github.com/SteffenSchmitt/quotlyn/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/SteffenSchmitt/quotlyn?label=release&color=0ea5e9&logo=github&logoColor=white"></a>
+  <a href="https://github.com/SteffenSchmitt/quotlyn/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/SteffenSchmitt/quotlyn?label=last%20commit&color=64748b"></a>
+  <a href="LICENSE"><img alt="License MIT" src="https://img.shields.io/github/license/SteffenSchmitt/quotlyn?color=10b981"></a>
+</p>
+
+<p align="center">
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue_3-42b883?logo=vuedotjs&logoColor=white">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white">
+  <img alt="Node 22 or newer" src="https://img.shields.io/badge/Node-%E2%89%A5_22-5fa04e?logo=nodedotjs&logoColor=white">
   <img alt="Runs locally" src="https://img.shields.io/badge/runs-locally,_no_cloud-f59e0b">
 </p>
 

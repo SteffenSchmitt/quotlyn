@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Cuts a release: checks the tree, runs tests and build, bumps package.json and the README badge,
+// Cuts a release: checks the tree, runs tests and build, bumps package.json,
 // regenerates CHANGELOG.md from the git tags, commits "chore: release X", tags vX and pushes.
 //
 //   npm run release -- <version|major|minor|patch> [--message "tag text"] [--dry-run] [--no-push] [--skip-checks]
@@ -9,7 +9,7 @@
 // with the changelog section is created through gh, if gh is logged in as the repository owner.
 // No dependencies.
 import { execFileSync } from 'node:child_process'
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const root = resolve(new URL('..', import.meta.url).pathname)
@@ -157,15 +157,10 @@ if (!flag('--skip-checks')) {
 
 // --- write ---------------------------------------------------------------------------------------
 run('npm', ['version', version, '--no-git-tag-version'])
-const readmePath = resolve(root, 'README.md')
-if (existsSync(readmePath)) {
-  const readme = readFileSync(readmePath, 'utf8')
-  const next = readme.replace(/release-v\d+\.\d+\.\d+-/g, `release-v${version}-`)
-  if (next !== readme) writeFileSync(readmePath, next)
-}
+// The README's release badge reads the latest tag from GitHub, so there is nothing to rewrite here.
 writeFileSync(resolve(root, 'CHANGELOG.md'), renderChangelog())
 
-git('add', 'package.json', 'package-lock.json', 'README.md', 'CHANGELOG.md')
+git('add', 'package.json', 'package-lock.json', 'CHANGELOG.md')
 git('commit', '-q', '-m', `chore: release ${version}`)
 git('tag', '-a', `v${version}`, '-m', message)
 console.log(`release: committed and tagged v${version}`)
