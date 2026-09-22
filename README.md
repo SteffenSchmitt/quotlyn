@@ -10,6 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/SteffenSchmitt/quotlyn/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/SteffenSchmitt/quotlyn/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white"></a>
+  <a href="https://github.com/SteffenSchmitt/quotlyn/actions/workflows/ci.yml"><img alt="Test coverage" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FSteffenSchmitt%2Fquotlyn%2Fbadges%2Fcoverage.json"></a>
   <a href="https://github.com/SteffenSchmitt/quotlyn/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/SteffenSchmitt/quotlyn?label=release&color=0ea5e9&logo=github&logoColor=white"></a>
   <a href="https://github.com/SteffenSchmitt/quotlyn/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/SteffenSchmitt/quotlyn?label=last%20commit&color=64748b"></a>
   <a href="LICENSE"><img alt="License MIT" src="https://img.shields.io/github/license/SteffenSchmitt/quotlyn?color=10b981"></a>
@@ -350,6 +351,18 @@ The header shows the version from `package.json`. Releases go through
 `npm run release -- <version|major|minor|patch>`: it runs the checks, bumps
 the version and the badge, regenerates [CHANGELOG.md](CHANGELOG.md) from
 the git tags, commits, tags and pushes.
+
+
+### Test coverage
+
+```sh
+npm run coverage        # runs the suite and writes coverage/ (HTML report included)
+```
+
+Bootstrap and plain configuration are excluded (`src/main.ts`, the router, the i18n setup, the
+chart theme), because a test there would only assert that a list is a list. Everything else counts,
+including the views. On a push to `main`, CI writes a shields.io endpoint file to the `badges`
+branch, which the badge at the top of this file reads.
 
 ## Contributing
 

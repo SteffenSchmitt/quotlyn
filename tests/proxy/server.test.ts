@@ -14,6 +14,7 @@ let upstreamBody = '{"usage":{"input_tokens":22,"output_tokens":1}}'
 let upstreamHeaders: Record<string, string> = {}
 let perModel: Record<string, { status: number; headers?: Record<string, string>; body?: string }> = {}
 let seenModels: string[] = []
+let upstreamBaseUrl = ''
 
 function listen(server: http.Server): Promise<string> {
   return new Promise((resolve) => {
@@ -77,8 +78,8 @@ beforeAll(async () => {
       res.end(upstreamBody)
     })
   })
-  const upstreamBase = await listen(upstream)
-  proxy = createProxyServer({ upstream: upstreamBase, model: 'test-model', fallbackModel: 'fallback-model' })
+  upstreamBaseUrl = await listen(upstream)
+  proxy = createProxyServer({ upstream: upstreamBaseUrl, model: 'test-model', fallbackModel: 'fallback-model' })
   proxyBase = await listen(proxy)
 })
 
@@ -233,6 +234,53 @@ describe('fallback probe', () => {
     expect(res.status).toBe(401)
     expect(seenModels).toEqual(['test-model'])
     perModel = {}
+  })
+})
+
+describe('odd answers from upstream', () => {
+  it('reports an unreachable upstream as 502 without inventing headers', async () => {
+    const dead = createProxyServer({ upstream: 'http://127.0.0.1:1' })
+    const base = await listen(dead)
+    const res = await fetch(`${base}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(502)
+    const json = await res.json()
+    expect(json.upstreamStatus).toBeNull()
+    expect(json.headers).toEqual({})
+    expect(json.error.type).toBe('upstream_unreachable')
+    dead.close()
+  })
+
+  it('answers with a null usage when the body carries none', async () => {
+    upstreamStatus = 200
+    upstreamHeaders = RATE_HEADERS
+    upstreamBody = '{}'
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(200)
+    expect((await res.json()).usage).toBeNull()
+    upstreamBody = '{"usage":{"input_tokens":22,"output_tokens":1}}'
+  })
+
+  it('passes an error body through even when it is not JSON', async () => {
+    perModel = { 'test-model': { status: 500, headers: {}, body: 'gateway exploded' } }
+    seenModels = []
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(500)
+    const json = await res.json()
+    expect(json.error.type).toBe('upstream_error')
+    expect(json.error.message).toContain('gateway exploded')
+    perModel = {}
+  })
+
+  it('does not retry when the fallback model is the primary one', async () => {
+    const same = createProxyServer({ upstream: upstreamBaseUrl, model: 'only-model', fallbackModel: 'only-model' })
+    const base = await listen(same)
+    perModel = { 'only-model': { status: 429, headers: {} } }
+    seenModels = []
+    const res = await fetch(`${base}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(429)
+    expect(seenModels).toEqual(['only-model'])
+    perModel = {}
+    same.close()
   })
 })
 

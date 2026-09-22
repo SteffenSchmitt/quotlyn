@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import AccountCard from '../../src/components/AccountCard.vue'
@@ -59,6 +59,9 @@ function mountCard(props: Partial<InstanceType<typeof AccountCard>['$props']> = 
     global: { plugins: [i18n], stubs: { UsageRings: true, RawDataView: true } },
   })
 }
+
+// The unfolded state lives in localStorage and would otherwise carry from test to test.
+beforeEach(() => localStorage.clear())
 
 describe('AccountCard', () => {
   it('translates the API verdict and the binding window into plain language', () => {
@@ -126,6 +129,112 @@ describe('AccountCard', () => {
 
   it('offers no toggle when nobody is noted', () => {
     expect(mountCard().find('[data-test="used-by-toggle"]').exists()).toBe(false)
+  })
+
+  it('opens the status strip on focus and shows one line per window', async () => {
+    const w = mountCard()
+    const strip = w.find('[role="img"]')
+    expect(w.find('[role="tooltip"]').exists()).toBe(false)
+    await strip.trigger('focus')
+    const tip = w.find('[role="tooltip"]')
+    expect(tip.exists()).toBe(true)
+    expect(tip.findAll('span').length).toBeGreaterThan(1)
+    await strip.trigger('blur')
+    expect(w.find('[role="tooltip"]').exists()).toBe(false)
+  })
+
+  it('works where localStorage refuses to answer', () => {
+    const real = Object.getOwnPropertyDescriptor(window, 'localStorage')!
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get() {
+        throw new Error('blocked')
+      },
+    })
+    try {
+      const w = mountCard({ account: { ...account, usedBy: 'Design team' } })
+      expect(w.find('[data-test="used-by-toggle"]').attributes('aria-expanded')).toBe('false')
+    } finally {
+      Object.defineProperty(window, 'localStorage', real)
+    }
+  })
+
+  it('colours a merely warning window amber, not red', () => {
+    const w = mountCard({
+      parsed: parsed({
+        windows: [{ key: '5h', utilization: 0.85, resetsAt: new Date(NOW + HOUR).toISOString(), status: 'allowed' }],
+      }),
+    })
+    expect((w.element as HTMLElement).style.borderRight).toContain('#f59e0b')
+  })
+
+  it('colours a quiet account green', () => {
+    const w = mountCard({
+      parsed: parsed({
+        windows: [{ key: '5h', utilization: 0.1, resetsAt: new Date(NOW + HOUR).toISOString(), status: 'allowed' }],
+      }),
+    })
+    expect((w.element as HTMLElement).style.borderRight).toContain('#10b981')
+  })
+
+  it('carries both recommendation stars', () => {
+    const w = mountCard({ starNow: true, starWeek: true })
+    expect(w.findAll('h3 svg')).toHaveLength(2)
+    expect(w.text()).toContain(de.dashboard.recommend.starNow)
+    expect(w.text()).toContain(de.dashboard.recommend.starWeek)
+  })
+
+  it('names every poll state in the footer', () => {
+    for (const status of ['idle', 'fetching', 'ok', 'limited', 'error', 'paused', 'disabled'] as const) {
+      const text = mountCard({ state: state({ status }) }).text()
+      expect(text).toContain(de.dashboard.state[status])
+    }
+  })
+
+  it('explains a reached limit instead of treating it as an error', () => {
+    const text = mountCard({ state: state({ status: 'limited' }) }).text()
+    expect(text).toContain(de.dashboard.limitedHint)
+  })
+
+  it('says the Fable window is missing when the fallback brought nothing', () => {
+    const text = mountCard({
+      parsed: parsed({
+        windows: [{ key: '5h', utilization: 0.4, resetsAt: new Date(NOW + HOUR).toISOString(), status: 'allowed' }],
+        probe: { model: 'claude-haiku-4-5-20251001', fallbackUsed: true, primaryStatus: 429 },
+      }),
+    }).text()
+    expect(text).toContain('fehlt')
+  })
+
+  it('says where the values come from when the fallback carried the window along', () => {
+    const text = mountCard({
+      parsed: parsed({
+        windows: [
+          { key: '5h', utilization: 0.4, resetsAt: new Date(NOW + HOUR).toISOString(), status: 'allowed' },
+          { key: '7d_oi', utilization: 1, resetsAt: new Date(NOW + HOUR).toISOString(), status: 'rejected' },
+        ],
+        probe: { model: 'claude-haiku-4-5-20251001', fallbackUsed: true, primaryStatus: 429 },
+      }),
+    }).text()
+    expect(text).toContain('Haiku')
+    expect(text).not.toContain('fehlt')
+  })
+
+  it('says so while nothing has been read', () => {
+    const w = mountCard({ parsed: undefined })
+    expect(w.text()).toContain(de.dashboard.noData)
+    expect(w.find('[data-test="used-by-toggle"]').exists()).toBe(false)
+  })
+
+  it('keeps the used-by note folded away for a second card of the same account', async () => {
+    const withNote = { ...account, usedBy: 'Design team' }
+    const first = mountCard({ account: withNote })
+    await first.find('[data-test="used-by-toggle"]').trigger('click')
+    expect(first.find('[data-test="used-by-toggle"]').attributes('aria-expanded')).toBe('true')
+
+    // A fresh card for the same account picks the remembered state up again.
+    const second = mountCard({ account: withNote })
+    expect(second.find('[data-test="used-by-toggle"]').attributes('aria-expanded')).toBe('true')
   })
 
   it('emits refresh when the poll button is clicked and disables it while fetching', async () => {

@@ -11,6 +11,8 @@ permissions:
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -18,8 +20,23 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
+      - run: npm run coverage
       - run: npm run build
+      # The README badge reads this file from the "badges" branch through shields.io. A branch of its
+      # own keeps main free of build commits, and main is protected against pushes anyway.
+      - name: Publish the coverage badge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          node scripts/coverage-badge.mjs "$RUNNER_TEMP/badges/coverage.json"
+          cd "$RUNNER_TEMP/badges"
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add coverage.json
+          git commit -qm "coverage badge for ${GITHUB_SHA::7}"
+          git push -q --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}" HEAD:badges
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   smoke:
     runs-on: ubuntu-latest
