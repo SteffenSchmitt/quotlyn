@@ -83,7 +83,7 @@
     "billingTip": "Billing: {value}",
     "columns": {
       "label": "Columns",
-      "option": "{n} columns"
+      "option": "{n}"
     }
   },
   "lang": {

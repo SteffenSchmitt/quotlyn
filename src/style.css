@@ -39,6 +39,10 @@
   @apply h-8 rounded-md border bg-white px-2.5 text-sm text-slate-900 placeholder:text-slate-400
     focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
 }
+/** A field that grows with its rows: same look, but without the one-line height. */
+@utility field-area {
+  @apply field h-auto py-1.5 leading-snug;
+}
 @utility select {
   @apply field cursor-pointer appearance-none bg-no-repeat pr-8;
   background-position: right 0.5rem center;

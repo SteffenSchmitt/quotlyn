@@ -129,7 +129,7 @@ function submit() {
       </div>
       <label class="block text-sm">
         <span class="flex items-center">{{ t('accounts.usedBy') }}<InfoTip :text="t('help.usedBy')" /></span>
-        <textarea v-model="usedBy" rows="3" class="field mt-1 w-full resize-y" />
+        <textarea v-model="usedBy" rows="3" class="field-area mt-1 w-full resize-y" />
       </label>
     </fieldset>
     <p v-if="error" class="text-sm text-red-600">{{ error }}</p>

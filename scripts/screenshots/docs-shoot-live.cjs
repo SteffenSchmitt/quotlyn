@@ -9,6 +9,12 @@ const file = process.argv[3]
 const theme = process.argv[4] === 'light' ? 'light' : 'dark'
 const base = 'http://localhost:15173'
 const COLORS = ['#eab308', '#f97316', '#ec4899', '#22d3ee', '#a3e635']
+// Made-up meta information, one per visibility mode, so the shots show all three at once.
+const META = [
+  { billing: 'Northwind Ltd · INV-4821', visibility: 'everywhere', usedBy: 'Design team\nCI runner build-02' },
+  { billing: 'Northwind Ltd · INV-4822', visibility: 'masked', usedBy: 'Backend team' },
+  { billing: 'Contoso GmbH · INV-3310', visibility: 'hideOnDashboard', usedBy: 'Ops on-call' },
+]
 ;(async () => {
   const snaps = JSON.parse(readFileSync(file, 'utf8'))
   const newest = Math.max(...snaps.map((s) => Date.parse(s.fetchedAt)))
@@ -34,6 +40,10 @@ const COLORS = ['#eab308', '#f97316', '#ec4899', '#22d3ee', '#a3e635']
     await page.fill('form input[required]', name)
     await page.$eval('form input[type=color]', (el, c) => { el.value = c; el.dispatchEvent(new Event('input', { bubbles: true })) }, COLORS[i % COLORS.length])
     await page.fill('form input[type=password]', `sk-ant-oat01-${String(i + 1).padStart(4, '0')}`)
+    const meta = META[i % META.length]
+    await page.fill('form fieldset input', meta.billing)
+    await page.selectOption('form fieldset select', meta.visibility)
+    await page.fill('form fieldset textarea', meta.usedBy)
     await page.click('form button[type=submit]')
     await page.waitForSelector('form', { state: 'detached' })
   }
@@ -104,10 +114,15 @@ const COLORS = ['#eab308', '#f97316', '#ec4899', '#22d3ee', '#a3e635']
     if (!text.includes('Not fetched yet') && !text.includes('Fetching')) break
   }
   await page.waitForTimeout(800)
+  // One card with its "used by" note open, so the shots show the note and not just the toggle.
+  await page.click('article >> nth=0 >> [data-test="used-by-toggle"]')
+  await page.waitForTimeout(300)
   await shot('dashboard')
+  await crop('main div[class*="justify-between"] >> nth=0', 'feature-columns', 6)
   // Feature crops from the dashboard: recommendation strip, one card, rings of the busiest card, the status strip tooltip.
   await crop('main section[class*="rounded-lg"]', 'feature-recommendation')
   await crop('article >> nth=0', 'feature-card')
+  await crop('article >> nth=0 >> header', 'feature-meta')
   await crop('article >> nth=2 >> div.flex.items-center.gap-4', 'feature-rings')
   await page.hover('article >> nth=2 >> [role="img"]'); await page.waitForTimeout(400)
   await crop('article >> nth=2', 'feature-status', 8)

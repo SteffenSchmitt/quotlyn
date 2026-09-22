@@ -148,6 +148,20 @@ that as *Limit reached* with the current numbers rather than as an error.
     <td valign="top"><b>Forecast, your way.</b> Look-back for the session forecast, minimum data points, and a notification when a window is expected to run out within the hour.</td>
     <td valign="top"><b>Alerts.</b> Warn and critical thresholds drive rings, traffic light and browser notifications, once per crossing, plus a note when a used-up window is free again.</td>
   </tr>
+  <tr>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-meta.png">
+  <img src="docs/screenshots/light/feature-meta.png" alt="Card header with the billing account in grey under the account name">
+</picture></td>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-columns.png">
+  <img src="docs/screenshots/light/feature-columns.png" alt="Dashboard toolbar with auto-refresh, order and column count">
+</picture></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Whose account is this.</b> A billing account under the name and a note on who uses it, folded into the card's footer. Show the billing account in full, masked down to its first and last characters, or keep it off the cards while timeline and history still show it.</td>
+    <td valign="top"><b>Two, three or four to a row.</b> Pick how many cards share a row. The count is an upper bound, so narrower windows still step down and the cards stay readable.</td>
+  </tr>
 </table>
 
 ## What you see

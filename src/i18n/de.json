@@ -83,7 +83,7 @@
     "billingTip": "Abrechnung: {value}",
     "columns": {
       "label": "Spalten",
-      "option": "{n} Spalten"
+      "option": "{n}"
     }
   },
   "lang": {
