@@ -13,6 +13,7 @@ import { formatCountdown } from '../lib/usageView'
 import { barLabel, sortBars, timelineBars, TIMELINE_SORTS, type TimelineBar, type TimelineSort } from '../lib/timelineBars'
 import { useWindowLabels } from '../lib/windowLabels'
 import { useAccountsStore } from '../stores/accounts'
+import { billingFor } from '../lib/accountMeta'
 import { useUsageStore } from '../stores/usage'
 import { useSettingsStore } from '../stores/settings'
 
@@ -54,7 +55,7 @@ function truncate(text: string, max = 28): string {
 
 const model = computed(() => {
   const built = timelineBars(
-    accounts.accounts,
+    accounts.accounts.map((a) => ({ id: a.id, name: a.name, billing: billingFor(a, 'elsewhere') })),
     usage.latest,
     now.value,
     (name, key) => `${name}\u0001${oneLine(key)}`,
@@ -79,6 +80,7 @@ const option = computed(() => {
       ...th.tooltip,
       formatter: (p: { data: TimelineBar }) =>
         `${p.data.accountName} · ${oneLine(p.data.windowKey)}<br/>` +
+        (p.data.billing ? `${t('dashboard.billingTip', { value: p.data.billing })}<br/>` : '') +
         `${barLabel(p.data.utilization, countdown(p.data), (k, pr) => t(k, pr ?? {}))}<br/>` +
         d(new Date(p.data.endMs), 'datetime') +
         (p.data.exhaustsAtMs !== null

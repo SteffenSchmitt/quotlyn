@@ -19,7 +19,11 @@ const account: Account = {
   token: 'sk-ant-oat01-test',
   primaryWindow: 'critical',
   notificationsEnabled: true,
-} as Account
+  order: 0,
+  billingAccount: '',
+  billingVisibility: 'everywhere',
+  usedBy: '',
+}
 
 function parsed(over: Partial<ParsedUsage> = {}): ParsedUsage {
   return {
@@ -80,6 +84,48 @@ describe('AccountCard', () => {
     const text = mountCard({ state: state({ status: 'error', lastError: 'Failed to fetch', lastFetchedAt: later }) }).text()
     expect(text).toContain('fehlgeschlagen: Failed to fetch')
     expect(text).toContain('Zuletzt gelesen')
+  })
+
+  it('shows the billing account under the name', () => {
+    const text = mountCard({ account: { ...account, billingAccount: 'Acme GmbH · DE-1234' } }).text()
+    expect(text).toContain('Acme GmbH · DE-1234')
+  })
+
+  it('masks the billing account when the account asks for it', () => {
+    const text = mountCard({
+      account: { ...account, billingAccount: 'Acme GmbH · DE-1234', billingVisibility: 'masked' },
+    }).text()
+    expect(text).toContain('Acme…1234')
+    expect(text).not.toContain('Acme GmbH · DE-1234')
+  })
+
+  it('leaves the billing account off the card when it is hidden on the dashboard', () => {
+    const text = mountCard({
+      account: { ...account, billingAccount: 'Acme GmbH · DE-1234', billingVisibility: 'hideOnDashboard' },
+    }).text()
+    expect(text).not.toContain('Acme')
+  })
+
+  it('keeps the billing line reserved so cards stay aligned', () => {
+    const without = mountCard({ reserveBillingLine: true })
+    expect(without.find('[data-test="billing"]').exists()).toBe(true)
+    expect(without.find('[data-test="billing"]').text()).toBe('')
+    expect(mountCard().find('[data-test="billing"]').exists()).toBe(false)
+  })
+
+  it('reveals who uses the account only after the footer is expanded', async () => {
+    const w = mountCard({ account: { ...account, usedBy: 'Steffen (MacBook)\nCI-Runner build-02' } })
+    const toggle = w.find('[data-test="used-by-toggle"]')
+    expect(toggle.attributes('aria-expanded')).toBe('false')
+    expect(w.text()).not.toContain('CI-Runner build-02')
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+    expect(w.text()).toContain('Steffen (MacBook)')
+    expect(w.text()).toContain('CI-Runner build-02')
+  })
+
+  it('offers no toggle when nobody is noted', () => {
+    expect(mountCard().find('[data-test="used-by-toggle"]').exists()).toBe(false)
   })
 
   it('emits refresh when the poll button is clicked and disables it while fetching', async () => {

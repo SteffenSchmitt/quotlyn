@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { fetchUsage } from '../api/usageClient'
 import type { Account, NewAccount } from '../stores/accounts'
 import { PRIMARY_WINDOWS, type PrimaryWindow } from '../lib/usageView'
+import { BILLING_VISIBILITIES, type BillingVisibility } from '../lib/accountMeta'
 
 const props = defineProps<{ account?: Account }>()
 const emit = defineEmits<{
@@ -18,6 +19,9 @@ const color = ref(props.account?.color ?? '#2563eb')
 const token = ref('')
 const notificationsEnabled = ref(props.account?.notificationsEnabled ?? true)
 const primaryWindow = ref<PrimaryWindow>(props.account?.primaryWindow ?? 'critical')
+const billingAccount = ref(props.account?.billingAccount ?? '')
+const billingVisibility = ref<BillingVisibility>(props.account?.billingVisibility ?? 'everywhere')
+const usedBy = ref(props.account?.usedBy ?? '')
 const error = ref<string | null>(null)
 const testState = ref<'idle' | 'busy' | 'ok' | 'fail'>('idle')
 const testMessage = ref('')
@@ -66,6 +70,9 @@ function submit() {
     token: tok,
     notificationsEnabled: notificationsEnabled.value,
     primaryWindow: primaryWindow.value,
+    billingAccount: billingAccount.value.trim(),
+    billingVisibility: billingVisibility.value,
+    usedBy: usedBy.value.trim(),
   })
 }
 </script>
@@ -103,6 +110,28 @@ function submit() {
       {{ t('accounts.notifications') }}
       <InfoTip :text="t('help.notificationsAccount')" />
     </label>
+    <fieldset class="space-y-3 border-t pt-3 dark:border-slate-700">
+      <legend class="pr-2 text-sm font-bold">{{ t('accounts.meta') }}</legend>
+      <p class="text-xs text-slate-500">{{ t('accounts.metaHint') }}</p>
+      <div class="flex flex-wrap gap-3 sm:flex-nowrap">
+        <label class="block min-w-0 flex-1 text-sm">
+          <span class="flex items-center">{{ t('accounts.billing') }}<InfoTip :text="t('help.billing')" /></span>
+          <input v-model="billingAccount" class="field mt-1 w-full" />
+        </label>
+        <label class="block min-w-0 flex-1 text-sm sm:max-w-56">
+          <span class="flex items-center">{{ t('accounts.billingVisibility') }}<InfoTip :text="t('help.billingVisibility')" /></span>
+          <select v-model="billingVisibility" class="select mt-1 w-full">
+            <option v-for="v in BILLING_VISIBILITIES" :key="v" :value="v">
+              {{ t(`accounts.billingVisibilityOptions.${v}`) }}
+            </option>
+          </select>
+        </label>
+      </div>
+      <label class="block text-sm">
+        <span class="flex items-center">{{ t('accounts.usedBy') }}<InfoTip :text="t('help.usedBy')" /></span>
+        <textarea v-model="usedBy" rows="3" class="field mt-1 w-full resize-y" />
+      </label>
+    </fieldset>
     <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
     <p v-if="testState === 'ok'" class="text-sm text-green-600">{{ testMessage }}</p>
     <p v-if="testState === 'fail'" class="text-sm text-red-600">{{ testMessage }}</p>

@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AccountCard from "../components/AccountCard.vue";
 import { sortByHeadroom } from "../lib/usageView";
+import { billingFor } from "../lib/accountMeta";
 import { recommend } from "../lib/recommend";
 import { forecastLine } from "../lib/forecastText";
 import { useWindowLabels } from "../lib/windowLabels";
@@ -15,6 +16,9 @@ const { oneLine } = useWindowLabels();
 const accounts = useAccountsStore();
 const settings = useSettingsStore();
 const usage = useUsageStore();
+
+/** Only reserve the billing line on every card once at least one card actually shows one. */
+const reserveBillingLine = computed(() => accounts.accounts.some((a) => billingFor(a, "dashboard") !== null));
 
 const now = ref(Date.now());
 let tick: ReturnType<typeof setInterval> | null = null;
@@ -189,6 +193,7 @@ function intervalLabel(seconds: number): string {
         :forecasts="forecastsFor(a.id)"
         :star-now="recommendation.now?.accountId === a.id"
         :star-week="recommendation.week?.accountId === a.id"
+        :reserve-billing-line="reserveBillingLine"
         :now="now"
         @refresh="usage.refreshAccount(a.id)"
       />

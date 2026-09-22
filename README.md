@@ -167,6 +167,12 @@ Above the cards Quotlyn names the account to use next: an amber star for
 the session with the most headroom, a sky-blue one for the account whose
 tighter weekly window has the most room, each with its forecast.
 
+Meta information from the account settings appears here where it is set:
+the billing account in grey under the name, and a note on who uses the
+account, folded away in the card's footer. The billing account can be
+shown in full, masked down to its first and last characters, or kept off
+the cards while timeline and history still show it in their tooltips.
+
 ### Forecast
 
 From the readings of the current cycle Quotlyn fits the slope of each
@@ -214,7 +220,7 @@ window lasts. The forecast can be switched off.
 </picture></td>
   </tr>
   <tr>
-    <td valign="top"><b>Accounts.</b> Name, colour, token, lead metric and per-account notifications. Reorder with the arrows, test a token before saving.</td>
+    <td valign="top"><b>Accounts.</b> Name, colour, token, lead metric and per-account notifications. Reorder with the arrows, test a token before saving. A meta section holds the billing account and a note on who uses the account.</td>
     <td valign="top"><b>Settings.</b> Polling, history retention and forecast, warn and critical thresholds with browser notifications, theme and language, and export and import of your data.</td>
   </tr>
 </table>

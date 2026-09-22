@@ -78,7 +78,9 @@
       "starNow": "Recommended for now",
       "starWeek": "Recommended for this week",
       "none": "none, every window at its limit"
-    }
+    },
+    "usedBy": "Used by",
+    "billingTip": "Billing: {value}"
   },
   "lang": {
     "de": "Deutsch",
@@ -137,6 +139,16 @@
       "7d": "7 d all models",
       "7d_oi": "7 d Fable"
     },
+    "meta": "Meta information",
+    "metaHint": "The meta information kept here is shown on the cards where it is set.",
+    "billing": "Billing account",
+    "billingVisibility": "Visibility",
+    "billingVisibilityOptions": {
+      "everywhere": "show everywhere",
+      "masked": "masked",
+      "hideOnDashboard": "hide on the dashboard"
+    },
+    "usedBy": "Used by",
     "howTo": "How do I get a token?"
   },
   "history": {
@@ -267,7 +279,10 @@
     "export": "Accounts export the encrypted vault file as is. History exports never contain tokens.",
     "import": "Merge or replace accounts from an exported vault file. You need the passphrase that file was created with.",
     "remember": "Keeps the vault open for this browser tab. Closing the tab locks it again.",
-    "forecast": "The slope of the utilization is fitted by linear regression over the snapshots of the current cycle and extended to 100 % or to the reset. For the session window the look-back decides how much history enters; week windows always use the whole cycle from 0 % and, once a previous week is in the history, blend in last week's rise over the same remaining span. The thin arc inside each ring is a cycle clock from the last reset to the next, ending where the window is expected to run out."
+    "forecast": "The slope of the utilization is fitted by linear regression over the snapshots of the current cycle and extended to 100 % or to the reset. For the session window the look-back decides how much history enters; week windows always use the whole cycle from 0 % and, once a previous week is in the history, blend in last week's rise over the same remaining span. The thin arc inside each ring is a cycle clock from the last reset to the next, ending where the window is expected to run out.",
+    "billing": "Who the usage is billed to. Shown on the card below the name and in the timeline and history tooltips.",
+    "billingVisibility": "\"show everywhere\" prints the value in full, \"masked\" only its start and end, \"hide on the dashboard\" leaves it off the cards while timeline and history keep showing it.",
+    "usedBy": "Who or what works on this account, one entry per line. Sits collapsed in the card's footer."
   },
   "help_page": {
     "title": "Getting a token",

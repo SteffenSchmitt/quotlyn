@@ -82,6 +82,56 @@ describe('accounts CRUD', () => {
     expect(a.notificationsEnabled).toBe(false)
   })
 
+  it('defaults the meta information and keeps it through a round trip', async () => {
+    const store = await unlocked()
+    const plain = await store.addAccount({ name: 'A', color: '#000', token: 'sk-ant-oat-a' })
+    expect(plain.billingAccount).toBe('')
+    expect(plain.billingVisibility).toBe('everywhere')
+    expect(plain.usedBy).toBe('')
+
+    const withMeta = await store.addAccount({
+      name: 'B',
+      color: '#111',
+      token: 'sk-ant-oat-b',
+      billingAccount: 'Acme GmbH · DE-1234',
+      billingVisibility: 'masked',
+      usedBy: 'Steffen\nCI-Runner',
+    })
+    expect(withMeta.billingVisibility).toBe('masked')
+
+    setActivePinia(createPinia())
+    const again = useAccountsStore()
+    await again.init()
+    await again.unlock('pass')
+    const b = again.accounts.find((x) => x.name === 'B')!
+    expect(b.billingAccount).toBe('Acme GmbH · DE-1234')
+    expect(b.billingVisibility).toBe('masked')
+    expect(b.usedBy).toBe('Steffen\nCI-Runner')
+  })
+
+  it('updates the meta information on its own', async () => {
+    const store = await unlocked()
+    const a = await store.addAccount({ name: 'A', color: '#000', token: 't1' })
+    await store.updateAccount(a.id, { billingAccount: 'Team Alpha', billingVisibility: 'hideOnDashboard' })
+    expect(store.accounts[0]!.billingAccount).toBe('Team Alpha')
+    expect(store.accounts[0]!.billingVisibility).toBe('hideOnDashboard')
+    expect(store.accounts[0]!.name).toBe('A')
+  })
+
+  it('fills the meta information in for accounts from an older vault', async () => {
+    const legacy = { id: 'old', name: 'Legacy', color: '#000', token: 't', order: 0 }
+    storage.setItem(VAULT_KEY, JSON.stringify(await sealVault('pass', { accounts: [legacy] }, { iterations: 1000 })))
+    const store = useAccountsStore()
+    await store.init()
+    await store.unlock('pass')
+    expect(store.accounts[0]).toMatchObject({
+      billingAccount: '',
+      billingVisibility: 'everywhere',
+      usedBy: '',
+      notificationsEnabled: true,
+    })
+  })
+
   it('persists every change encrypted', async () => {
     const store = await unlocked()
     await store.addAccount({ name: 'A', color: '#000', token: 'sk-ant-oat-secret' })

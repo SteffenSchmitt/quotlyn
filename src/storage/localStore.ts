@@ -1,6 +1,8 @@
 export const VAULT_KEY = 'quotlyn.vault'
 export const SESSION_KEY_KEY = 'quotlyn.sessionKey'
 export const SETTINGS_KEY = 'quotlyn.settings'
+/** Which cards have their "used by" note unfolded; view state, not settings. */
+export const USED_BY_OPEN_KEY = 'quotlyn.usedByOpen'
 
 export function readJson<T>(storage: Storage, key: string): T | null {
   const raw = storage.getItem(key)

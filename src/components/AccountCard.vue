@@ -23,6 +23,8 @@ import type { Forecast } from '../lib/forecast'
 import { FORECAST_TONE_CLASS, forecastLine, forecastTone } from '../lib/forecastText'
 import UsageRings from './UsageRings.vue'
 import RawDataView from './RawDataView.vue'
+import { billingFor, usedByLines } from '../lib/accountMeta'
+import { USED_BY_OPEN_KEY, readJson, writeJson } from '../storage/localStore'
 
 const props = withDefaults(
   defineProps<{
@@ -35,6 +37,8 @@ const props = withDefaults(
     /** Recommendation stars: for the session (now) and for the week. */
     starNow?: boolean
     starWeek?: boolean
+    /** Keep an empty line where the billing account goes, so cards in a row stay aligned. */
+    reserveBillingLine?: boolean
     now: number
   }>(),
   { thresholds: () => DEFAULT_THRESHOLDS },
@@ -42,6 +46,27 @@ const props = withDefaults(
 const emit = defineEmits<{ refresh: [] }>()
 const { t, te, d } = useI18n()
 const { oneLine } = useWindowLabels()
+
+const billing = computed(() => billingFor(props.account, 'dashboard'))
+const usedBy = computed(() => usedByLines(props.account))
+
+/** The unfolded cards, remembered per account in this browser. */
+function readOpen(): Record<string, boolean> {
+  try {
+    return readJson<Record<string, boolean>>(localStorage, USED_BY_OPEN_KEY) ?? {}
+  } catch {
+    return {}
+  }
+}
+const usedByOpen = ref(readOpen()[props.account.id] === true)
+function toggleUsedBy() {
+  usedByOpen.value = !usedByOpen.value
+  try {
+    writeJson(localStorage, USED_BY_OPEN_KEY, { ...readOpen(), [props.account.id]: usedByOpen.value })
+  } catch {
+    // A browser that refuses storage still gets a working toggle, it just forgets it.
+  }
+}
 
 const summary = computed(() => {
   const w = primaryWindowFor(props.parsed, props.account.primaryWindow)
@@ -158,6 +183,12 @@ const bindingWindow = computed(() => {
           {{ summary.percent }} %
         </div>
       </div>
+      <p
+        v-if="billing || reserveBillingLine"
+        data-test="billing"
+        class="h-4 truncate text-xs leading-4 text-slate-500"
+        :title="billing ? t('dashboard.billingTip', { value: billing }) : undefined"
+      >{{ billing }}</p>
       <p v-if="summary" class="flex items-center text-xs text-slate-500">
         <span class="min-w-0 truncate">{{ summary.label }} · {{ t('dashboard.resetsIn', { t: summary.countdown }) }}</span>
         <InfoTip :text="t('help.summary')" />
@@ -224,5 +255,33 @@ const bindingWindow = computed(() => {
       </span>
       <InfoTip :text="t('help.state')" />
     </p>
+
+    <template v-if="usedBy.length">
+      <button
+        type="button"
+        data-test="used-by-toggle"
+        class="mt-1 flex w-full items-center gap-1 text-left text-xs text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:hover:text-slate-200"
+        :aria-expanded="usedByOpen"
+        @click="toggleUsedBy"
+      >
+        <svg
+          viewBox="0 0 20 20"
+          class="h-3 w-3 shrink-0 transition-transform"
+          :class="usedByOpen ? 'rotate-90' : ''"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M7.5 4.5l6 5.5-6 5.5" />
+        </svg>
+        <span class="truncate">{{ t('dashboard.usedBy') }}</span>
+      </button>
+      <ul v-if="usedByOpen" class="mt-0.5 space-y-0.5 pl-4 text-xs text-slate-400">
+        <li v-for="(line, i) in usedBy" :key="i" class="truncate" :title="line">{{ line }}</li>
+      </ul>
+    </template>
   </article>
 </template>

@@ -13,6 +13,7 @@ import {
 } from '../crypto/vault'
 import { SESSION_KEY_KEY, VAULT_KEY, readJson, remove, writeJson } from '../storage/localStore'
 import type { PrimaryWindow } from '../lib/usageView'
+import { DEFAULT_BILLING_VISIBILITY, type BillingVisibility } from '../lib/accountMeta'
 
 export interface Account {
   id: string
@@ -22,13 +23,26 @@ export interface Account {
   notificationsEnabled: boolean
   primaryWindow: PrimaryWindow
   order: number
+  /** Who the usage is billed to; shown on the cards and in the tooltips. '' when unset. */
+  billingAccount: string
+  billingVisibility: BillingVisibility
+  /** Who or what works on this account, one per line. '' when unset. */
+  usedBy: string
 }
 
 export type NewAccount = Pick<Account, 'name' | 'color' | 'token'> & {
   notificationsEnabled?: boolean
   primaryWindow?: PrimaryWindow
+  billingAccount?: string
+  billingVisibility?: BillingVisibility
+  usedBy?: string
 }
-export type AccountPatch = Partial<Pick<Account, 'name' | 'color' | 'token' | 'notificationsEnabled' | 'primaryWindow'>>
+export type AccountPatch = Partial<
+  Pick<
+    Account,
+    'name' | 'color' | 'token' | 'notificationsEnabled' | 'primaryWindow' | 'billingAccount' | 'billingVisibility' | 'usedBy'
+  >
+>
 
 interface VaultData {
   accounts: Account[]
@@ -56,7 +70,14 @@ export const useAccountsStore = defineStore('accounts', () => {
   }
 
   function normalize(a: Account): Account {
-    return { ...a, notificationsEnabled: a.notificationsEnabled ?? true, primaryWindow: a.primaryWindow ?? 'critical' }
+    return {
+      ...a,
+      notificationsEnabled: a.notificationsEnabled ?? true,
+      primaryWindow: a.primaryWindow ?? 'critical',
+      billingAccount: a.billingAccount ?? '',
+      billingVisibility: a.billingVisibility ?? DEFAULT_BILLING_VISIBILITY,
+      usedBy: a.usedBy ?? '',
+    }
   }
 
   function applyData(data: unknown) {
@@ -141,6 +162,9 @@ export const useAccountsStore = defineStore('accounts', () => {
       notificationsEnabled: input.notificationsEnabled ?? true,
       primaryWindow: input.primaryWindow ?? 'critical',
       order: list.value.length,
+      billingAccount: input.billingAccount ?? '',
+      billingVisibility: input.billingVisibility ?? DEFAULT_BILLING_VISIBILITY,
+      usedBy: input.usedBy ?? '',
     }
     list.value = [...list.value, account]
     await persist()

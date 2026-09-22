@@ -20,7 +20,7 @@ describe('timelineBars', () => {
     const { rows, bars } = timelineBars(
       [
         { id: 'a', name: 'Alpha' },
-        { id: 'b', name: 'Beta' },
+        { id: 'b', name: 'Beta', billing: 'Acme…1234' },
       ],
       {
         a: parsed([
@@ -34,8 +34,8 @@ describe('timelineBars', () => {
     )
     expect(rows.map((r) => r.label)).toEqual(['Alpha/5h', 'Beta/7d'])
     expect(bars).toEqual([
-      { row: 0, accountName: 'Alpha', windowKey: '5h', startMs: now, endMs: Date.parse('2026-09-21T14:00:00.000Z'), utilization: 0.5, exhaustsAtMs: null, lasts: false },
-      { row: 1, accountName: 'Beta', windowKey: '7d', startMs: now, endMs: Date.parse('2026-09-23T12:00:00.000Z'), utilization: 0.9, exhaustsAtMs: null, lasts: false },
+      { row: 0, accountName: 'Alpha', billing: null, windowKey: '5h', startMs: now, endMs: Date.parse('2026-09-21T14:00:00.000Z'), utilization: 0.5, exhaustsAtMs: null, lasts: false },
+      { row: 1, accountName: 'Beta', billing: 'Acme…1234', windowKey: '7d', startMs: now, endMs: Date.parse('2026-09-23T12:00:00.000Z'), utilization: 0.9, exhaustsAtMs: null, lasts: false },
     ])
   })
 

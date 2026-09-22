@@ -78,7 +78,9 @@
       "starNow": "Empfehlung für jetzt",
       "starWeek": "Empfehlung für diese Woche",
       "none": "keine, alle Fenster am Limit"
-    }
+    },
+    "usedBy": "Benutzt durch",
+    "billingTip": "Abrechnung: {value}"
   },
   "lang": {
     "de": "Deutsch",
@@ -137,6 +139,16 @@
       "7d": "7 d alle Modelle",
       "7d_oi": "7 d Fable"
     },
+    "meta": "Metainformationen",
+    "metaHint": "Die hier hinterlegten Meta-Informationen werden – wenn vorhanden – auf den Cards mit angezeigt.",
+    "billing": "Abrechnungs-Account",
+    "billingVisibility": "Sichtbarkeit",
+    "billingVisibilityOptions": {
+      "everywhere": "überall anzeigen",
+      "masked": "maskiert",
+      "hideOnDashboard": "im Dashboard ausblenden"
+    },
+    "usedBy": "Benutzt durch",
     "howTo": "Wie bekomme ich einen Token?"
   },
   "history": {
@@ -267,7 +279,10 @@
     "export": "„Accounts“ exportiert die verschlüsselte Tresordatei unverändert. Verlaufs-Exporte enthalten nie Tokens.",
     "import": "Accounts aus einer exportierten Tresordatei zusammenführen oder ersetzen. Dafür brauchst du die Passphrase, mit der die Datei erstellt wurde.",
     "remember": "Hält den Tresor für diesen Browser-Tab offen. Beim Schließen des Tabs wird er wieder gesperrt.",
-    "forecast": "Aus den Snapshots des aktuellen Zyklus wird per linearer Regression die Steigung der Auslastung geschätzt und bis 100 % bzw. bis zum Reset verlängert. Beim Sitzungsfenster bestimmt der Rückblick, wie viel Vergangenheit eingeht; Wochenfenster nehmen immer den ganzen Zyklus ab 0 % und mischen, sobald eine Vorwoche im Verlauf liegt, den Anstieg der Vorwoche über dieselbe Restspanne dazu. Der dünne Bogen in jedem Ring ist eine Zyklus-Uhr vom letzten bis zum nächsten Reset und endet dort, wo das Fenster voraussichtlich voll ist."
+    "forecast": "Aus den Snapshots des aktuellen Zyklus wird per linearer Regression die Steigung der Auslastung geschätzt und bis 100 % bzw. bis zum Reset verlängert. Beim Sitzungsfenster bestimmt der Rückblick, wie viel Vergangenheit eingeht; Wochenfenster nehmen immer den ganzen Zyklus ab 0 % und mischen, sobald eine Vorwoche im Verlauf liegt, den Anstieg der Vorwoche über dieselbe Restspanne dazu. Der dünne Bogen in jedem Ring ist eine Zyklus-Uhr vom letzten bis zum nächsten Reset und endet dort, wo das Fenster voraussichtlich voll ist.",
+    "billing": "Wem die Nutzung in Rechnung gestellt wird. Steht auf der Card unter dem Namen und im Tooltip von Timeline und Verlauf.",
+    "billingVisibility": "„überall anzeigen“ zeigt den Wert vollständig, „maskiert“ nur Anfang und Ende, „im Dashboard ausblenden“ lässt ihn auf den Cards weg – Timeline und Verlauf zeigen ihn weiterhin.",
+    "usedBy": "Wer oder was auf diesem Account arbeitet, eine Angabe pro Zeile. Steht ausklappbar im Fuß der Card."
   },
   "help_page": {
     "title": "So kommst du an einen Token",

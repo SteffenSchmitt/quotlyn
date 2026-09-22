@@ -25,7 +25,8 @@ import {
 import { useChartTheme } from "../lib/chartTheme";
 import { withAlpha } from "../lib/palette";
 import type { UsageSnapshot } from "../storage/historyDb";
-import { useAccountsStore } from "../stores/accounts";
+import { useAccountsStore, type Account } from "../stores/accounts";
+import { billingFor } from "../lib/accountMeta";
 import { useSettingsStore } from "../stores/settings";
 import { useUsageStore } from "../stores/usage";
 import { useWindowLabels } from "../lib/windowLabels";
@@ -45,6 +46,12 @@ const { t, d } = useI18n();
 const { oneLine: windowLabel } = useWindowLabels();
 const theme = useChartTheme();
 const accounts = useAccountsStore();
+
+/** Billing account for the selector's tooltip; undefined leaves the title attribute off. */
+function billingTip(a: Account): string | undefined {
+  const value = billingFor(a, "elsewhere");
+  return value ? t("dashboard.billingTip", { value }) : undefined;
+}
 const settings = useSettingsStore();
 const usage = useUsageStore();
 
@@ -293,6 +300,7 @@ const option = computed(() => {
             v-for="a in accounts.accounts"
             :key="a.id"
             class="flex items-center gap-1"
+            :title="billingTip(a)"
           >
             <input
               type="checkbox"

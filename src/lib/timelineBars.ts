@@ -3,6 +3,8 @@ import type { ParsedUsage } from '../api/usageParser'
 export interface TimelineBar {
   row: number
   accountName: string
+  /** Billing account as it may be shown here, or null when there is none to show. */
+  billing: string | null
   windowKey: string
   startMs: number
   endMs: number
@@ -30,7 +32,7 @@ export interface TimelineRow {
  * Bars run from now to the reset; the fill is the utilization.
  */
 export function timelineBars(
-  accounts: Array<{ id: string; name: string }>,
+  accounts: Array<{ id: string; name: string; billing?: string | null }>,
   latest: Record<string, ParsedUsage | undefined>,
   nowMs: number,
   label: (accountName: string, windowKey: string) => string,
@@ -49,6 +51,7 @@ export function timelineBars(
       bars.push({
         row: rows.length - 1,
         accountName: a.name,
+        billing: a.billing ?? null,
         windowKey: w.key,
         startMs: nowMs,
         endMs: Math.max(endMs, nowMs),
