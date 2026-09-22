@@ -29,7 +29,8 @@
       "new": "neu"
     },
     "noData": "Noch keine Daten",
-    "fallback": "Fable-Limit erreicht: Die Fable-Abfrage wurde abgelehnt ({status}). Die Werte stammen aus einer Haiku-Abfrage, das Fable-Fenster fehlt deshalb.",
+    "fallback": "Fable-Limit erreicht: Die Fable-Abfrage wurde abgelehnt ({status}). Sitzung und Woche stammen aus einer Haiku-Abfrage, das Fable-Fenster aus der abgelehnten Antwort.",
+    "fallbackPartial": "Fable-Limit erreicht: Die Fable-Abfrage wurde abgelehnt ({status}). Die Werte stammen aus einer Haiku-Abfrage, das Fable-Fenster fehlt deshalb.",
     "probeModel": "Modell: {model}",
     "limitedHint": "Die API lehnt Anfragen ab, bis sich das maßgebliche Fenster zurücksetzt. Die Zahlen unten sind trotzdem aktuell.",
     "sort": {

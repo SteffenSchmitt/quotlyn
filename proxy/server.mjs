@@ -13,7 +13,11 @@ const DEFAULT_FALLBACK_MODEL = 'claude-haiku-4-5-20251001'
 // The API only serves the larger models to these OAuth tokens when the request
 // identifies itself as the Claude CLI. This is the CLI's own system prompt.
 const PROBE_SYSTEM = "You are Claude Code, Anthropic's official CLI for Claude."
-const RATE_LIMIT_MARKER = 'anthropic-ratelimit-unified-status'
+const UNIFIED_PREFIX = 'anthropic-ratelimit-unified-'
+const RATE_LIMIT_MARKER = `${UNIFIED_PREFIX}status`
+const WINDOW_RE = new RegExp(`^${UNIFIED_PREFIX}(.+)-utilization$`)
+// Windows every model counts against: once one of these is out, the fallback model is turned away too.
+const SHARED_WINDOWS = new Set(['5h', '7d'])
 
 function json(res, status, payload, extraHeaders = {}) {
   res.writeHead(status, { 'content-type': 'application/json', ...extraHeaders })
@@ -25,6 +29,47 @@ function pickHeaders(headers) {
   for (const [name, value] of Object.entries(headers)) {
     if (name.startsWith('anthropic-') || name === 'request-id') {
       out[name] = Array.isArray(value) ? value.join(', ') : String(value)
+    }
+  }
+  return out
+}
+
+function windowKeys(headers) {
+  const keys = new Set()
+  for (const name of Object.keys(headers)) {
+    const m = WINDOW_RE.exec(name)
+    if (m) keys.add(m[1])
+  }
+  return keys
+}
+
+/**
+ * Whether a second probe with the fallback model is worth sending. The API turns a probe away
+ * before it runs and then answers with a limit snapshot frozen at that moment, so an account whose
+ * model-specific window is used up would otherwise report stale numbers for its other windows until
+ * that window resets. Only a rejection that comes solely from such a window can be worked around:
+ * the fallback model does not touch it, but it does share the other windows.
+ */
+function fallbackWorthwhile(headers) {
+  if (!(RATE_LIMIT_MARKER in headers)) return true
+  const rejected = [...windowKeys(headers)].filter((k) => headers[`${UNIFIED_PREFIX}${k}-status`] === 'rejected')
+  return rejected.length > 0 && rejected.every((k) => !SHARED_WINDOWS.has(k))
+}
+
+/** A probe answer is usable when it ran or at least carries the limit headers. */
+function carriesUsage({ status, headers }) {
+  return (status >= 200 && status < 300) || RATE_LIMIT_MARKER in headers
+}
+
+/** Fallback headers, plus the windows only the primary model is subject to. */
+function withPrimaryWindows(fallbackHeaders, primaryHeaders) {
+  const covered = windowKeys(fallbackHeaders)
+  const out = { ...fallbackHeaders }
+  for (const key of windowKeys(primaryHeaders)) {
+    if (covered.has(key)) continue
+    const prefix = `${UNIFIED_PREFIX}${key}-`
+    for (const [name, value] of Object.entries(primaryHeaders)) {
+      if (name.startsWith(prefix)) out[name] = value
     }
   }
   return out
@@ -100,13 +145,17 @@ export function createProxyServer({ upstream, port, model, fallbackModel } = {})
 
     try {
       let probeModel = primaryModel
-      let result = await sendProbe(auth, primaryModel)
-      const primaryStatus = result.status
+      const primary = await sendProbe(auth, primaryModel)
+      let result = primary
+      const primaryStatus = primary.status
       let fallbackUsed = false
-      if (result.status === 429 && !(RATE_LIMIT_MARKER in result.headers) && secondaryModel !== primaryModel) {
-        probeModel = secondaryModel
-        result = await sendProbe(auth, secondaryModel)
-        fallbackUsed = true
+      if (primary.status === 429 && secondaryModel !== primaryModel && fallbackWorthwhile(primary.headers)) {
+        const fallback = await sendProbe(auth, secondaryModel)
+        if (carriesUsage(fallback)) {
+          probeModel = secondaryModel
+          fallbackUsed = true
+          result = { ...fallback, headers: withPrimaryWindows(fallback.headers, primary.headers) }
+        }
       }
 
       const payload = {

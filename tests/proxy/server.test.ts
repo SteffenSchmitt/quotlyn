@@ -35,6 +35,18 @@ const RATE_HEADERS = {
   'cf-ray': 'should-not-pass',
 }
 
+/** A Fable probe turned away by its own weekly window while the shared windows still have room. */
+const LIMITED_FABLE = {
+  ...RATE_HEADERS,
+  'anthropic-ratelimit-unified-status': 'rejected',
+  'anthropic-ratelimit-unified-representative-claim': 'seven_day_overage_included',
+  'anthropic-ratelimit-unified-5h-status': 'allowed',
+  'anthropic-ratelimit-unified-7d-status': 'allowed',
+  'anthropic-ratelimit-unified-7d_oi-status': 'rejected',
+  'anthropic-ratelimit-unified-7d_oi-utilization': '1.0',
+  'anthropic-ratelimit-unified-7d_oi-reset': '1790359200',
+}
+
 beforeAll(async () => {
   upstream = http.createServer((req, res) => {
     let body = ''
@@ -155,6 +167,62 @@ describe('fallback probe', () => {
     expect(seenModels).toEqual(['test-model'])
     const json = await res.json()
     expect(json.probe).toEqual({ model: 'test-model', fallbackUsed: false, primaryStatus: 429 })
+    perModel = {}
+  })
+
+  it('retries with the fallback model when only a model-specific window is rejected', async () => {
+    upstreamStatus = 200
+    upstreamHeaders = { ...RATE_HEADERS, 'anthropic-ratelimit-unified-5h-utilization': '0.42' }
+    perModel = { 'test-model': { status: 429, headers: LIMITED_FABLE } }
+    seenModels = []
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(seenModels).toEqual(['test-model', 'fallback-model'])
+    expect(json.probe).toEqual({ model: 'fallback-model', fallbackUsed: true, primaryStatus: 429 })
+    // Fresh numbers from the request that actually ran ...
+    expect(json.headers['anthropic-ratelimit-unified-5h-utilization']).toBe('0.42')
+    expect(json.headers['anthropic-ratelimit-unified-7d-utilization']).toBe('0.51')
+    // ... plus the exhausted window the fallback model is not subject to.
+    expect(json.headers['anthropic-ratelimit-unified-7d_oi-utilization']).toBe('1.0')
+    expect(json.headers['anthropic-ratelimit-unified-7d_oi-status']).toBe('rejected')
+    expect(json.headers['anthropic-ratelimit-unified-7d_oi-reset']).toBe('1790359200')
+    perModel = {}
+    upstreamHeaders = RATE_HEADERS
+  })
+
+  it('does not retry when a window every model shares is rejected', async () => {
+    perModel = {
+      'test-model': {
+        status: 429,
+        headers: {
+          ...LIMITED_FABLE,
+          'anthropic-ratelimit-unified-5h-status': 'rejected',
+          'anthropic-ratelimit-unified-5h-utilization': '1.0',
+        },
+      },
+    }
+    seenModels = []
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(res.status).toBe(429)
+    expect(seenModels).toEqual(['test-model'])
+    const json = await res.json()
+    expect(json.probe).toEqual({ model: 'test-model', fallbackUsed: false, primaryStatus: 429 })
+    perModel = {}
+  })
+
+  it('keeps the primary answer when the fallback probe carries nothing usable', async () => {
+    perModel = {
+      'test-model': { status: 429, headers: LIMITED_FABLE },
+      'fallback-model': { status: 500, body: '{"type":"error","error":{"type":"api_error","message":"boom"}}' },
+    }
+    seenModels = []
+    const res = await fetch(`${proxyBase}/usage`, { headers: { Authorization: 'Bearer x' } })
+    expect(seenModels).toEqual(['test-model', 'fallback-model'])
+    expect(res.status).toBe(429)
+    const json = await res.json()
+    expect(json.probe).toEqual({ model: 'test-model', fallbackUsed: false, primaryStatus: 429 })
+    expect(json.headers['anthropic-ratelimit-unified-7d_oi-utilization']).toBe('1.0')
     perModel = {}
   })
 

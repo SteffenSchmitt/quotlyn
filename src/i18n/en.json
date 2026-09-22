@@ -29,7 +29,8 @@
       "new": "new"
     },
     "noData": "No data yet",
-    "fallback": "Fable limit reached: the Fable probe was rejected ({status}); values come from a Haiku probe and the Fable window is missing.",
+    "fallback": "Fable limit reached: the Fable probe was rejected ({status}); session and week come from a Haiku probe, the Fable window from the rejected answer.",
+    "fallbackPartial": "Fable limit reached: the Fable probe was rejected ({status}); values come from a Haiku probe and the Fable window is missing.",
     "probeModel": "Probe: {model}",
     "limitedHint": "The API rejects requests until the binding window resets; the numbers below are still current.",
     "sort": {

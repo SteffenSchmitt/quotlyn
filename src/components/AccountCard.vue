@@ -92,8 +92,12 @@ const notice = computed(() => {
     const time = props.state.lastFetchedAt ? d(new Date(props.state.lastFetchedAt), 'time') : '–'
     return { text: t('dashboard.attemptFailed', { time, error: props.state.lastError }), cls: 'text-red-600 dark:text-red-400' }
   }
-  if (props.parsed?.probe.fallbackUsed)
-    return { text: t('dashboard.fallback', { status: props.parsed.probe.primaryStatus ?? '?' }), cls: 'text-red-600 dark:text-red-400' }
+  if (props.parsed?.probe.fallbackUsed) {
+    // The rejected window rides along with the fallback answer; without it only the shared windows are left.
+    const carried = props.parsed.windows.some((w) => w.status === 'rejected')
+    const key = carried ? 'dashboard.fallback' : 'dashboard.fallbackPartial'
+    return { text: t(key, { status: props.parsed.probe.primaryStatus ?? '?' }), cls: 'text-red-600 dark:text-red-400' }
+  }
   if (props.state?.status === 'limited') return { text: t('dashboard.limitedHint'), cls: 'text-slate-500' }
   return null
 })

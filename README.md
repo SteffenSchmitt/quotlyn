@@ -258,13 +258,20 @@ The probe goes to Fable by default, because the model-specific weekly
 window only appears on requests for that model. The API serves the larger
 models to these tokens only when the request carries the Claude CLI's
 system prompt, so the probe sends that one line. If the Fable probe is rate
-limited, Quotlyn retries with Haiku and flags the missing window on the
-card. A poll costs roughly 35 tokens of quota; the default interval is five
-minutes and accounts are probed one after another.
+limited, Quotlyn retries with Haiku and flags that on the card. A poll costs
+roughly 35 tokens of quota; the default interval is five minutes and
+accounts are probed one after another.
 
 When a window is used up, the API answers with 429 but still includes the
 headers. Quotlyn shows that as *Limit reached* with current numbers rather
 than treating it as an error.
+
+A request turned away before it runs is answered with a limit snapshot
+frozen at that moment. So once the weekly Fable window is used up, Quotlyn
+repeats the probe with Haiku, which that window does not block: session and
+week then keep moving, and the exhausted Fable window is carried over from
+the rejected answer. If a window every model shares is the one that is out,
+no second probe is sent — nothing would run anyway.
 
 The bundled proxy (`proxy/server.mjs`, no dependencies) exists only because
 a browser cannot call the API directly. It forwards your token, sends the
