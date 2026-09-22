@@ -85,6 +85,20 @@ describe('settings store', () => {
     expect(t.settings.dashboardSort).toBe('headroom')
   })
 
+  it('keeps the dashboard column count within the offered choices', () => {
+    const s = useSettingsStore()
+    s.load()
+    expect(s.settings.dashboardColumns).toBe(3)
+    s.update({ dashboardColumns: 4 })
+    expect(s.settings.dashboardColumns).toBe(4)
+    s.update({ dashboardColumns: 5 as never })
+    expect(s.settings.dashboardColumns).toBe(4)
+    s.update({ dashboardColumns: '2' as never })
+    expect(s.settings.dashboardColumns).toBe(4)
+    s.update({ dashboardColumns: 2 })
+    expect(s.settings.dashboardColumns).toBe(2)
+  })
+
   it('ignores unknown or malformed stored values', () => {
     storage.setItem(SETTINGS_KEY, JSON.stringify({ intervalSeconds: 'abc', junk: 1 }))
     const s = useSettingsStore()

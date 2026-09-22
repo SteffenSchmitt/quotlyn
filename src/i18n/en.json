@@ -80,7 +80,11 @@
       "none": "none, every window at its limit"
     },
     "usedBy": "Used by",
-    "billingTip": "Billing: {value}"
+    "billingTip": "Billing: {value}",
+    "columns": {
+      "label": "Columns",
+      "option": "{n} columns"
+    }
   },
   "lang": {
     "de": "Deutsch",

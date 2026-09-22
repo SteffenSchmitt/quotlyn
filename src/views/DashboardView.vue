@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import AccountCard from "../components/AccountCard.vue";
 import { sortByHeadroom } from "../lib/usageView";
 import { billingFor } from "../lib/accountMeta";
+import { DASHBOARD_COLUMNS, gridClass } from "../lib/dashboardGrid";
 import { recommend } from "../lib/recommend";
 import { forecastLine } from "../lib/forecastText";
 import { useWindowLabels } from "../lib/windowLabels";
@@ -16,6 +17,8 @@ const { oneLine } = useWindowLabels();
 const accounts = useAccountsStore();
 const settings = useSettingsStore();
 const usage = useUsageStore();
+
+const cardGrid = computed(() => gridClass(settings.settings.dashboardColumns));
 
 /** Only reserve the billing line on every card once at least one card actually shows one. */
 const reserveBillingLine = computed(() => accounts.accounts.some((a) => billingFor(a, "dashboard") !== null));
@@ -132,6 +135,22 @@ function intervalLabel(seconds: number): string {
             {{ t("dashboard.sort.headroom") }}
           </option>
         </select>
+        <select
+          :value="settings.settings.dashboardColumns"
+          class="select"
+          :aria-label="t('dashboard.columns.label')"
+          @change="
+            settings.update({
+              dashboardColumns: Number(
+                ($event.target as HTMLSelectElement).value,
+              ) as (typeof DASHBOARD_COLUMNS)[number],
+            })
+          "
+        >
+          <option v-for="n in DASHBOARD_COLUMNS" :key="n" :value="n">
+            {{ t("dashboard.columns.label") }}: {{ t("dashboard.columns.option", { n }) }}
+          </option>
+        </select>
         <button
           class="btn-primary"
           :disabled="usage.refreshing || accounts.accounts.length === 0"
@@ -182,7 +201,7 @@ function intervalLabel(seconds: number): string {
       </ul>
     </section>
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div :class="cardGrid">
       <AccountCard
         v-for="a in orderedAccounts"
         :key="a.id"

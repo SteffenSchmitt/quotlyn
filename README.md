@@ -161,7 +161,9 @@ account. Rings glow as a window approaches your warn and critical
 thresholds, and the right edge of each card is a traffic light: green,
 amber or red by the most used window, always red while the limit is
 reached. Hover it to see why. Each card can be polled on its own, and cards
-can be ordered as configured or by remaining room.
+can be ordered as configured or by remaining room, two, three or four to a
+row. The row count is an upper bound: narrower windows still step down, so
+cards stay readable on a laptop or half a screen.
 
 Above the cards Quotlyn names the account to use next: an amber star for
 the session with the most headroom, a sky-blue one for the account whose

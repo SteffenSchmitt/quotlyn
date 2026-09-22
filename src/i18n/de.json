@@ -80,7 +80,11 @@
       "none": "keine, alle Fenster am Limit"
     },
     "usedBy": "Benutzt durch",
-    "billingTip": "Abrechnung: {value}"
+    "billingTip": "Abrechnung: {value}",
+    "columns": {
+      "label": "Spalten",
+      "option": "{n} Spalten"
+    }
   },
   "lang": {
     "de": "Deutsch",

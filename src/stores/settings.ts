@@ -4,6 +4,7 @@ import { SETTINGS_KEY, readJson, writeJson } from '../storage/localStore'
 import { DEFAULT_THRESHOLDS, type Thresholds } from '../lib/usageView'
 import { DEFAULT_FORECAST, LOOKBACK_CHOICES, type ForecastOptions } from '../lib/forecast'
 import { TIMELINE_SORTS, type TimelineSort } from '../lib/timelineBars'
+import { DASHBOARD_COLUMNS, DEFAULT_DASHBOARD_COLUMNS, type DashboardColumns } from '../lib/dashboardGrid'
 
 export type Theme = 'system' | 'light' | 'dark'
 export type LocaleSetting = 'auto' | 'de' | 'en'
@@ -27,6 +28,8 @@ export interface Settings {
   theme: Theme
   locale: LocaleSetting
   dashboardSort: DashboardSort
+  /** Cards per row on a wide window; narrower windows still step down. */
+  dashboardColumns: DashboardColumns
   timelineSort: TimelineSort
 }
 
@@ -41,6 +44,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   locale: 'auto',
   dashboardSort: 'manual',
+  dashboardColumns: DEFAULT_DASHBOARD_COLUMNS,
   timelineSort: 'accounts',
 }
 export const MIN_INTERVAL_SECONDS = 60
@@ -89,6 +93,9 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
   if (input.theme && THEMES.includes(input.theme)) out.theme = input.theme
   if (input.locale && LOCALES.includes(input.locale)) out.locale = input.locale
   if (input.dashboardSort && SORTS.includes(input.dashboardSort)) out.dashboardSort = input.dashboardSort
+  if (input.dashboardColumns !== undefined && DASHBOARD_COLUMNS.includes(input.dashboardColumns)) {
+    out.dashboardColumns = input.dashboardColumns
+  }
   if (input.timelineSort && TIMELINE_SORTS.includes(input.timelineSort)) out.timelineSort = input.timelineSort
   return out
 }
