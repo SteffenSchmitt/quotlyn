@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { ParsedUsage } from '../../src/api/usageParser'
-import { barLabel, sortBars, timelineBars } from '../../src/lib/timelineBars'
+import { barLabel, sortBars, SUBSCRIPTION_KEY, timelineBars } from '../../src/lib/timelineBars'
+import type { SubscriptionCycle } from '../../src/lib/subscription'
 
 function parsed(windows: Array<[string, number, string | null]>): ParsedUsage {
   return {
@@ -57,6 +58,29 @@ describe('timelineBars', () => {
     expect(bars[1]!.exhaustsAtMs).toBeNull()
     expect(bars[1]!.lasts).toBe(true)
   })
+  it('adds a subscription row after the windows of an account, also without usage data', () => {
+    const cycle: SubscriptionCycle = { state: 'active', startMs: now - 10 * 86_400_000, endMs: now + 20 * 86_400_000, day: 11, days: 30, progress: 1 / 3 }
+    const { rows, bars } = timelineBars(
+      [
+        { id: 'a', name: 'Alpha' },
+        { id: 'b', name: 'Beta' },
+      ],
+      { a: parsed([['5h', 0.5, '2026-09-21T14:00:00.000Z']]) },
+      now,
+      (n, k) => `${n}/${k}`,
+      undefined,
+      (id) => (id === 'b' || id === 'a' ? cycle : null),
+    )
+    expect(rows.map((r) => r.label)).toEqual(['Alpha/5h', `Alpha/${SUBSCRIPTION_KEY}`, `Beta/${SUBSCRIPTION_KEY}`])
+    expect(bars[1]).toMatchObject({ row: 1, windowKey: SUBSCRIPTION_KEY, startMs: now, endMs: cycle.endMs, utilization: 1 / 3, exhaustsAtMs: null, lasts: false, subscription: cycle })
+  })
+
+  it('leaves the subscription row out without a date', () => {
+    const none: SubscriptionCycle = { state: 'none', startMs: 0, endMs: 0, day: 0, days: 0, progress: 0 }
+    const { rows } = timelineBars([{ id: 'a', name: 'A' }], {}, now, (n) => n, undefined, () => none)
+    expect(rows).toEqual([])
+  })
+
   it('clamps past resets to now', () => {
     const { bars } = timelineBars([{ id: 'a', name: 'A' }], { a: parsed([['5h', 1, '2026-09-21T11:00:00.000Z']]) }, now, (n) => n)
     expect(bars[0]!.endMs).toBe(now)
@@ -92,6 +116,16 @@ describe('sortBars', () => {
     expect(r.map((x) => x.label)).toEqual(['B/5h', 'A/7d', 'A/5h', 'B/7d'])
     expect(b.map((x) => x.row)).toEqual([0, 1, 2, 3])
     expect(b[0]!.accountName).toBe('B')
+  })
+  it('keeps subscription rows at the end when sorting by exhaustion or window', () => {
+    const cycle: SubscriptionCycle = { state: 'active', startMs: 0, endMs: 50, day: 1, days: 30, progress: 0.99 }
+    const withSub = [{ label: 'A/sub', accountId: 'a', windowKey: SUBSCRIPTION_KEY }, ...rows]
+    const subBars = [
+      { row: 0, accountName: 'A', windowKey: SUBSCRIPTION_KEY, startMs: 0, endMs: 50, utilization: 0.99, exhaustsAtMs: null, lasts: false, subscription: cycle },
+      ...bars.map((b) => ({ ...b, row: b.row + 1 })),
+    ]
+    expect(sortBars(withSub, subBars, 'exhaustion').rows.at(-1)!.label).toBe('A/sub')
+    expect(sortBars(withSub, subBars, 'window').rows.map((r) => r.label)).toEqual(['A/5h', 'B/5h', 'A/7d', 'B/7d', 'A/sub'])
   })
   it('groups by window, accounts in order within a group', () => {
     expect(sortBars(rows, bars, 'window').rows.map((r) => r.label)).toEqual(['A/5h', 'B/5h', 'A/7d', 'B/7d'])

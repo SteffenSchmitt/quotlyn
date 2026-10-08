@@ -132,6 +132,25 @@ describe('accounts CRUD', () => {
     })
   })
 
+  it('defaults the subscription and keeps it through a round trip', async () => {
+    const store = await unlocked()
+    const plain = await store.addAccount({ name: 'A', color: '#000', token: 't1' })
+    expect(plain).toMatchObject({ subscriptionDate: '', subscriptionCancelled: false, plan: '', monthlyPrice: null })
+    await store.updateAccount(plain.id, { subscriptionDate: '2026-10-14', subscriptionCancelled: true, plan: 'max20x', monthlyPrice: 216 })
+    store.lock()
+    await store.unlock('pass')
+    expect(store.accounts[0]).toMatchObject({ subscriptionDate: '2026-10-14', subscriptionCancelled: true, plan: 'max20x', monthlyPrice: 216 })
+  })
+
+  it('fills the subscription in for accounts from an older vault and drops nonsense', async () => {
+    const legacy = { id: 'old', name: 'Legacy', color: '#000', token: 't', order: 0, plan: 'gold', monthlyPrice: -3 }
+    storage.setItem(VAULT_KEY, JSON.stringify(await sealVault('pass', { accounts: [legacy] }, { iterations: 1000 })))
+    const store = useAccountsStore()
+    await store.init()
+    await store.unlock('pass')
+    expect(store.accounts[0]).toMatchObject({ subscriptionDate: '', subscriptionCancelled: false, plan: '', monthlyPrice: null })
+  })
+
   it('persists every change encrypted', async () => {
     const store = await unlocked()
     await store.addAccount({ name: 'A', color: '#000', token: 'sk-ant-oat-secret' })

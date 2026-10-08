@@ -23,6 +23,10 @@ const account: Account = {
   billingAccount: '',
   billingVisibility: 'everywhere',
   usedBy: '',
+  subscriptionDate: '',
+  subscriptionCancelled: false,
+  plan: '',
+  monthlyPrice: null,
 }
 
 function parsed(over: Partial<ParsedUsage> = {}): ParsedUsage {
@@ -114,6 +118,20 @@ describe('AccountCard', () => {
     expect(without.find('[data-test="billing"]').exists()).toBe(true)
     expect(without.find('[data-test="billing"]').text()).toBe('')
     expect(mountCard().find('[data-test="billing"]').exists()).toBe(false)
+  })
+
+  it('announces a renewal within the week next to the name', () => {
+    const w = mountCard({ account: { ...account, subscriptionDate: '2026-09-24' } })
+    const badge = w.find('[data-test="sub-badge"]')
+    expect(badge.text()).toContain('verlängert in')
+    expect(badge.attributes('title')).toContain('Abo verlängert sich am')
+  })
+
+  it('shows a cancelled subscription and an expired one, but no renewal far away', () => {
+    expect(mountCard({ account: { ...account, subscriptionDate: '2026-10-01', subscriptionCancelled: true } }).find('[data-test="sub-badge"]').text()).toContain('endet in')
+    expect(mountCard({ account: { ...account, subscriptionDate: '2026-09-01', subscriptionCancelled: true } }).find('[data-test="sub-badge"]').text()).toBe(de.dashboard.subscriptionBadge.expired)
+    expect(mountCard({ account: { ...account, subscriptionDate: '2026-10-15' } }).find('[data-test="sub-badge"]').exists()).toBe(false)
+    expect(mountCard().find('[data-test="sub-badge"]').exists()).toBe(false)
   })
 
   it('reveals who uses the account only after the footer is expanded', async () => {

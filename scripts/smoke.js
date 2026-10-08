@@ -69,6 +69,15 @@ async function waitFor(url, ms = 30_000) {
     await page.waitForSelector('form')
     await page.fill('form input[required]', name)
     await page.fill('form input[type=password]', token)
+    if (name === 'Account A') {
+      // A subscription renewing in three days, so card badge, timeline row, history mark and the
+      // subscriptions page all take their subscription paths.
+      const d = new Date()
+      d.setDate(d.getDate() + 3)
+      await page.fill('[data-test="sub-date"]', `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`)
+      await page.selectOption('[data-test="sub-plan"]', 'max20x')
+      await page.fill('[data-test="sub-price"]', '216')
+    }
     await page.click('form button[type=submit]')
     await page.waitForSelector('form', { state: 'detached' })
   }
@@ -81,12 +90,17 @@ async function waitFor(url, ms = 30_000) {
   if (cards !== 3) problems.push(`expected 3 cards, saw ${cards}`)
   const limited = await page.evaluate(() => document.body.innerText.includes('Limit reached'))
   if (!limited) problems.push('the limited account is not shown as limit reached')
+  const badge = await page.evaluate(() => document.querySelectorAll('[data-test="sub-badge"]').length)
+  if (badge !== 1) problems.push(`expected 1 subscription badge, saw ${badge}`)
 
   await page.hover('article >> nth=0 >> [role="img"]')
   await page.waitForTimeout(300)
-  for (const route of ['/history', '/timeline', '/accounts', '/settings', '/help']) {
+  for (const route of ['/history', '/timeline', '/subscriptions', '/accounts', '/settings', '/help']) {
     await page.goto(base + route)
     await page.waitForTimeout(1200)
+    if (route === '/subscriptions' && !(await page.evaluate(() => document.querySelectorAll('tbody tr').length === 1))) {
+      problems.push('the subscriptions page does not list the one subscription')
+    }
   }
   await page.goto(base + '/')
   await page.click('header >> button:has-text("Lock")')
@@ -99,7 +113,7 @@ async function waitFor(url, ms = 30_000) {
     for (const p of problems) console.error('  ' + p)
     process.exit(1)
   }
-  console.log('smoke: ok (dashboard, history, timeline, accounts, settings, help, lock)')
+  console.log('smoke: ok (dashboard, history, timeline, subscriptions, accounts, settings, help, lock)')
 })().catch((e) => {
   stopAll()
   console.error(e)

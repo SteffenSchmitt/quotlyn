@@ -4,6 +4,7 @@ import { SETTINGS_KEY, readJson, writeJson } from '../storage/localStore'
 import { DEFAULT_THRESHOLDS, type Thresholds } from '../lib/usageView'
 import { DEFAULT_FORECAST, LOOKBACK_CHOICES, type ForecastOptions } from '../lib/forecast'
 import { TIMELINE_SORTS, type TimelineSort } from '../lib/timelineBars'
+import { CURRENCIES, type Currency } from '../lib/subscription'
 import { DASHBOARD_COLUMNS, DEFAULT_DASHBOARD_COLUMNS, type DashboardColumns } from '../lib/dashboardGrid'
 
 export type Theme = 'system' | 'light' | 'dark'
@@ -31,6 +32,12 @@ export interface Settings {
   /** Cards per row on a wide window; narrower windows still step down. */
   dashboardColumns: DashboardColumns
   timelineSort: TimelineSort
+  timelineShowSubscription: boolean
+  historyShowSubscription: boolean
+  /** Currency of the monthly prices. */
+  currency: Currency
+  /** Days ahead to notify about a renewal or the end of a subscription; 0 turns it off. */
+  subscriptionNotifyDays: number
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -46,7 +53,12 @@ export const DEFAULT_SETTINGS: Settings = {
   dashboardSort: 'manual',
   dashboardColumns: DEFAULT_DASHBOARD_COLUMNS,
   timelineSort: 'accounts',
+  timelineShowSubscription: true,
+  historyShowSubscription: true,
+  currency: 'EUR',
+  subscriptionNotifyDays: 3,
 }
+export const MAX_SUBSCRIPTION_NOTIFY_DAYS = 30
 export const MIN_INTERVAL_SECONDS = 60
 export const MIN_FORECAST_POINTS = 2
 export const MAX_FORECAST_POINTS = 10
@@ -97,6 +109,12 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
     out.dashboardColumns = input.dashboardColumns
   }
   if (input.timelineSort && TIMELINE_SORTS.includes(input.timelineSort)) out.timelineSort = input.timelineSort
+  if (input.timelineShowSubscription !== undefined) out.timelineShowSubscription = input.timelineShowSubscription === true
+  if (input.historyShowSubscription !== undefined) out.historyShowSubscription = input.historyShowSubscription === true
+  if (input.currency && CURRENCIES.includes(input.currency)) out.currency = input.currency
+  if (typeof input.subscriptionNotifyDays === 'number' && Number.isFinite(input.subscriptionNotifyDays)) {
+    out.subscriptionNotifyDays = clamp(Math.round(input.subscriptionNotifyDays), 0, MAX_SUBSCRIPTION_NOTIFY_DAYS)
+  }
   return out
 }
 

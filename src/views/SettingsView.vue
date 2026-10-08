@@ -6,7 +6,15 @@ import { downloadText, parseHistoryExport, snapshotsToCsv, snapshotsToJson } fro
 import { permissionState, requestPermission, type NotifyPermission } from '../notify/webNotify'
 import { VAULT_KEY, readJson } from '../storage/localStore'
 import { useAccountsStore } from '../stores/accounts'
-import { MAX_FORECAST_POINTS, MIN_FORECAST_POINTS, useSettingsStore, type LocaleSetting, type Theme } from '../stores/settings'
+import {
+  MAX_FORECAST_POINTS,
+  MAX_SUBSCRIPTION_NOTIFY_DAYS,
+  MIN_FORECAST_POINTS,
+  useSettingsStore,
+  type LocaleSetting,
+  type Theme,
+} from '../stores/settings'
+import { CURRENCIES, type Currency } from '../lib/subscription'
 import { LOOKBACK_CHOICES } from '../lib/forecast'
 import { useUsageStore } from '../stores/usage'
 import { VaultError } from '../crypto/vault'
@@ -216,6 +224,30 @@ async function runImport() {
         {{ t('settings.resetNotifications') }}
       </label>
       <p v-if="isMac" class="mt-2 text-xs text-slate-500">{{ t('settings.notificationsMacHint') }}</p>
+    </fieldset>
+
+    <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+      <h3 class="mb-3 flex items-center text-sm font-bold">{{ t('settings.groups.subscriptions') }}<InfoTip :text="t('help.subscriptionSettings')" /></h3>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <label class="text-sm">
+          {{ t('settings.currency') }}
+          <select :value="s.currency" class="select mt-1 w-full" @change="settings.update({ currency: ($event.target as HTMLSelectElement).value as Currency })">
+            <option v-for="c in CURRENCIES" :key="c" :value="c">{{ t(`settings.currencies.${c}`) }}</option>
+          </select>
+        </label>
+        <label class="text-sm">
+          {{ t('settings.subscriptionNotifyDays') }}
+          <input
+            :value="s.subscriptionNotifyDays"
+            type="number"
+            min="0"
+            :max="MAX_SUBSCRIPTION_NOTIFY_DAYS"
+            data-test="sub-notify-days"
+            class="field mt-1 w-full"
+            @change="settings.update({ subscriptionNotifyDays: Number(($event.target as HTMLInputElement).value) })"
+          />
+        </label>
+      </div>
     </fieldset>
 
     <fieldset class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">

@@ -84,6 +84,16 @@
     "columns": {
       "label": "Columns",
       "option": "{n}"
+    },
+    "subscriptionBadge": {
+      "renews": "renews today | renews tomorrow | renews in {n} days",
+      "ends": "ends today | ends tomorrow | ends in {n} days",
+      "expired": "Subscription expired",
+      "tip": {
+        "renews": "Subscription renews on {date}",
+        "ends": "Subscription is cancelled and ends on {date}",
+        "expired": "Subscription ran out on {date}"
+      }
     }
   },
   "lang": {
@@ -111,7 +121,8 @@
     "history": "History",
     "timeline": "Timeline",
     "settings": "Settings",
-    "help": "Help"
+    "help": "Help",
+    "subscriptions": "Subscriptions"
   },
   "accounts": {
     "title": "Accounts",
@@ -153,7 +164,22 @@
       "hideOnDashboard": "hide on the dashboard"
     },
     "usedBy": "Used by",
-    "howTo": "How do I get a token?"
+    "howTo": "How do I get a token?",
+    "subscription": {
+      "title": "Subscription",
+      "hint": "With a date, plan and price Quotlyn shows the billing cycle in the timeline, the history and under “Subscriptions”.",
+      "plan": "Plan",
+      "planNone": "not set",
+      "plans": {
+        "pro": "Pro",
+        "max5x": "Max 5x",
+        "max20x": "Max 20x"
+      },
+      "price": "Price per month ({currency})",
+      "renews": "Next renewal",
+      "ends": "Ends on",
+      "cancelled": "Cancelled"
+    }
   },
   "history": {
     "title": "History",
@@ -164,7 +190,10 @@
     "range24h": "24 h",
     "range7d": "7 days",
     "range30d": "30 days",
-    "forecast": "{name} · forecast"
+    "forecast": "{name} · forecast",
+    "subscriptionShow": "Show subscription",
+    "subscriptionRenewal": "Renewal",
+    "subscriptionEnd": "Subscription ends"
   },
   "timeline": {
     "title": "Reset timeline",
@@ -176,6 +205,13 @@
       "accounts": "as configured",
       "exhaustion": "soonest exhaustion first",
       "window": "by window"
+    },
+    "subscription": "Subscription",
+    "subscriptionShow": "Show subscription",
+    "subscriptionLabel": {
+      "active": "Day {day}/{days} · renews {date}",
+      "ending": "ends in {countdown} · {date}",
+      "expired": "expired since {date}"
     }
   },
   "settings": {
@@ -228,7 +264,8 @@
       "history": "History and forecast",
       "alerts": "Alerts",
       "appearance": "Appearance",
-      "data": "Data"
+      "data": "Data",
+      "subscriptions": "Subscriptions"
     },
     "forecast": {
       "enabled": "Show forecast",
@@ -247,7 +284,13 @@
       "unknown": "Unknown accounts skipped: {names}.",
       "malformed": "This is not a Quotlyn history file."
     },
-    "resetNotifications": "Also notify when a window that was used up is free again"
+    "resetNotifications": "Also notify when a window that was used up is free again",
+    "currency": "Currency",
+    "currencies": {
+      "EUR": "Euro (€)",
+      "USD": "US dollar ($)"
+    },
+    "subscriptionNotifyDays": "Notify ahead (days, 0 = off)"
   },
   "windows": {
     "session": {
@@ -286,7 +329,11 @@
     "forecast": "The slope of the utilization is fitted by linear regression over the snapshots of the current cycle and extended to 100 % or to the reset. For the session window the look-back decides how much history enters; week windows always use the whole cycle from 0 % and, once a previous week is in the history, blend in last week's rise over the same remaining span. The thin arc inside each ring is a cycle clock from the last reset to the next, ending where the window is expected to run out.",
     "billing": "Who the usage is billed to. Shown on the card below the name and in the timeline and history tooltips.",
     "billingVisibility": "\"show everywhere\" prints the value in full, \"masked\" only its start and end, \"hide on the dashboard\" leaves it off the cards while timeline and history keep showing it.",
-    "usedBy": "Who or what works on this account, one entry per line. Sits collapsed in the card's footer."
+    "usedBy": "Who or what works on this account, one entry per line. Sits collapsed in the card's footer.",
+    "subscriptionDate": "Not cancelled: any renewal day, Quotlyn carries it on month by month (the 31st becomes the last day of shorter months). Cancelled: the day the subscription ends, as Anthropic shows it after cancelling.",
+    "subscriptionPrice": "What the subscription costs per month, in the currency from the settings. “Subscriptions” uses it for the total and the price per percentage point of the weekly limit used.",
+    "subscriptionSettings": "The currency applies to all prices. The notification comes once per account and date, this many days before a renewal or the end of a cancelled subscription; 0 turns it off.",
+    "subscriptions": "Avg weekly limit: every week counts with its highest reading of the “7 d all models” window, the weeks of the billing month are averaged; the running week counts with its value so far. Price per %: monthly price divided by that average, so what one percentage point of the weekly limit cost. The evaluation reaches back as far as the stored history."
   },
   "help_page": {
     "title": "Getting a token",
@@ -337,11 +384,43 @@
     "bodyNoReset": "{window} at {percent} % (threshold {threshold} %)",
     "forecastTitle": "{account} · Forecast",
     "resetTitle": "{account} · Reset",
-    "resetBody": "{window} is free again ({percent} %)"
+    "resetBody": "{window} is free again ({percent} %)",
+    "subscriptionTitle": "{account} · Subscription",
+    "subscriptionRenews": "Renews today ({date}) | Renews tomorrow ({date}) | Renews in {n} days ({date})",
+    "subscriptionEnds": "Ends today ({date}) | Ends tomorrow ({date}) | Ends in {n} days ({date})"
   },
   "theme": {
     "toggle": "Toggle colour scheme",
     "toLight": "Switch to the light theme",
     "toDark": "Switch to the dark theme"
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "empty": "No account with subscription details yet. Enter a date, plan or price under Accounts.",
+    "total": "Cost per month",
+    "running": "no running subscriptions | one running subscription | {n} running subscriptions",
+    "next": "Next date",
+    "average": "Avg weekly limit, all subscriptions",
+    "columns": {
+      "account": "Account",
+      "plan": "Plan",
+      "price": "Price/month",
+      "status": "Status",
+      "cycle": "Cycle",
+      "usage": "Avg weekly limit",
+      "perPercent": "Price per %"
+    },
+    "status": {
+      "none": "no date",
+      "active": "renews {date}",
+      "ending": "ends {date}",
+      "expired": "expired {date}"
+    },
+    "cycle": "Day {day}/{days}",
+    "weeks": "no week | one week | {n} weeks",
+    "previous": "previous month {percent} %",
+    "since": "data from {date}",
+    "noData": "no data",
+    "last30": "last 30 days"
   }
 }

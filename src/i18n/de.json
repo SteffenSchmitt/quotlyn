@@ -84,6 +84,16 @@
     "columns": {
       "label": "Spalten",
       "option": "{n}"
+    },
+    "subscriptionBadge": {
+      "renews": "verlängert heute | verlängert morgen | verlängert in {n} Tagen",
+      "ends": "endet heute | endet morgen | endet in {n} Tagen",
+      "expired": "Abo abgelaufen",
+      "tip": {
+        "renews": "Abo verlängert sich am {date}",
+        "ends": "Abo ist gekündigt und endet am {date}",
+        "expired": "Abo ist am {date} ausgelaufen"
+      }
     }
   },
   "lang": {
@@ -111,7 +121,8 @@
     "history": "Verlauf",
     "timeline": "Timeline",
     "settings": "Einstellungen",
-    "help": "Hilfe"
+    "help": "Hilfe",
+    "subscriptions": "Abos"
   },
   "accounts": {
     "title": "Accounts",
@@ -153,7 +164,22 @@
       "hideOnDashboard": "im Dashboard ausblenden"
     },
     "usedBy": "Benutzt durch",
-    "howTo": "Wie bekomme ich einen Token?"
+    "howTo": "Wie bekomme ich einen Token?",
+    "subscription": {
+      "title": "Abo",
+      "hint": "Mit Datum, Tarif und Preis zeigt Quotlyn den Abrechnungszyklus in Timeline, Verlauf und unter „Abos“.",
+      "plan": "Tarif",
+      "planNone": "nicht angegeben",
+      "plans": {
+        "pro": "Pro",
+        "max5x": "Max 5x",
+        "max20x": "Max 20x"
+      },
+      "price": "Preis pro Monat ({currency})",
+      "renews": "Nächste Verlängerung",
+      "ends": "Endet am",
+      "cancelled": "Gekündigt"
+    }
   },
   "history": {
     "title": "Verlauf",
@@ -164,7 +190,10 @@
     "range24h": "24 h",
     "range7d": "7 Tage",
     "range30d": "30 Tage",
-    "forecast": "{name} · Prognose"
+    "forecast": "{name} · Prognose",
+    "subscriptionShow": "Abo anzeigen",
+    "subscriptionRenewal": "Abo",
+    "subscriptionEnd": "Abo-Ende"
   },
   "timeline": {
     "title": "Reset-Timeline",
@@ -176,6 +205,13 @@
       "accounts": "wie festgelegt",
       "exhaustion": "früheste Erschöpfung zuerst",
       "window": "nach Fenster"
+    },
+    "subscription": "Abo",
+    "subscriptionShow": "Abo anzeigen",
+    "subscriptionLabel": {
+      "active": "Tag {day}/{days} · verlängert {date}",
+      "ending": "endet in {countdown} · {date}",
+      "expired": "abgelaufen seit {date}"
     }
   },
   "settings": {
@@ -228,7 +264,8 @@
       "history": "Verlauf und Vorhersage",
       "alerts": "Warnungen",
       "appearance": "Darstellung",
-      "data": "Daten"
+      "data": "Daten",
+      "subscriptions": "Abos"
     },
     "forecast": {
       "enabled": "Vorhersage anzeigen",
@@ -247,7 +284,13 @@
       "unknown": "Unbekannte Accounts übersprungen: {names}.",
       "malformed": "Das ist keine Verlaufsdatei von Quotlyn."
     },
-    "resetNotifications": "Auch benachrichtigen, wenn ein erschöpftes Fenster wieder frei ist"
+    "resetNotifications": "Auch benachrichtigen, wenn ein erschöpftes Fenster wieder frei ist",
+    "currency": "Währung",
+    "currencies": {
+      "EUR": "Euro (€)",
+      "USD": "US-Dollar ($)"
+    },
+    "subscriptionNotifyDays": "Vorher benachrichtigen (Tage, 0 = aus)"
   },
   "windows": {
     "session": {
@@ -286,7 +329,11 @@
     "forecast": "Aus den Snapshots des aktuellen Zyklus wird per linearer Regression die Steigung der Auslastung geschätzt und bis 100 % bzw. bis zum Reset verlängert. Beim Sitzungsfenster bestimmt der Rückblick, wie viel Vergangenheit eingeht; Wochenfenster nehmen immer den ganzen Zyklus ab 0 % und mischen, sobald eine Vorwoche im Verlauf liegt, den Anstieg der Vorwoche über dieselbe Restspanne dazu. Der dünne Bogen in jedem Ring ist eine Zyklus-Uhr vom letzten bis zum nächsten Reset und endet dort, wo das Fenster voraussichtlich voll ist.",
     "billing": "Wem die Nutzung in Rechnung gestellt wird. Steht auf der Card unter dem Namen und im Tooltip von Timeline und Verlauf.",
     "billingVisibility": "„überall anzeigen“ zeigt den Wert vollständig, „maskiert“ nur Anfang und Ende, „im Dashboard ausblenden“ lässt ihn auf den Cards weg – Timeline und Verlauf zeigen ihn weiterhin.",
-    "usedBy": "Wer oder was auf diesem Account arbeitet, eine Angabe pro Zeile. Steht ausklappbar im Fuß der Card."
+    "usedBy": "Wer oder was auf diesem Account arbeitet, eine Angabe pro Zeile. Steht ausklappbar im Fuß der Card.",
+    "subscriptionDate": "Nicht gekündigt: irgendein Verlängerungstag, Quotlyn rechnet monatlich weiter (der 31. wird in kürzeren Monaten zum Monatsletzten). Gekündigt: der Tag, an dem das Abo endet, so wie Anthropic ihn nach der Kündigung anzeigt.",
+    "subscriptionPrice": "Was das Abo im Monat kostet, in der Währung aus den Einstellungen. Daraus berechnet „Abos“ die Gesamtkosten und den Preis je genutztem Prozentpunkt des Wochenlimits.",
+    "subscriptionSettings": "Die Währung gilt für alle Preise. Die Benachrichtigung kommt einmal pro Account und Termin, so viele Tage vor einer Verlängerung oder dem Ende eines gekündigten Abos; 0 schaltet sie ab.",
+    "subscriptions": "Ø Wochenlimit: Jede Woche zählt mit ihrem höchsten Wert des Fensters „7 d alle Modelle“, die Wochen des Abrechnungsmonats werden gemittelt; die laufende Woche zählt mit ihrem bisherigen Wert. Preis je %: Monatspreis geteilt durch diesen Durchschnitt, also was ein Prozentpunkt Wochenlimit gekostet hat. Die Auswertung reicht so weit zurück wie der gespeicherte Verlauf."
   },
   "help_page": {
     "title": "So kommst du an einen Token",
@@ -337,11 +384,43 @@
     "bodyNoReset": "{window} bei {percent} % (Schwelle {threshold} %)",
     "forecastTitle": "{account} · Prognose",
     "resetTitle": "{account} · Reset",
-    "resetBody": "{window} ist wieder frei ({percent} %)"
+    "resetBody": "{window} ist wieder frei ({percent} %)",
+    "subscriptionTitle": "{account} · Abo",
+    "subscriptionRenews": "Verlängert sich heute ({date}) | Verlängert sich morgen ({date}) | Verlängert sich in {n} Tagen ({date})",
+    "subscriptionEnds": "Endet heute ({date}) | Endet morgen ({date}) | Endet in {n} Tagen ({date})"
   },
   "theme": {
     "toggle": "Farbschema umschalten",
     "toLight": "Zum hellen Design wechseln",
     "toDark": "Zum dunklen Design wechseln"
+  },
+  "subscriptions": {
+    "title": "Abos",
+    "empty": "Noch kein Account mit Abo-Angaben. Trage Datum, Tarif oder Preis unter Accounts ein.",
+    "total": "Kosten pro Monat",
+    "running": "keine laufenden Abos | ein laufendes Abo | {n} laufende Abos",
+    "next": "Nächster Termin",
+    "average": "Ø Wochenlimit aller Abos",
+    "columns": {
+      "account": "Account",
+      "plan": "Tarif",
+      "price": "Preis/Monat",
+      "status": "Status",
+      "cycle": "Zyklus",
+      "usage": "Ø Wochenlimit",
+      "perPercent": "Preis je %"
+    },
+    "status": {
+      "none": "kein Datum",
+      "active": "verlängert {date}",
+      "ending": "endet {date}",
+      "expired": "abgelaufen {date}"
+    },
+    "cycle": "Tag {day}/{days}",
+    "weeks": "keine Woche | eine Woche | {n} Wochen",
+    "previous": "Vormonat {percent} %",
+    "since": "Daten ab {date}",
+    "noData": "keine Daten",
+    "last30": "letzte 30 Tage"
   }
 }

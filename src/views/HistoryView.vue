@@ -30,6 +30,8 @@ import { billingFor } from "../lib/accountMeta";
 import { useSettingsStore } from "../stores/settings";
 import { useUsageStore } from "../stores/usage";
 import { useWindowLabels } from "../lib/windowLabels";
+import { subscriptionEvents } from "../lib/subscription";
+import { levelColor } from "../lib/usageView";
 
 use([
   LineChart,
@@ -137,6 +139,24 @@ function forecastSeries(a: { id: string; name: string; color: string }, snaps: U
     ],
     endIso,
   };
+}
+
+/**
+ * Renewals and the end of a cancelled subscription as solid lines in the account colour (the end in red),
+ * labelled at the bottom so they do not collide with the reset times at the top. They stay within the
+ * axis: a renewal in three weeks must not stretch the 24 h view.
+ */
+function subscriptionMarks(a: Account, fromIso: string, toIso: string) {
+  if (!settings.settings.historyShowSubscription) return [];
+  return subscriptionEvents(a, Date.parse(fromIso), Date.parse(toIso)).map((e) => {
+    const color = e.kind === "end" ? levelColor("crit") : a.color;
+    const text = e.kind === "end" ? t("history.subscriptionEnd") : t("history.subscriptionRenewal");
+    return {
+      xAxis: new Date(e.atMs).toISOString(),
+      lineStyle: { color, type: "solid", width: 1.5, opacity: 0.9 },
+      label: { show: true, position: "insideEndBottom", color, fontSize: 10, formatter: () => text },
+    };
+  });
 }
 
 const option = computed(() => {
@@ -260,7 +280,7 @@ const option = computed(() => {
             fontSize: 10,
             formatter: (p: { value: string }) => d(new Date(p.value), "time"),
           },
-          data: markers.map((iso) => ({ xAxis: iso })),
+          data: [...markers.map((iso) => ({ xAxis: iso })), ...subscriptionMarks(a, since, axisMax)],
         },
       };
     }), ...forecasts.map(({ endIso: _end, ...f }) => f)],
@@ -314,6 +334,15 @@ const option = computed(() => {
             {{ a.name }}
           </label>
         </div>
+        <label class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            data-test="history-sub-toggle"
+            :checked="settings.settings.historyShowSubscription"
+            @change="settings.update({ historyShowSubscription: ($event.target as HTMLInputElement).checked })"
+          />
+          {{ t("history.subscriptionShow") }}
+        </label>
       </div>
     </div>
     <div

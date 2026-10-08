@@ -86,6 +86,7 @@ describe('App shell', () => {
     expect(w.find('nav').exists()).toBe(true)
     expect(w.find('.view').exists()).toBe(true)
     expect(w.text()).toContain(de.nav.dashboard)
+    expect(w.findAllComponents(RouterLinkStub).map((l) => l.props('to'))).toContain('/subscriptions')
   })
 
   it('carries the version in the header', async () => {

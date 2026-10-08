@@ -99,6 +99,18 @@ describe('settings store', () => {
     expect(s.settings.dashboardColumns).toBe(2)
   })
 
+  it('keeps the subscription settings within bounds', () => {
+    const s = useSettingsStore()
+    s.load()
+    expect(s.settings).toMatchObject({ currency: 'EUR', subscriptionNotifyDays: 3, timelineShowSubscription: true, historyShowSubscription: true })
+    s.update({ currency: 'USD', subscriptionNotifyDays: 99, timelineShowSubscription: false, historyShowSubscription: false })
+    expect(s.settings).toMatchObject({ currency: 'USD', subscriptionNotifyDays: 30, timelineShowSubscription: false, historyShowSubscription: false })
+    s.update({ currency: 'GBP' as never, subscriptionNotifyDays: -1 })
+    expect(s.settings).toMatchObject({ currency: 'USD', subscriptionNotifyDays: 0 })
+    s.update({ subscriptionNotifyDays: 'x' as never, timelineShowSubscription: 'no' as never })
+    expect(s.settings).toMatchObject({ subscriptionNotifyDays: 0, timelineShowSubscription: false })
+  })
+
   it('ignores unknown or malformed stored values', () => {
     storage.setItem(SETTINGS_KEY, JSON.stringify({ intervalSeconds: 'abc', junk: 1 }))
     const s = useSettingsStore()

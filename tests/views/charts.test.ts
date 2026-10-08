@@ -36,6 +36,13 @@ import type { UsageSnapshot } from '../../src/storage/historyDb'
 
 const HOUR = 3_600_000
 
+/** A local calendar day as the date field stores it, `days` away from today. */
+function localDay(days: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() + days)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function snapshot(accountId: string, minutesAgo: number, u5: number): Omit<UsageSnapshot, 'id'> {
   const at = new Date(Date.now() - minutesAgo * 60_000).toISOString()
   return {
@@ -128,6 +135,60 @@ describe('TimelineView', () => {
     const other = select.findAll('option').map((o) => o.attributes('value')).find((v) => v !== settings.settings.timelineSort)!
     await select.setValue(other)
     expect(settings.settings.timelineSort).toBe(other)
+  })
+})
+
+describe('the subscription in the charts', () => {
+  type Shape = { type: string; children: Array<{ type: string; style?: { text?: string } }> }
+  type TimelineOption = {
+    tooltip: { formatter: (p: unknown) => string }
+    series: Array<{ data: Array<Record<string, unknown>>; renderItem: (p: { dataIndex: number }, api: unknown) => Shape | null }>
+  }
+  const api = { coord: ([x, row]: [number, number]) => [100 + x * 400, 20 + row * 30], size: () => [0, 24] }
+
+  it('gives the timeline a subscription row with its own label and tooltip', async () => {
+    const { store, usage } = await setup(['Alpha'])
+    await seed(usage)
+    await store.updateAccount(accounts[0]!.id, { subscriptionDate: localDay(10), plan: 'max20x' })
+    mountView(TimelineView)
+    await vi.waitFor(() => expect(options).toHaveLength(1))
+
+    const option = options[0] as TimelineOption
+    const index = option.series[0]!.data.findIndex((b) => b.windowKey === 'subscription')
+    expect(index).toBeGreaterThan(-1)
+    const shape = option.series[0]!.renderItem({ dataIndex: index }, api)!
+    expect(shape.children.find((c) => c.type === 'text')!.style!.text).toContain('verlängert')
+    const tip = option.tooltip.formatter({ data: option.series[0]!.data[index] })
+    expect(tip).toContain(de.timeline.subscription)
+    expect(tip).toContain('Max 20x')
+  })
+
+  it('hides the subscription row with its switch and remembers that', async () => {
+    const { store, settings, usage } = await setup(['Alpha'])
+    await seed(usage)
+    await store.updateAccount(accounts[0]!.id, { subscriptionDate: localDay(10), subscriptionCancelled: true })
+    const w = mountView(TimelineView)
+    await vi.waitFor(() => expect(options).toHaveLength(1))
+    await w.find('[data-test="timeline-sub-toggle"]').setValue(false)
+    expect(settings.settings.timelineShowSubscription).toBe(false)
+    const option = options.at(-1) as TimelineOption
+    expect(option.series[0]!.data.some((b) => b.windowKey === 'subscription')).toBe(false)
+  })
+
+  it('marks a renewal in the history and hides it with its switch', async () => {
+    const { store, settings, usage } = await setup(['Alpha'])
+    await seed(usage)
+    await store.updateAccount(accounts[0]!.id, { subscriptionDate: localDay(0) })
+    const w = mountView(HistoryView)
+    await vi.waitFor(() => expect(w.find('.chart').exists()).toBe(true))
+
+    type Mark = { xAxis: string; label?: { formatter?: () => string } }
+    const marks = () => ((options.at(-1) as { series: Array<{ markLine?: { data: Mark[] } }> }).series[0]!.markLine?.data ?? [])
+    await vi.waitFor(() => expect(marks().some((m) => m.label?.formatter?.() === de.history.subscriptionRenewal)).toBe(true))
+
+    await w.find('[data-test="history-sub-toggle"]').setValue(false)
+    expect(settings.settings.historyShowSubscription).toBe(false)
+    await vi.waitFor(() => expect(marks().some((m) => m.label?.formatter?.() === de.history.subscriptionRenewal)).toBe(false))
   })
 })
 

@@ -6,8 +6,9 @@ import { fetchUsage } from '../api/usageClient'
 import type { Account, NewAccount } from '../stores/accounts'
 import { PRIMARY_WINDOWS, type PrimaryWindow } from '../lib/usageView'
 import { BILLING_VISIBILITIES, type BillingVisibility } from '../lib/accountMeta'
+import { PLANS, type Currency, type Plan } from '../lib/subscription'
 
-const props = defineProps<{ account?: Account }>()
+const props = withDefaults(defineProps<{ account?: Account; currency?: Currency }>(), { currency: 'EUR' })
 const emit = defineEmits<{
   save: [value: Required<NewAccount>]
   cancel: []
@@ -22,6 +23,17 @@ const primaryWindow = ref<PrimaryWindow>(props.account?.primaryWindow ?? 'critic
 const billingAccount = ref(props.account?.billingAccount ?? '')
 const billingVisibility = ref<BillingVisibility>(props.account?.billingVisibility ?? 'everywhere')
 const usedBy = ref(props.account?.usedBy ?? '')
+const subscriptionDate = ref(props.account?.subscriptionDate ?? '')
+const subscriptionCancelled = ref(props.account?.subscriptionCancelled ?? false)
+const plan = ref<Plan>(props.account?.plan ?? '')
+const price = ref(props.account?.monthlyPrice != null ? String(props.account.monthlyPrice) : '')
+
+/** "108,50" and "108.50" both mean 108.5; anything else leaves the price unset. */
+function parsePrice(text: string): number | null {
+  const v = text.trim().replace(',', '.')
+  if (!/^\d+(\.\d+)?$/.test(v)) return null
+  return Number(v)
+}
 const error = ref<string | null>(null)
 const testState = ref<'idle' | 'busy' | 'ok' | 'fail'>('idle')
 const testMessage = ref('')
@@ -73,6 +85,10 @@ function submit() {
     billingAccount: billingAccount.value.trim(),
     billingVisibility: billingVisibility.value,
     usedBy: usedBy.value.trim(),
+    subscriptionDate: subscriptionDate.value,
+    subscriptionCancelled: subscriptionCancelled.value,
+    plan: plan.value,
+    monthlyPrice: parsePrice(price.value),
   })
 }
 </script>
@@ -131,6 +147,36 @@ function submit() {
         <span class="flex items-center">{{ t('accounts.usedBy') }}<InfoTip :text="t('help.usedBy')" /></span>
         <textarea v-model="usedBy" rows="3" class="field-area mt-1 w-full resize-y" />
       </label>
+    </fieldset>
+    <fieldset class="space-y-3 border-t pt-3 dark:border-slate-700">
+      <legend class="pr-2 text-sm font-bold">{{ t('accounts.subscription.title') }}</legend>
+      <p class="text-xs text-slate-500">{{ t('accounts.subscription.hint') }}</p>
+      <div class="flex flex-wrap gap-3 sm:flex-nowrap">
+        <label class="block min-w-0 flex-1 text-sm">
+          <span class="flex items-center" data-test="sub-date-label">
+            {{ subscriptionCancelled ? t('accounts.subscription.ends') : t('accounts.subscription.renews') }}
+            <InfoTip :text="t('help.subscriptionDate')" />
+          </span>
+          <input v-model="subscriptionDate" type="date" data-test="sub-date" class="field mt-1 w-full" />
+        </label>
+        <label class="flex min-w-0 items-center gap-2 self-end pb-1.5 text-sm sm:flex-none">
+          <input v-model="subscriptionCancelled" type="checkbox" data-test="sub-cancelled" />
+          {{ t('accounts.subscription.cancelled') }}
+        </label>
+      </div>
+      <div class="flex flex-wrap gap-3 sm:flex-nowrap">
+        <label class="block min-w-0 flex-1 text-sm">
+          {{ t('accounts.subscription.plan') }}
+          <select v-model="plan" data-test="sub-plan" class="select mt-1 w-full">
+            <option value="">{{ t('accounts.subscription.planNone') }}</option>
+            <option v-for="p in PLANS" :key="p" :value="p">{{ t(`accounts.subscription.plans.${p}`) }}</option>
+          </select>
+        </label>
+        <label class="block min-w-0 flex-1 text-sm">
+          <span class="flex items-center">{{ t('accounts.subscription.price', { currency }) }}<InfoTip :text="t('help.subscriptionPrice')" /></span>
+          <input v-model="price" inputmode="decimal" autocomplete="off" data-test="sub-price" class="field mt-1 w-full tabular-nums" />
+        </label>
+      </div>
     </fieldset>
     <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
     <p v-if="testState === 'ok'" class="text-sm text-green-600">{{ testMessage }}</p>

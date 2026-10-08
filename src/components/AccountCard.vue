@@ -25,6 +25,7 @@ import UsageRings from './UsageRings.vue'
 import RawDataView from './RawDataView.vue'
 import { billingFor, usedByLines } from '../lib/accountMeta'
 import { USED_BY_OPEN_KEY, readJson, writeJson } from '../storage/localStore'
+import { subscriptionBadge, subscriptionCycle } from '../lib/subscription'
 
 const props = withDefaults(
   defineProps<{
@@ -48,6 +49,24 @@ const { t, te, d } = useI18n()
 const { oneLine } = useWindowLabels()
 
 const billing = computed(() => billingFor(props.account, 'dashboard'))
+
+const BADGE_CLASS = {
+  renews: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+  ends: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+  expired: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+} as const
+/** Renewal within the week, a cancelled subscription, or one that has run out. */
+const subBadge = computed(() => {
+  const cycle = subscriptionCycle(props.account, props.now)
+  const badge = subscriptionBadge(cycle, props.now)
+  if (!badge) return null
+  const date = d(new Date(cycle.endMs), 'date')
+  return {
+    text: badge.kind === 'expired' ? t('dashboard.subscriptionBadge.expired') : t(`dashboard.subscriptionBadge.${badge.kind}`, { n: badge.days }, badge.days),
+    tip: t(`dashboard.subscriptionBadge.tip.${badge.kind}`, { date }),
+    cls: BADGE_CLASS[badge.kind],
+  }
+})
 const usedBy = computed(() => usedByLines(props.account))
 
 /** The unfolded cards, remembered per account in this browser. */
@@ -177,6 +196,13 @@ const bindingWindow = computed(() => {
             <title>{{ t('dashboard.recommend.starWeek') }}</title>
             <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z" />
           </svg>
+          <span
+            v-if="subBadge"
+            data-test="sub-badge"
+            class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-normal leading-4"
+            :class="subBadge.cls"
+            :title="subBadge.tip"
+          >{{ subBadge.text }}</span>
         </h3>
         <div v-if="summary" class="flex items-center gap-2 text-xl font-bold tabular-nums">
           <span class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: summary.color }" />

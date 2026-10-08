@@ -3,6 +3,7 @@ import DashboardView from '../views/DashboardView.vue'
 import AccountsView from '../views/AccountsView.vue'
 import HistoryView from '../views/HistoryView.vue'
 import TimelineView from '../views/TimelineView.vue'
+import SubscriptionsView from '../views/SubscriptionsView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import HelpView from '../views/HelpView.vue'
 
@@ -13,6 +14,7 @@ export const router = createRouter({
     { path: '/accounts', name: 'accounts', component: AccountsView },
     { path: '/history', name: 'history', component: HistoryView },
     { path: '/timeline', name: 'timeline', component: TimelineView },
+    { path: '/subscriptions', name: 'subscriptions', component: SubscriptionsView },
     { path: '/settings', name: 'settings', component: SettingsView },
     { path: '/help', name: 'help', component: HelpView },
   ],

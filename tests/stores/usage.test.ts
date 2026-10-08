@@ -10,7 +10,7 @@ import { fetchUsage, type UsageResult } from '../../src/api/usageClient'
 import { notify } from '../../src/notify/webNotify'
 import { accountsDeps, useAccountsStore, type Account } from '../../src/stores/accounts'
 import { settingsDeps, useSettingsStore } from '../../src/stores/settings'
-import { useUsageStore } from '../../src/stores/usage'
+import { usageDeps, useUsageStore } from '../../src/stores/usage'
 import { MemoryStorage } from '../../src/storage/localStore'
 
 const fetchMock = vi.mocked(fetchUsage)
@@ -45,6 +45,8 @@ async function setup() {
   accountsDeps.session = () => new MemoryStorage()
   accountsDeps.iterations = 1000
   settingsDeps.storage = () => new MemoryStorage()
+  const alerts = new MemoryStorage()
+  usageDeps.storage = () => alerts
   const accounts = useAccountsStore()
   await accounts.init()
   await accounts.createVault('pass')
@@ -169,6 +171,52 @@ describe('notifications', () => {
     await usage.refreshAccount(account.id)
 
     expect(notifyMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('subscription notifications', () => {
+  function inDays(days: number): string {
+    const d = new Date()
+    d.setDate(d.getDate() + days)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+
+  it('tells once when the subscription renews within the lead time', async () => {
+    const { accounts, settings, usage } = await setup()
+    settings.update({ notificationsEnabled: true, forecast: { ...settings.settings.forecast, notify: false } })
+    await accounts.updateAccount(account.id, { subscriptionDate: inDays(2) })
+    fetchMock.mockResolvedValue(ok())
+    await usage.start()
+    await usage.refreshAccount(account.id)
+    await usage.refreshAccount(account.id)
+
+    // The store's i18n follows navigator.language, which is English here.
+    const calls = notifyMock.mock.calls.filter((c) => c[0] === 'Alpha · Subscription')
+    expect(calls).toHaveLength(1)
+    expect(calls[0]![1]).toMatch(/^Renews in 2 days/)
+  })
+
+  it('tells about the end of a cancelled subscription', async () => {
+    const { accounts, settings, usage } = await setup()
+    settings.update({ notificationsEnabled: true, forecast: { ...settings.settings.forecast, notify: false } })
+    await accounts.updateAccount(account.id, { subscriptionDate: inDays(1), subscriptionCancelled: true })
+    fetchMock.mockResolvedValue(ok())
+    await usage.start()
+    await usage.refreshAccount(account.id)
+    expect(notifyMock.mock.calls.some((c) => c[1].startsWith('Ends tomorrow'))).toBe(true)
+  })
+
+  it('stays quiet when the lead time is zero or the date is further away', async () => {
+    const { accounts, settings, usage } = await setup()
+    settings.update({ notificationsEnabled: true, subscriptionNotifyDays: 0, forecast: { ...settings.settings.forecast, notify: false } })
+    await accounts.updateAccount(account.id, { subscriptionDate: inDays(1) })
+    fetchMock.mockResolvedValue(ok())
+    await usage.start()
+    await usage.refreshAccount(account.id)
+    settings.update({ subscriptionNotifyDays: 3 })
+    await accounts.updateAccount(account.id, { subscriptionDate: inDays(10) })
+    await usage.refreshAccount(account.id)
+    expect(notifyMock.mock.calls.some((c) => c[0].includes('Subscription'))).toBe(false)
   })
 })
 

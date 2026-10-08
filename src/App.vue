@@ -72,6 +72,9 @@ watch(
           <RouterLink to="/timeline" class="hover:underline" active-class="font-bold">
             {{ t('nav.timeline') }}
           </RouterLink>
+          <RouterLink to="/subscriptions" class="hover:underline" active-class="font-bold">
+            {{ t('nav.subscriptions') }}
+          </RouterLink>
           <RouterLink to="/accounts" class="hover:underline" active-class="font-bold">
             {{ t('nav.accounts') }}
           </RouterLink>

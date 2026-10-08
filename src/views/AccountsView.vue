@@ -4,10 +4,12 @@ import { useI18n } from 'vue-i18n'
 import AccountForm from '../components/AccountForm.vue'
 import { useAccountsStore, type Account, type NewAccount } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
+import { useSettingsStore } from '../stores/settings'
 
 const { t } = useI18n()
 const store = useAccountsStore()
 const usage = useUsageStore()
+const settings = useSettingsStore()
 const adding = ref(false)
 const editingId = ref<string | null>(null)
 const confirmingId = ref<string | null>(null)
@@ -39,7 +41,7 @@ async function onDelete(account: Account) {
       </button>
     </div>
 
-    <AccountForm v-if="adding" @save="onAdd" @cancel="adding = false" />
+    <AccountForm v-if="adding" :currency="settings.settings.currency" @save="onAdd" @cancel="adding = false" />
 
     <p v-if="store.accounts.length === 0 && !adding" class="text-slate-500">{{ t('accounts.empty') }}</p>
 
@@ -48,6 +50,7 @@ async function onDelete(account: Account) {
         <AccountForm
           v-if="editingId === account.id"
           :account="account"
+          :currency="settings.settings.currency"
           @save="(v) => onEdit(account.id, v)"
           @cancel="editingId = null"
         />

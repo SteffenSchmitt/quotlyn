@@ -1,4 +1,8 @@
 import type { ParsedUsage } from '../api/usageParser'
+import type { SubscriptionCycle } from './subscription'
+
+/** Window key of the subscription row; it never collides with an API window. */
+export const SUBSCRIPTION_KEY = 'subscription'
 
 export interface TimelineBar {
   row: number
@@ -13,6 +17,8 @@ export interface TimelineBar {
   exhaustsAtMs: number | null
   /** True when a forecast exists and says the window lasts until the reset. */
   lasts: boolean
+  /** Only on the subscription row: the billing month it shows. */
+  subscription?: SubscriptionCycle
 }
 
 /** The part of a forecast the timeline needs. */
@@ -29,7 +35,8 @@ export interface TimelineRow {
 
 /**
  * One row per (account, window) with a reset time, in account order then window order.
- * Bars run from now to the reset; the fill is the utilization.
+ * Bars run from now to the reset; the fill is the utilization. With a subscription the account gets
+ * one more row after its windows, filled with the share of the billing month that has passed.
  */
 export function timelineBars(
   accounts: Array<{ id: string; name: string; billing?: string | null }>,
@@ -37,6 +44,7 @@ export function timelineBars(
   nowMs: number,
   label: (accountName: string, windowKey: string) => string,
   forecast: (accountId: string, windowKey: string) => TimelineForecast | null = () => null,
+  subscription: (accountId: string) => SubscriptionCycle | null = () => null,
 ): { rows: TimelineRow[]; bars: TimelineBar[] } {
   const rows: TimelineRow[] = []
   const bars: TimelineBar[] = []
@@ -60,6 +68,22 @@ export function timelineBars(
         lasts: f !== null && !f.beforeReset,
       })
     }
+    const sub = subscription(a.id)
+    if (sub && sub.state !== 'none') {
+      rows.push({ label: label(a.name, SUBSCRIPTION_KEY), accountId: a.id, windowKey: SUBSCRIPTION_KEY })
+      bars.push({
+        row: rows.length - 1,
+        accountName: a.name,
+        billing: a.billing ?? null,
+        windowKey: SUBSCRIPTION_KEY,
+        startMs: nowMs,
+        endMs: Math.max(sub.endMs, nowMs),
+        utilization: sub.progress,
+        exhaustsAtMs: null,
+        lasts: false,
+        subscription: sub,
+      })
+    }
   }
   return { rows, bars }
 }
@@ -80,19 +104,22 @@ export const TIMELINE_SORTS: TimelineSort[] = ['accounts', 'exhaustion', 'window
 /**
  * Reorders rows and bars: as configured, by soonest forecast exhaustion (then highest utilization),
  * or grouped by window with accounts in order inside each group. Bars get their new row index.
+ * Subscription rows are no limit that runs out, so both sorts put them last.
  */
 export function sortBars(rows: TimelineRow[], bars: TimelineBar[], sort: TimelineSort): { rows: TimelineRow[]; bars: TimelineBar[] } {
   const order = bars.map((_, i) => i)
+  const isSub = (i: number) => (bars[i]!.windowKey === SUBSCRIPTION_KEY ? 1 : 0)
   if (sort === 'exhaustion') {
     order.sort((x, y) => {
       const a = bars[x]!
       const b = bars[y]!
+      if (isSub(x) !== isSub(y)) return isSub(x) - isSub(y)
       const ea = a.exhaustsAtMs ?? Infinity
       const eb = b.exhaustsAtMs ?? Infinity
       return ea - eb || b.utilization - a.utilization || x - y
     })
   } else if (sort === 'window') {
-    const keys = [...new Set(bars.map((b) => b.windowKey))]
+    const keys = [...new Set(bars.map((b) => b.windowKey))].sort((a, b) => Number(a === SUBSCRIPTION_KEY) - Number(b === SUBSCRIPTION_KEY))
     order.sort((x, y) => keys.indexOf(bars[x]!.windowKey) - keys.indexOf(bars[y]!.windowKey) || x - y)
   }
   return {

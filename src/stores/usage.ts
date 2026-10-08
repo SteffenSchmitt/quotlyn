@@ -13,12 +13,19 @@ import { forecastWindow, type Forecast } from '../lib/forecast'
 import { ForecastWatcher } from '../notify/forecastAlerts'
 import { ResetWatcher } from '../notify/resetAlerts'
 import { forecastLine } from '../lib/forecastText'
+import { SubscriptionWatcher } from '../notify/subscriptionAlerts'
+import { subscriptionCycle } from '../lib/subscription'
+import { SUBSCRIPTION_ALERTS_KEY, readJson, writeJson } from '../storage/localStore'
 import { useAccountsStore } from './accounts'
 import { useSettingsStore } from './settings'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 /** How much history the forecast keeps in memory: the longest window is seven days. */
 const CYCLE_MS = 7 * DAY_MS
+
+export const usageDeps = {
+  storage: (): Storage => localStorage,
+}
 
 export const useUsageStore = defineStore('usage', () => {
   const accounts = useAccountsStore()
@@ -37,6 +44,23 @@ export const useUsageStore = defineStore('usage', () => {
   const watcher = new ThresholdWatcher()
   const forecastWatcher = new ForecastWatcher()
   const resetWatcher = new ResetWatcher()
+  const subscriptionWatcher = new SubscriptionWatcher({
+    load: () => {
+      try {
+        const keys = readJson<unknown>(usageDeps.storage(), SUBSCRIPTION_ALERTS_KEY)
+        return Array.isArray(keys) ? keys.filter((k): k is string => typeof k === 'string') : []
+      } catch {
+        return []
+      }
+    },
+    save: (keys) => {
+      try {
+        writeJson(usageDeps.storage(), SUBSCRIPTION_ALERTS_KEY, keys)
+      } catch {
+        // Without storage a reload may notify once more; nothing else depends on it.
+      }
+    },
+  })
   const FORECAST_HORIZON_MS = 3_600_000
 
   function targets(): PollTarget[] {
@@ -91,6 +115,7 @@ export const useUsageStore = defineStore('usage', () => {
       remember(target.id, snapshot)
       notifyForecasts(target.id)
     }
+    notifySubscription(target.id)
     if (db) await db.add(snapshot)
   }
 
@@ -108,6 +133,21 @@ export const useUsageStore = defineStore('usage', () => {
       const line = forecastLine(f, now, (key, params) => t(key, params ?? {}))
       notify(t('notify.forecastTitle', { account: account.name }), `${window}: ${line}`)
     }
+  }
+
+  /** A renewal or the end of a cancelled subscription within the lead time; once per date. */
+  function notifySubscription(accountId: string) {
+    const account = accounts.accounts.find((a) => a.id === accountId)
+    if (!account) return
+    const now = Date.now()
+    const alert = subscriptionWatcher.evaluate(accountId, subscriptionCycle(account, now), now, settingsStore.settings.subscriptionNotifyDays)
+    if (!alert || !settingsStore.settings.notificationsEnabled || !account.notificationsEnabled) return
+    const { t, d } = i18n.global
+    const key = alert.kind === 'ends' ? 'notify.subscriptionEnds' : 'notify.subscriptionRenews'
+    notify(
+      t('notify.subscriptionTitle', { account: account.name }),
+      t(key, { n: alert.days, date: d(new Date(alert.atMs), 'date') }, alert.days),
+    )
   }
 
   function remember(accountId: string, snapshot: Omit<UsageSnapshot, 'id'>) {
@@ -231,6 +271,7 @@ export const useUsageStore = defineStore('usage', () => {
     watcher.forget(id)
     forecastWatcher.forget(id)
     resetWatcher.forget(id)
+    subscriptionWatcher.forget(id)
     delete latest[id]
     delete pollState[id]
     delete lastSnapshot[id]

@@ -14,6 +14,7 @@ import {
 import { SESSION_KEY_KEY, VAULT_KEY, readJson, remove, writeJson } from '../storage/localStore'
 import type { PrimaryWindow } from '../lib/usageView'
 import { DEFAULT_BILLING_VISIBILITY, type BillingVisibility } from '../lib/accountMeta'
+import { isPlan, priceOrNull, type Plan } from '../lib/subscription'
 
 export interface Account {
   id: string
@@ -28,6 +29,12 @@ export interface Account {
   billingVisibility: BillingVisibility
   /** Who or what works on this account, one per line. '' when unset. */
   usedBy: string
+  /** 'YYYY-MM-DD': any renewal day, or the end day once cancelled. '' when unset. */
+  subscriptionDate: string
+  subscriptionCancelled: boolean
+  plan: Plan
+  /** In the currency from the settings; null when unset. */
+  monthlyPrice: number | null
 }
 
 export type NewAccount = Pick<Account, 'name' | 'color' | 'token'> & {
@@ -36,13 +43,12 @@ export type NewAccount = Pick<Account, 'name' | 'color' | 'token'> & {
   billingAccount?: string
   billingVisibility?: BillingVisibility
   usedBy?: string
+  subscriptionDate?: string
+  subscriptionCancelled?: boolean
+  plan?: Plan
+  monthlyPrice?: number | null
 }
-export type AccountPatch = Partial<
-  Pick<
-    Account,
-    'name' | 'color' | 'token' | 'notificationsEnabled' | 'primaryWindow' | 'billingAccount' | 'billingVisibility' | 'usedBy'
-  >
->
+export type AccountPatch = Partial<Omit<Account, 'id' | 'order'>>
 
 interface VaultData {
   accounts: Account[]
@@ -77,6 +83,10 @@ export const useAccountsStore = defineStore('accounts', () => {
       billingAccount: a.billingAccount ?? '',
       billingVisibility: a.billingVisibility ?? DEFAULT_BILLING_VISIBILITY,
       usedBy: a.usedBy ?? '',
+      subscriptionDate: typeof a.subscriptionDate === 'string' ? a.subscriptionDate : '',
+      subscriptionCancelled: a.subscriptionCancelled === true,
+      plan: isPlan(a.plan) ? a.plan : '',
+      monthlyPrice: priceOrNull(a.monthlyPrice),
     }
   }
 
@@ -165,6 +175,10 @@ export const useAccountsStore = defineStore('accounts', () => {
       billingAccount: input.billingAccount ?? '',
       billingVisibility: input.billingVisibility ?? DEFAULT_BILLING_VISIBILITY,
       usedBy: input.usedBy ?? '',
+      subscriptionDate: input.subscriptionDate ?? '',
+      subscriptionCancelled: input.subscriptionCancelled ?? false,
+      plan: input.plan ?? '',
+      monthlyPrice: priceOrNull(input.monthlyPrice),
     }
     list.value = [...list.value, account]
     await persist()

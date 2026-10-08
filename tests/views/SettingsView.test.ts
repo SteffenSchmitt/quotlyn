@@ -117,6 +117,16 @@ describe('SettingsView', () => {
     expect(settings.settings.forecast.enabled).toBeTypeOf('boolean')
   })
 
+  it('changes the currency and how early a subscription date is announced', async () => {
+    const settings = useSettingsStore()
+    const w = mountView()
+    expect(w.text()).toContain(de.settings.groups.subscriptions)
+    await selectWith(w, 'USD').setValue('USD')
+    expect(settings.settings.currency).toBe('USD')
+    await w.find('[data-test="sub-notify-days"]').setValue(7)
+    expect(settings.settings.subscriptionNotifyDays).toBe(7)
+  })
+
   it('switches the forecast off and on again', async () => {
     const settings = useSettingsStore()
     const w = mountView()

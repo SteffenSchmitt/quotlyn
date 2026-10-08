@@ -21,6 +21,10 @@ const account: Account = {
   billingAccount: 'Northwind Ltd',
   billingVisibility: 'masked',
   usedBy: 'Design team',
+  subscriptionDate: '2026-10-14',
+  subscriptionCancelled: false,
+  plan: 'max20x',
+  monthlyPrice: 216,
 }
 
 function mountForm(props: Record<string, unknown> = {}) {
@@ -75,6 +79,46 @@ describe('AccountForm', () => {
       billingVisibility: 'hideOnDashboard',
       usedBy: 'Ops on-call',
     })
+  })
+
+  it('carries the subscription into its fields', () => {
+    const w = mountForm({ account })
+    expect((w.find('[data-test="sub-date"]').element as HTMLInputElement).value).toBe('2026-10-14')
+    expect((w.find('[data-test="sub-plan"]').element as HTMLSelectElement).value).toBe('max20x')
+    expect((w.find('[data-test="sub-price"]').element as HTMLInputElement).value).toBe('216')
+    expect((w.find('[data-test="sub-cancelled"]').element as HTMLInputElement).checked).toBe(false)
+  })
+
+  it('calls the date the end once the subscription is cancelled', async () => {
+    const w = mountForm({ account })
+    expect(w.find('[data-test="sub-date-label"]').text()).toContain(de.accounts.subscription.renews)
+    await w.find('[data-test="sub-cancelled"]').setValue(true)
+    expect(w.find('[data-test="sub-date-label"]').text()).toContain(de.accounts.subscription.ends)
+  })
+
+  it('emits the subscription, reading a price with a decimal comma', async () => {
+    const w = mountForm({ account })
+    await w.find('[data-test="sub-date"]').setValue('2026-11-02')
+    await w.find('[data-test="sub-cancelled"]').setValue(true)
+    await w.find('[data-test="sub-plan"]').setValue('max5x')
+    await w.find('[data-test="sub-price"]').setValue(' 108,50 ')
+    await w.find('form').trigger('submit')
+    expect(w.emitted('save')![0]![0]).toMatchObject({
+      subscriptionDate: '2026-11-02',
+      subscriptionCancelled: true,
+      plan: 'max5x',
+      monthlyPrice: 108.5,
+    })
+  })
+
+  it('leaves the price unset when the field is empty or not a number', async () => {
+    const w = mountForm({ account })
+    await w.find('[data-test="sub-price"]').setValue('')
+    await w.find('form').trigger('submit')
+    await w.find('[data-test="sub-price"]').setValue('viel')
+    await w.find('form').trigger('submit')
+    const saves = w.emitted('save')!.map((e) => (e[0] as { monthlyPrice: unknown }).monthlyPrice)
+    expect(saves).toEqual([null, null])
   })
 
   it('keeps the stored token when the field is left empty', async () => {

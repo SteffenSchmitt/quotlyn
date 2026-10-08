@@ -9,8 +9,17 @@ import { GridComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { useChartTheme } from '../lib/chartTheme'
 import { windowColor, withAlpha } from '../lib/palette'
-import { formatCountdown } from '../lib/usageView'
-import { barLabel, sortBars, timelineBars, TIMELINE_SORTS, type TimelineBar, type TimelineSort } from '../lib/timelineBars'
+import { formatCountdown, levelColor } from '../lib/usageView'
+import {
+  barLabel,
+  sortBars,
+  SUBSCRIPTION_KEY,
+  timelineBars,
+  TIMELINE_SORTS,
+  type TimelineBar,
+  type TimelineSort,
+} from '../lib/timelineBars'
+import { subscriptionCycle, type SubscriptionCycle } from '../lib/subscription'
 import { useWindowLabels } from '../lib/windowLabels'
 import { useAccountsStore } from '../stores/accounts'
 import { billingFor } from '../lib/accountMeta'
@@ -43,6 +52,14 @@ const CLOCK_HEIGHT = 3
 const CLOCK_ON = { dark: '#f8fafc', light: '#0f172a' }
 const CLOCK_REST = { dark: 'rgba(248,250,252,0.18)', light: 'rgba(15,23,42,0.14)' }
 
+/** The subscription row is no limit: a calm grey while it renews, the warning colours once cancelled. */
+const SUBSCRIPTION_COLOR = { dark: '#94a3b8', light: '#64748b' }
+function subscriptionColor(c: SubscriptionCycle, dark: boolean): string {
+  if (c.state === 'expired') return levelColor('crit')
+  if (c.state === 'ending') return levelColor('warn')
+  return SUBSCRIPTION_COLOR[dark ? 'dark' : 'light']
+}
+
 const NAME_COL = 200
 /** Room to the right of the bars for "44 % · resets in 6d 22h". */
 const END_LABEL = 190
@@ -53,23 +70,50 @@ function truncate(text: string, max = 28): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text
 }
 
+/** Window column text; the subscription row is not an API window. */
+function rowLabel(key: string): string {
+  return key === SUBSCRIPTION_KEY ? t('timeline.subscription') : oneLine(key)
+}
+
+function subscriptionText(c: SubscriptionCycle): string {
+  const date = d(new Date(c.endMs), 'date')
+  if (c.state === 'active') return t('timeline.subscriptionLabel.active', { day: c.day, days: c.days, date })
+  if (c.state === 'ending') {
+    return t('timeline.subscriptionLabel.ending', { countdown: formatCountdown(new Date(c.endMs).toISOString(), now.value), date })
+  }
+  return t('timeline.subscriptionLabel.expired', { date })
+}
+
 const model = computed(() => {
+  const byId = new Map(accounts.accounts.map((a) => [a.id, a]))
   const built = timelineBars(
     accounts.accounts.map((a) => ({ id: a.id, name: a.name, billing: billingFor(a, 'elsewhere') })),
     usage.latest,
     now.value,
-    (name, key) => `${name}\u0001${oneLine(key)}`,
+    (name, key) => `${name}\u0001${rowLabel(key)}`,
     (id, key) => usage.forecastFor(id, key, now.value),
+    (id) => {
+      const a = byId.get(id)
+      return a && settings.settings.timelineShowSubscription ? subscriptionCycle(a, now.value) : null
+    },
   )
   return sortBars(built.rows, built.bars, settings.settings.timelineSort)
 })
-const allKeys = computed(() => [...new Set(model.value.bars.map((b) => b.windowKey))])
+const allKeys = computed(() => [...new Set(model.value.bars.map((b) => b.windowKey).filter((k) => k !== SUBSCRIPTION_KEY))])
+function planOf(bar: TimelineBar): string {
+  const id = model.value.rows[bar.row]?.accountId
+  const plan = accounts.accounts.find((a) => a.id === id)?.plan
+  return plan ? t(`accounts.subscription.plans.${plan}`) : ''
+}
 const hasData = computed(() => model.value.bars.length > 0)
 
 const option = computed(() => {
   const th = theme.value
   const { rows, bars } = model.value
-  const colorOf = (b: TimelineBar) => windowColor(b.windowKey, allKeys.value, th.dark)
+  const colorOf = (b: TimelineBar) =>
+    b.subscription ? subscriptionColor(b.subscription, th.dark) : windowColor(b.windowKey, allKeys.value, th.dark)
+  const endText = (b: TimelineBar) =>
+    b.subscription ? subscriptionText(b.subscription) : barLabel(b.utilization, countdown(b), (k, p) => t(k, p ?? {}))
   // Every bar spans the full width: the bar is the window's capacity, the fill its utilization.
   // The time line beneath runs from now (left) to the reset (right).
   const countdown = (b: TimelineBar) => formatCountdown(new Date(b.endMs).toISOString(), now.value)
@@ -79,6 +123,12 @@ const option = computed(() => {
     tooltip: {
       ...th.tooltip,
       formatter: (p: { data: TimelineBar }) =>
+        p.data.subscription
+          ? `${p.data.accountName} · ${t('timeline.subscription')}` +
+            (planOf(p.data) ? ` · ${planOf(p.data)}` : '') +
+            `<br/>${subscriptionText(p.data.subscription)}<br/>` +
+            `${d(new Date(p.data.subscription.startMs), 'date')} – ${d(new Date(p.data.subscription.endMs), 'date')}`
+          :
         `${p.data.accountName} · ${oneLine(p.data.windowKey)}<br/>` +
         (p.data.billing ? `${t('dashboard.billingTip', { value: p.data.billing })}<br/>` : '') +
         `${barLabel(p.data.utilization, countdown(p.data), (k, pr) => t(k, pr ?? {}))}<br/>` +
@@ -180,7 +230,7 @@ const option = computed(() => {
                 style: {
                   x: x0 + width + 8,
                   y,
-                  text: barLabel(bar.utilization, countdown(bar), (k, p) => t(k, p ?? {})),
+                  text: endText(bar),
                   fill: th.muted,
                   fontSize: 11,
                   verticalAlign: 'middle',
@@ -200,6 +250,16 @@ const option = computed(() => {
   <section class="space-y-4">
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <h2 class="flex items-center text-lg font-bold">{{ t('timeline.title') }}<InfoTip :text="t('help.timeline')" /></h2>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          data-test="timeline-sub-toggle"
+          :checked="settings.settings.timelineShowSubscription"
+          @change="settings.update({ timelineShowSubscription: ($event.target as HTMLInputElement).checked })"
+        />
+        {{ t('timeline.subscriptionShow') }}
+      </label>
       <select
         :value="settings.settings.timelineSort"
         class="select"
@@ -208,6 +268,7 @@ const option = computed(() => {
       >
         <option v-for="s in TIMELINE_SORTS" :key="s" :value="s">{{ t('timeline.sort.label') }}: {{ t(`timeline.sort.${s}`) }}</option>
       </select>
+      </div>
     </div>
     <div class="rounded-lg border bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
       <VChart
