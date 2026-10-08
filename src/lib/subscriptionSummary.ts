@@ -21,16 +21,25 @@ export interface SummaryRow {
   /** The billing month before; empty without a date. */
   previous: CycleUsage
   perPercent: number | null
+  /** Whether it counts towards total, running and average: never once expired, cancelled ones on request. */
+  included: boolean
+}
+
+export interface SummaryOptions {
+  /** Count cancelled subscriptions that still run; by default the summary shows what keeps running. */
+  includeCancelled?: boolean
 }
 
 export interface SubscriptionSummary {
   rows: SummaryRow[]
-  /** Sum of the prices of everything that has not run out; null when no price is known. */
+  /** Sum of the prices of the included subscriptions; null when no price is known. */
   totalMonthly: number | null
-  /** Listed subscriptions that have not run out. */
+  /** Prices of the cancelled subscriptions that still run, included or not; null when there is none. */
+  cancelledMonthly: number | null
+  /** Included subscriptions. */
   running: number
   next: { name: string; atMs: number; kind: 'renewal' | 'end' } | null
-  /** Mean of the current averages that have readings. */
+  /** Mean of the current averages of the included subscriptions that have readings. */
   average: number | null
 }
 
@@ -49,6 +58,7 @@ export function summarizeSubscriptions(
   accounts: SummaryAccount[],
   history: Record<string, UsageSnapshot[] | undefined>,
   nowMs: number,
+  { includeCancelled = false }: SummaryOptions = {},
 ): SubscriptionSummary {
   const rows = accounts.filter(hasSubscription).map((a): SummaryRow => {
     const snaps = history[a.id] ?? []
@@ -72,20 +82,26 @@ export function summarizeSubscriptions(
       current,
       previous,
       perPercent: costPerPercent(a.monthlyPrice, current.average),
+      included: cycle.state !== 'expired' && (includeCancelled || cycle.state !== 'ending'),
     }
   })
 
-  const live = rows.filter((r) => r.cycle.state !== 'expired')
-  const prices = live.map((r) => r.monthlyPrice).filter((p): p is number => p !== null)
-  const averages = rows.map((r) => r.current.average).filter((v): v is number => v !== null)
-  const upcoming = live
+  const sum = (values: Array<number | null>) => {
+    const known = values.filter((v): v is number => v !== null)
+    return known.length ? known.reduce((total, v) => total + v, 0) : null
+  }
+  const included = rows.filter((r) => r.included)
+  const averages = included.map((r) => r.current.average).filter((v): v is number => v !== null)
+  // The next date ignores the switch: the end of a cancelled subscription is the one not to miss.
+  const upcoming = rows
     .filter((r) => r.cycle.state === 'active' || r.cycle.state === 'ending')
     .sort((x, y) => x.cycle.endMs - y.cycle.endMs)[0]
 
   return {
     rows,
-    totalMonthly: prices.length ? prices.reduce((sum, p) => sum + p, 0) : null,
-    running: live.length,
+    totalMonthly: sum(included.map((r) => r.monthlyPrice)),
+    cancelledMonthly: sum(rows.filter((r) => r.cycle.state === 'ending').map((r) => r.monthlyPrice)),
+    running: included.length,
     next: upcoming
       ? { name: upcoming.name, atMs: upcoming.cycle.endMs, kind: upcoming.cycle.state === 'ending' ? 'end' : 'renewal' }
       : null,

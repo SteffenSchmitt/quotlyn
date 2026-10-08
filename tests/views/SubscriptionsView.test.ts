@@ -57,15 +57,31 @@ describe('SubscriptionsView', () => {
     await accounts.addAccount({ name: 'Gamma', color: '#000', token: 'sk-ant-oat01-c' })
     const w = mountView()
 
+    // Beta is cancelled: left out of the total by default, named beneath it.
     const total = w.find('[data-test="sub-total"]').text()
-    expect(total).toContain('324,50')
+    expect(total).toContain('216,00')
     expect(total).toContain('€')
+    expect(w.find('[data-test="sub-cancelled"]').text()).toContain('ohne 108,50')
     expect(w.find('[data-test="sub-next"]').text()).toContain('Beta')
     const rows = w.findAll('tbody tr')
     expect(rows.map((r) => r.find('td').text())).toEqual(['Alpha', 'Beta'])
     expect(rows[0]!.text()).toContain('Max 20x')
     expect(rows[1]!.text()).toContain('endet')
     expect(rows[0]!.text()).toContain(de.subscriptions.noData)
+  })
+
+  it('counts cancelled subscriptions in once switched on, and remembers that', async () => {
+    const { accounts, settings } = await setup()
+    await accounts.addAccount({ name: 'Alpha', color: '#000', token: 'sk-ant-oat01-a', monthlyPrice: 216, subscriptionDate: inDays(5) })
+    await accounts.addAccount({ name: 'Beta', color: '#000', token: 'sk-ant-oat01-b', monthlyPrice: 108.5, subscriptionDate: inDays(2), subscriptionCancelled: true })
+    const w = mountView()
+    expect(w.findAll('tbody tr')[1]!.classes()).toContain('opacity-50')
+
+    await w.find('[data-test="sub-include-cancelled"]').setValue(true)
+    expect(settings.settings.subscriptionsIncludeCancelled).toBe(true)
+    expect(w.find('[data-test="sub-total"]').text()).toContain('324,50')
+    expect(w.find('[data-test="sub-cancelled"]').text()).toContain('inkl. 108,50')
+    expect(w.findAll('tbody tr')[1]!.classes()).not.toContain('opacity-50')
   })
 
   it('formats prices in the currency from the settings', async () => {

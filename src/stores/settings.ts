@@ -34,6 +34,8 @@ export interface Settings {
   timelineSort: TimelineSort
   timelineShowSubscription: boolean
   historyShowSubscription: boolean
+  /** Count cancelled subscriptions that still run in the totals of the subscriptions page. */
+  subscriptionsIncludeCancelled: boolean
   /** Currency of the monthly prices. */
   currency: Currency
   /** Days ahead to notify about a renewal or the end of a subscription; 0 turns it off. */
@@ -55,6 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   timelineSort: 'accounts',
   timelineShowSubscription: true,
   historyShowSubscription: true,
+  subscriptionsIncludeCancelled: false,
   currency: 'EUR',
   subscriptionNotifyDays: 3,
 }
@@ -111,6 +114,7 @@ function sanitize(input: Partial<Settings>, base: Settings): Settings {
   if (input.timelineSort && TIMELINE_SORTS.includes(input.timelineSort)) out.timelineSort = input.timelineSort
   if (input.timelineShowSubscription !== undefined) out.timelineShowSubscription = input.timelineShowSubscription === true
   if (input.historyShowSubscription !== undefined) out.historyShowSubscription = input.historyShowSubscription === true
+  if (input.subscriptionsIncludeCancelled !== undefined) out.subscriptionsIncludeCancelled = input.subscriptionsIncludeCancelled === true
   if (input.currency && CURRENCIES.includes(input.currency)) out.currency = input.currency
   if (typeof input.subscriptionNotifyDays === 'number' && Number.isFinite(input.subscriptionNotifyDays)) {
     out.subscriptionNotifyDays = clamp(Math.round(input.subscriptionNotifyDays), 0, MAX_SUBSCRIPTION_NOTIFY_DAYS)

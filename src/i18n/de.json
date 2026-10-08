@@ -333,7 +333,7 @@
     "subscriptionDate": "Nicht gekündigt: irgendein Verlängerungstag, Quotlyn rechnet monatlich weiter (der 31. wird in kürzeren Monaten zum Monatsletzten). Gekündigt: der Tag, an dem das Abo endet, so wie Anthropic ihn nach der Kündigung anzeigt.",
     "subscriptionPrice": "Was das Abo im Monat kostet, in der Währung aus den Einstellungen. Daraus berechnet „Abos“ die Gesamtkosten und den Preis je genutztem Prozentpunkt des Wochenlimits.",
     "subscriptionSettings": "Die Währung gilt für alle Preise. Die Benachrichtigung kommt einmal pro Account und Termin, so viele Tage vor einer Verlängerung oder dem Ende eines gekündigten Abos; 0 schaltet sie ab.",
-    "subscriptions": "Ø Wochenlimit: Jede Woche zählt mit ihrem höchsten Wert des Fensters „7 d alle Modelle“, die Wochen des Abrechnungsmonats werden gemittelt; die laufende Woche zählt mit ihrem bisherigen Wert. Preis je %: Monatspreis geteilt durch diesen Durchschnitt, also was ein Prozentpunkt Wochenlimit gekostet hat. Die Auswertung reicht so weit zurück wie der gespeicherte Verlauf."
+    "subscriptions": "Ø Wochenlimit: Jede Woche zählt mit ihrem höchsten Wert des Fensters „7 d alle Modelle“, die Wochen des Abrechnungsmonats werden gemittelt; die laufende Woche zählt mit ihrem bisherigen Wert. Preis je %: Monatspreis geteilt durch diesen Durchschnitt, also was ein Prozentpunkt Wochenlimit gekostet hat. Die Auswertung reicht so weit zurück wie der gespeicherte Verlauf. Gekündigte Abos, die noch laufen, zählen nur mit, wenn „Gekündigte Abos einbeziehen“ an ist; sonst stehen sie ausgegraut in der Tabelle und ihr Preis unter den Kosten."
   },
   "help_page": {
     "title": "So kommst du an einen Token",
@@ -421,6 +421,9 @@
     "previous": "Vormonat {percent} %",
     "since": "Daten ab {date}",
     "noData": "keine Daten",
-    "last30": "letzte 30 Tage"
+    "last30": "letzte 30 Tage",
+    "includeCancelled": "Gekündigte Abos einbeziehen",
+    "withCancelled": "inkl. {amount} gekündigt",
+    "withoutCancelled": "ohne {amount} gekündigt"
   }
 }

@@ -333,7 +333,7 @@
     "subscriptionDate": "Not cancelled: any renewal day, Quotlyn carries it on month by month (the 31st becomes the last day of shorter months). Cancelled: the day the subscription ends, as Anthropic shows it after cancelling.",
     "subscriptionPrice": "What the subscription costs per month, in the currency from the settings. “Subscriptions” uses it for the total and the price per percentage point of the weekly limit used.",
     "subscriptionSettings": "The currency applies to all prices. The notification comes once per account and date, this many days before a renewal or the end of a cancelled subscription; 0 turns it off.",
-    "subscriptions": "Avg weekly limit: every week counts with its highest reading of the “7 d all models” window, the weeks of the billing month are averaged; the running week counts with its value so far. Price per %: monthly price divided by that average, so what one percentage point of the weekly limit cost. The evaluation reaches back as far as the stored history."
+    "subscriptions": "Avg weekly limit: every week counts with its highest reading of the “7 d all models” window, the weeks of the billing month are averaged; the running week counts with its value so far. Price per %: monthly price divided by that average, so what one percentage point of the weekly limit cost. The evaluation reaches back as far as the stored history. Cancelled subscriptions that still run only count with “Include cancelled subscriptions” on; otherwise they stay greyed out in the table and their price is named under the cost."
   },
   "help_page": {
     "title": "Getting a token",
@@ -421,6 +421,9 @@
     "previous": "previous month {percent} %",
     "since": "data from {date}",
     "noData": "no data",
-    "last30": "last 30 days"
+    "last30": "last 30 days",
+    "includeCancelled": "Include cancelled subscriptions",
+    "withCancelled": "incl. {amount} cancelled",
+    "withoutCancelled": "excl. {amount} cancelled"
   }
 }

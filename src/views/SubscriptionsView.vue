@@ -39,7 +39,11 @@ async function load() {
 }
 watch([() => accounts.accounts.length, () => Object.values(usage.lastSnapshot)], load, { immediate: true, deep: true })
 
-const summary = computed(() => summarizeSubscriptions(accounts.accounts, history.value, now.value))
+const summary = computed(() =>
+  summarizeSubscriptions(accounts.accounts, history.value, now.value, {
+    includeCancelled: settings.settings.subscriptionsIncludeCancelled,
+  }),
+)
 
 function money(value: number | null): string {
   if (value === null) return '–'
@@ -77,7 +81,18 @@ function usageNote(r: SummaryRow): string {
 
 <template>
   <section class="space-y-4">
-    <h2 class="flex w-fit items-center text-lg font-bold">{{ t('subscriptions.title') }}<InfoTip :text="t('help.subscriptions')" /></h2>
+    <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <h2 class="flex items-center text-lg font-bold">{{ t('subscriptions.title') }}<InfoTip :text="t('help.subscriptions')" /></h2>
+      <label class="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          data-test="sub-include-cancelled"
+          :checked="settings.settings.subscriptionsIncludeCancelled"
+          @change="settings.update({ subscriptionsIncludeCancelled: ($event.target as HTMLInputElement).checked })"
+        />
+        {{ t('subscriptions.includeCancelled') }}
+      </label>
+    </div>
 
     <p v-if="summary.rows.length === 0" class="rounded-lg border bg-white p-6 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900">
       {{ t('subscriptions.empty') }}
@@ -89,6 +104,13 @@ function usageNote(r: SummaryRow): string {
           <p class="text-xs text-slate-500">{{ t('subscriptions.total') }}</p>
           <p data-test="sub-total" class="text-xl font-bold tabular-nums">{{ money(summary.totalMonthly) }}</p>
           <p class="text-xs text-slate-500">{{ t('subscriptions.running', { n: summary.running }, summary.running) }}</p>
+          <p v-if="summary.cancelledMonthly !== null" data-test="sub-cancelled" class="text-xs text-amber-700 dark:text-amber-400">
+            {{
+              t(settings.settings.subscriptionsIncludeCancelled ? 'subscriptions.withCancelled' : 'subscriptions.withoutCancelled', {
+                amount: money(summary.cancelledMonthly),
+              })
+            }}
+          </p>
         </div>
         <div class="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
           <p class="text-xs text-slate-500">{{ t('subscriptions.next') }}</p>
@@ -120,7 +142,12 @@ function usageNote(r: SummaryRow): string {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="r in summary.rows" :key="r.id" class="border-b last:border-0 dark:border-slate-800">
+            <tr
+              v-for="r in summary.rows"
+              :key="r.id"
+              class="border-b last:border-0 dark:border-slate-800"
+              :class="r.included ? '' : 'opacity-50'"
+            >
               <td class="px-4 py-2 font-bold">{{ r.name }}</td>
               <td class="px-4 py-2">{{ r.plan ? t(`accounts.subscription.plans.${r.plan}`) : '–' }}</td>
               <td class="px-4 py-2 text-right tabular-nums">{{ money(r.monthlyPrice) }}</td>

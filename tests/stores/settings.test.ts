@@ -102,7 +102,11 @@ describe('settings store', () => {
   it('keeps the subscription settings within bounds', () => {
     const s = useSettingsStore()
     s.load()
-    expect(s.settings).toMatchObject({ currency: 'EUR', subscriptionNotifyDays: 3, timelineShowSubscription: true, historyShowSubscription: true })
+    expect(s.settings).toMatchObject({ currency: 'EUR', subscriptionNotifyDays: 3, timelineShowSubscription: true, historyShowSubscription: true, subscriptionsIncludeCancelled: false })
+    s.update({ subscriptionsIncludeCancelled: true })
+    expect(s.settings.subscriptionsIncludeCancelled).toBe(true)
+    s.update({ subscriptionsIncludeCancelled: 'yes' as never })
+    expect(s.settings.subscriptionsIncludeCancelled).toBe(false)
     s.update({ currency: 'USD', subscriptionNotifyDays: 99, timelineShowSubscription: false, historyShowSubscription: false })
     expect(s.settings).toMatchObject({ currency: 'USD', subscriptionNotifyDays: 30, timelineShowSubscription: false, historyShowSubscription: false })
     s.update({ currency: 'GBP' as never, subscriptionNotifyDays: -1 })

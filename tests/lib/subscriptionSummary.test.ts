@@ -34,19 +34,43 @@ describe('summarizeSubscriptions', () => {
     expect(s.rows.map((r) => r.id)).toEqual(['b'])
   })
 
-  it('adds up the prices of everything that has not run out', () => {
+  const mixed = [
+    acc({ id: 'a', monthlyPrice: 216, subscriptionDate: '2026-10-14' }),
+    acc({ id: 'b', monthlyPrice: 108, subscriptionDate: '2026-10-20', subscriptionCancelled: true }),
+    acc({ id: 'c', monthlyPrice: 20, subscriptionDate: '2026-10-01', subscriptionCancelled: true }),
+    acc({ id: 'd', monthlyPrice: 18 }),
+  ]
+
+  it('adds up what keeps running, and names what was cancelled on its own', () => {
+    const s = summarizeSubscriptions(mixed, {}, NOW)
+    expect(s.totalMonthly).toBe(216 + 18)
+    expect(s.running).toBe(2)
+    expect(s.cancelledMonthly).toBe(108)
+    expect(s.rows.map((r) => r.included)).toEqual([true, false, false, true])
+  })
+
+  it('counts cancelled subscriptions that still run when asked to, never expired ones', () => {
+    const s = summarizeSubscriptions(mixed, {}, NOW, { includeCancelled: true })
+    expect(s.totalMonthly).toBe(216 + 108 + 18)
+    expect(s.running).toBe(3)
+    expect(s.cancelledMonthly).toBe(108)
+    expect(s.rows.map((r) => r.included)).toEqual([true, true, false, true])
+  })
+
+  it('leaves cancelled subscriptions out of the average unless asked to', () => {
+    const snaps = { a: [snap(NOW - DAY, 0.2, NOW + DAY)], b: [{ ...snap(NOW - DAY, 0.8, NOW + DAY), accountId: 'b' }] }
+    const accounts = [acc({ id: 'a', monthlyPrice: 10 }), acc({ id: 'b', subscriptionDate: '2026-10-20', subscriptionCancelled: true })]
+    expect(summarizeSubscriptions(accounts, snaps, NOW).average).toBeCloseTo(0.2)
+    expect(summarizeSubscriptions(accounts, snaps, NOW, { includeCancelled: true }).average).toBeCloseTo(0.5)
+  })
+
+  it('still names the end of a cancelled subscription as the next date', () => {
     const s = summarizeSubscriptions(
-      [
-        acc({ id: 'a', monthlyPrice: 216, subscriptionDate: '2026-10-14' }),
-        acc({ id: 'b', monthlyPrice: 108, subscriptionDate: '2026-10-20', subscriptionCancelled: true }),
-        acc({ id: 'c', monthlyPrice: 20, subscriptionDate: '2026-10-01', subscriptionCancelled: true }),
-        acc({ id: 'd', monthlyPrice: 18 }),
-      ],
+      [acc({ id: 'a', subscriptionDate: '2026-10-30' }), acc({ id: 'b', name: 'B', subscriptionDate: '2026-10-11', subscriptionCancelled: true })],
       {},
       NOW,
     )
-    expect(s.totalMonthly).toBe(216 + 108 + 18)
-    expect(s.running).toBe(3)
+    expect(s.next).toMatchObject({ name: 'B', kind: 'end' })
   })
 
   it('names the next renewal or end', () => {
@@ -85,6 +109,6 @@ describe('summarizeSubscriptions', () => {
 
   it('has no total and no average without prices or readings', () => {
     const s = summarizeSubscriptions([acc({ plan: 'pro' })], {}, NOW)
-    expect(s).toMatchObject({ totalMonthly: null, average: null, next: null })
+    expect(s).toMatchObject({ totalMonthly: null, cancelledMonthly: null, average: null, next: null })
   })
 })

@@ -237,7 +237,7 @@ Give an account its renewal day, plan and monthly price, and Quotlyn keeps track
 - **Timeline and history.** The timeline gets a subscription row per account, filled with the share of the billing month that has passed. The history marks renewals as solid lines in the account colour and the end in red. Both have a switch to hide them.
 - **On the card.** A badge next to the name when a renewal is less than a week away, while a cancelled subscription runs out, and once it has expired.
 - **Notification.** Once per account and date, a set number of days before a renewal or the end (three by default, 0 turns it off).
-- **Subscriptions page.** Monthly total of everything that has not run out, the next date, and per account the average weekly limit used in this and the previous billing month (every week counts with its peak of the all-models window) and the price per percentage point of it. Prices in euros or US dollars.
+- **Subscriptions page.** Monthly total of what keeps running (a switch counts cancelled subscriptions in until they end), the next date, and per account the average weekly limit used in this and the previous billing month (every week counts with its peak of the all-models window) and the price per percentage point of it. Prices in euros or US dollars.
 
 ### Accounts and settings
 
