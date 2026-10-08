@@ -169,6 +169,20 @@ that as *Limit reached* with the current numbers rather than as an error.
     <td valign="top"><b>Whose account is this.</b> A billing account under the name and a note on who uses it, folded into the card's footer. Show the billing account in full, masked down to its first and last characters, or keep it off the cards while timeline and history still show it.</td>
     <td valign="top"><b>Two, three or four to a row.</b> Pick how many cards share a row. The count is an upper bound, so narrower windows still step down and the cards stay readable.</td>
   </tr>
+  <tr>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-subscriptions.png">
+  <img src="docs/screenshots/light/feature-subscriptions.png" alt="Subscriptions page with monthly cost, next date and usage per billing month">
+</picture></td>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-subscription-card.png">
+  <img src="docs/screenshots/light/feature-subscription-card.png" alt="Card header with a badge saying the subscription ends in twelve days">
+</picture></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>What the subscriptions cost.</b> Monthly total of what keeps running, the next renewal or end, and per account how much of the weekly limit a billing month used and what one percentage point of it cost.</td>
+    <td valign="top"><b>Renewal and end in sight.</b> A badge on the card before a renewal and while a cancelled subscription runs out, a subscription row in the timeline and a line in the history.</td>
+  </tr>
 </table>
 
 ## What you see
@@ -238,6 +252,11 @@ Give an account its renewal day, plan and monthly price, and Quotlyn keeps track
 - **On the card.** A badge next to the name when a renewal is less than a week away, while a cancelled subscription runs out, and once it has expired.
 - **Notification.** Once per account and date, a set number of days before a renewal or the end (three by default, 0 turns it off).
 - **Subscriptions page.** Monthly total of what keeps running (a switch counts cancelled subscriptions in until they end), the next date, and per account the average weekly limit used in this and the previous billing month (every week counts with its peak of the all-models window) and the price per percentage point of it. Prices in euros or US dollars.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/subscriptions.png">
+  <img src="docs/screenshots/light/subscriptions.png" alt="Subscriptions page">
+</picture>
 
 ### Accounts and settings
 

@@ -15,6 +15,18 @@ const META = [
   { billing: 'Northwind Ltd · INV-4822', visibility: 'masked', usedBy: 'Backend team' },
   { billing: 'Contoso GmbH · INV-3310', visibility: 'hideOnDashboard', usedBy: 'Ops on-call' },
 ]
+// Made-up subscriptions, relative to today: one renewing soon (card badge), one cancelled (the end),
+// one renewed today (a renewal line inside the 24 h history).
+const SUBS = [
+  { inDays: 4, cancelled: false, plan: 'max20x', price: '200' },
+  { inDays: 12, cancelled: true, plan: 'max5x', price: '100' },
+  { inDays: 0, cancelled: false, plan: 'pro', price: '20' },
+]
+function localDay(inDays) {
+  const d = new Date()
+  d.setDate(d.getDate() + inDays)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 ;(async () => {
   const snaps = JSON.parse(readFileSync(file, 'utf8'))
   const newest = Math.max(...snaps.map((s) => Date.parse(s.fetchedAt)))
@@ -44,6 +56,11 @@ const META = [
     await page.fill('form fieldset input', meta.billing)
     await page.selectOption('form fieldset select', meta.visibility)
     await page.fill('form fieldset textarea', meta.usedBy)
+    const sub = SUBS[i % SUBS.length]
+    await page.fill('[data-test="sub-date"]', localDay(sub.inDays))
+    if (sub.cancelled) await page.check('[data-test="sub-cancelled"]')
+    await page.selectOption('[data-test="sub-plan"]', sub.plan)
+    await page.fill('[data-test="sub-price"]', sub.price)
     await page.click('form button[type=submit]')
     await page.waitForSelector('form', { state: 'detached' })
   }
@@ -123,6 +140,7 @@ const META = [
   await crop('main section[class*="rounded-lg"]', 'feature-recommendation')
   await crop('article >> nth=0', 'feature-card')
   await crop('article >> nth=0 >> header', 'feature-meta')
+  await crop('article >> nth=1 >> header', 'feature-subscription-card')
   await crop('article >> nth=2 >> div.flex.items-center.gap-4', 'feature-rings')
   await page.hover('article >> nth=2 >> [role="img"]'); await page.waitForTimeout(400)
   await crop('article >> nth=2', 'feature-status', 8)
@@ -137,6 +155,9 @@ const META = [
   await page.goto(base + '/timeline'); await page.waitForTimeout(1200)
   await shot('timeline')
   await crop('main div.rounded-lg', 'feature-timeline', 0)
+  await page.goto(base + '/subscriptions'); await page.waitForTimeout(1000)
+  await shot('subscriptions')
+  await crop('main section', 'feature-subscriptions', 6)
   await page.goto(base + '/accounts'); await page.waitForTimeout(500)
   await page.click(`text=${names[0]}`); await page.waitForSelector('form'); await page.waitForTimeout(300)
   await shot('accounts')
