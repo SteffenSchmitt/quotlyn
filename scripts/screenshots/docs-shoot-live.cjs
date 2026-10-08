@@ -14,6 +14,7 @@ const META = [
   { billing: 'Northwind Ltd · INV-4821', visibility: 'everywhere', usedBy: 'Design team\nCI runner build-02' },
   { billing: 'Northwind Ltd · INV-4822', visibility: 'masked', usedBy: 'Backend team' },
   { billing: 'Contoso GmbH · INV-3310', visibility: 'hideOnDashboard', usedBy: 'Ops on-call' },
+  { billing: 'Fabrikam Inc · INV-7702', visibility: 'everywhere', usedBy: 'Data team' },
 ]
 // Made-up subscriptions, relative to today: one renewing soon (card badge), one cancelled (the end),
 // one renewed today (a renewal line inside the 24 h history).
@@ -21,6 +22,7 @@ const SUBS = [
   { inDays: 4, cancelled: false, plan: 'max20x', price: '200' },
   { inDays: 12, cancelled: true, plan: 'max5x', price: '100' },
   { inDays: 0, cancelled: false, plan: 'pro', price: '20' },
+  { inDays: 23, cancelled: false, plan: 'max5x', price: '100' },
 ]
 function localDay(inDays) {
   const d = new Date()
