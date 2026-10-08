@@ -124,11 +124,12 @@ describe('AccountsView', () => {
     expect(store.accounts.map((a) => a.name)).toEqual(['Beta', 'Alpha'])
   })
 
-  it('shows only the beginning of a token', async () => {
+  it('shows only the end of a token, where tokens differ', async () => {
     const { store, w } = await mountView()
-    await store.addAccount({ name: 'Alpha', color: '#000', token: 'sk-ant-oat01-secret-tail' })
+    await store.addAccount({ name: 'Alpha', color: '#000', token: 'sk-ant-oat01-hidden-middle-Xy7Kq2mP' })
     await w.vm.$nextTick()
-    expect(w.text()).toContain('sk-ant-oat01-s…')
-    expect(w.text()).not.toContain('secret-tail')
+    expect(w.text()).toContain('…Xy7Kq2mP')
+    expect(w.text()).not.toContain('middle')
+    expect(w.text()).not.toContain('sk-ant')
   })
 })

@@ -13,6 +13,8 @@ const settings = useSettingsStore()
 const adding = ref(false)
 const editingId = ref<string | null>(null)
 const confirmingId = ref<string | null>(null)
+/** Every token starts with the same prefix; the end is what tells two apart and shows a typo. */
+const TOKEN_TAIL = 8
 
 async function onAdd(value: Required<NewAccount>) {
   await store.addAccount(value)
@@ -66,7 +68,7 @@ async function onDelete(account: Account) {
           <button type="button" class="min-w-0 flex-1 truncate text-left font-bold hover:underline" :title="t('accounts.edit')" @click="editingId = account.id">
             {{ account.name }}
           </button>
-          <span class="mr-1 font-mono text-xs text-slate-400">{{ account.token.slice(0, 14) }}…</span>
+          <span class="mr-1 font-mono text-xs text-slate-400">…{{ account.token.slice(-TOKEN_TAIL) }}</span>
           <button
             class="btn-icon"
             :disabled="index === 0"
