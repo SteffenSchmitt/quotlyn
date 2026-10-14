@@ -183,6 +183,13 @@ that as *Limit reached* with the current numbers rather than as an error.
     <td valign="top"><b>What the subscriptions cost.</b> Monthly total of what keeps running, the next renewal or end, and per account how much of the weekly limit a billing month used and what one percentage point of it cost.</td>
     <td valign="top"><b>Renewal and end in sight.</b> A badge on the card before a renewal and while a cancelled subscription runs out, a subscription row in the timeline and a line in the history.</td>
   </tr>
+  <tr>
+    <td><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-expired.png">
+  <img src="docs/screenshots/light/feature-expired.png" alt="Greyed-out card of an expired subscription that Quotlyn no longer checks">
+</picture></td>
+    <td valign="top"><b>Expired means quiet.</b> Once a cancelled subscription has ended, Quotlyn stops asking for that account's usage. Its card, list entry, timeline rows and history line move to the end and turn grey; the recorded history stays.</td>
+  </tr>
 </table>
 
 ## What you see
