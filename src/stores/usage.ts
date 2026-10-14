@@ -14,7 +14,7 @@ import { ForecastWatcher } from '../notify/forecastAlerts'
 import { ResetWatcher } from '../notify/resetAlerts'
 import { forecastLine } from '../lib/forecastText'
 import { SubscriptionWatcher } from '../notify/subscriptionAlerts'
-import { subscriptionCycle } from '../lib/subscription'
+import { isExpired, subscriptionCycle } from '../lib/subscription'
 import { SUBSCRIPTION_ALERTS_KEY, readJson, writeJson } from '../storage/localStore'
 import { useAccountsStore } from './accounts'
 import { useSettingsStore } from './settings'
@@ -63,8 +63,10 @@ export const useUsageStore = defineStore('usage', () => {
   })
   const FORECAST_HORIZON_MS = 3_600_000
 
+  /** Accounts whose subscription has expired are never asked again; checked on every cycle. */
   function targets(): PollTarget[] {
-    return accounts.accounts.map((a) => ({ id: a.id, token: a.token }))
+    const now = Date.now()
+    return accounts.accounts.filter((a) => !isExpired(a, now)).map((a) => ({ id: a.id, token: a.token }))
   }
 
   async function onResult(target: PollTarget, result: UsageResult) {

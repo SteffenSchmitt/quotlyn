@@ -6,6 +6,7 @@ import { sortByHeadroom } from "../lib/usageView";
 import { billingFor } from "../lib/accountMeta";
 import { DASHBOARD_COLUMNS, gridClass } from "../lib/dashboardGrid";
 import { recommend } from "../lib/recommend";
+import { expiredLast, isExpired } from "../lib/subscription";
 import { forecastLine } from "../lib/forecastText";
 import { useWindowLabels } from "../lib/windowLabels";
 import { useAccountsStore } from "../stores/accounts";
@@ -34,11 +35,16 @@ onUnmounted(() => {
   if (tick) clearInterval(tick);
 });
 
+/** Expired subscriptions go last whatever the sort, their figures are only history. */
 const orderedAccounts = computed(() =>
-  settings.settings.dashboardSort === "headroom"
-    ? sortByHeadroom(accounts.accounts, (a) => usage.latest[a.id])
-    : accounts.accounts,
+  expiredLast(
+    settings.settings.dashboardSort === "headroom"
+      ? sortByHeadroom(accounts.accounts, (a) => usage.latest[a.id])
+      : accounts.accounts,
+    now.value,
+  ),
 );
+const liveAccounts = computed(() => accounts.accounts.filter((a) => !isExpired(a, now.value)));
 
 const INTERVAL_PRESETS = [60, 120, 300, 600, 900, 1800];
 const intervalOptions = computed(() => {
@@ -62,9 +68,9 @@ function forecastsFor(accountId: string): Record<string, import("../lib/forecast
 }
 /** Which account to use next, for the session and for the week, from live values and forecasts. */
 const recommendation = computed(() => {
-  const forecasts = Object.fromEntries(accounts.accounts.map((a) => [a.id, forecastsFor(a.id)]));
-  const status = Object.fromEntries(accounts.accounts.map((a) => [a.id, usage.pollState[a.id]?.status]));
-  return recommend(accounts.accounts, usage.latest, forecasts, status);
+  const forecasts = Object.fromEntries(liveAccounts.value.map((a) => [a.id, forecastsFor(a.id)]));
+  const status = Object.fromEntries(liveAccounts.value.map((a) => [a.id, usage.pollState[a.id]?.status]));
+  return recommend(liveAccounts.value, usage.latest, forecasts, status);
 });
 function pickName(pick: { accountId: string } | null): string {
   if (!pick) return t("dashboard.recommend.none");
@@ -153,7 +159,7 @@ function intervalLabel(seconds: number): string {
         </select>
         <button
           class="btn-primary"
-          :disabled="usage.refreshing || accounts.accounts.length === 0"
+          :disabled="usage.refreshing || liveAccounts.length === 0"
           @click="usage.refreshNow()"
         >
           {{
@@ -173,7 +179,7 @@ function intervalLabel(seconds: number): string {
     </p>
 
     <section
-      v-if="accounts.accounts.length > 1 && (recommendation.now || recommendation.week)"
+      v-if="liveAccounts.length > 1 && (recommendation.now || recommendation.week)"
       class="rounded-lg border bg-white text-sm dark:border-slate-700 dark:bg-slate-900"
     >
       <button

@@ -130,4 +130,12 @@ describe('sortBars', () => {
   it('groups by window, accounts in order within a group', () => {
     expect(sortBars(rows, bars, 'window').rows.map((r) => r.label)).toEqual(['A/5h', 'B/5h', 'A/7d', 'B/7d'])
   })
+  it('puts the rows of expired accounts last, in every sort', () => {
+    const gone = new Set(['b'])
+    expect(sortBars(rows, bars, 'accounts', gone).rows.map((r) => r.label)).toEqual(['A/5h', 'A/7d', 'B/5h', 'B/7d'])
+    const { rows: r, bars: b } = sortBars(rows, bars, 'exhaustion', gone)
+    expect(r.map((x) => x.label)).toEqual(['A/7d', 'A/5h', 'B/5h', 'B/7d'])
+    expect(b.map((x) => x.row)).toEqual([0, 1, 2, 3])
+    expect(sortBars(rows, bars, 'window', new Set(['a'])).rows.map((x) => x.label)).toEqual(['B/5h', 'B/7d', 'A/5h', 'A/7d'])
+  })
 })

@@ -30,7 +30,7 @@ import { billingFor } from "../lib/accountMeta";
 import { useSettingsStore } from "../stores/settings";
 import { useUsageStore } from "../stores/usage";
 import { useWindowLabels } from "../lib/windowLabels";
-import { subscriptionEvents } from "../lib/subscription";
+import { expiredLast, isExpired, subscriptionEvents } from "../lib/subscription";
 import { levelColor } from "../lib/usageView";
 
 use([
@@ -163,7 +163,7 @@ const option = computed(() => {
   const th = theme.value;
   const since = rangeSince(range.value, now.value);
   const nowIso = new Date(now.value).toISOString();
-  const selectedAccounts = accounts.accounts.filter((a) =>
+  const selectedAccounts = expiredLast(accounts.accounts, now.value).filter((a) =>
     selected.value.has(a.id),
   );
   const forecasts = selectedAccounts
@@ -234,8 +234,9 @@ const option = computed(() => {
         showSymbol: true,
         symbolSize: 5,
         connectNulls: false,
-        itemStyle: { color: a.color },
-        lineStyle: { color: a.color, width: 2 },
+        // An expired subscription keeps its colour, faded like its card, so its history stays readable.
+        itemStyle: { color: a.color, opacity: isExpired(a, now.value) ? 0.4 : 1 },
+        lineStyle: { color: a.color, width: 2, opacity: isExpired(a, now.value) ? 0.4 : 1 },
         areaStyle: {
           color: {
             type: "linear",
@@ -317,9 +318,11 @@ const option = computed(() => {
         <div class="flex flex-wrap items-center gap-3">
           {{ t("history.accounts") }}
           <label
-            v-for="a in accounts.accounts"
+            v-for="a in expiredLast(accounts.accounts, now)"
             :key="a.id"
             class="flex items-center gap-1"
+            :class="isExpired(a, now) ? 'opacity-50 grayscale' : ''"
+            :data-expired="isExpired(a, now) || undefined"
             :title="billingTip(a)"
           >
             <input

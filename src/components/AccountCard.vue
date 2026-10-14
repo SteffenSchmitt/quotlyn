@@ -25,7 +25,7 @@ import UsageRings from './UsageRings.vue'
 import RawDataView from './RawDataView.vue'
 import { billingFor, usedByLines } from '../lib/accountMeta'
 import { USED_BY_OPEN_KEY, readJson, writeJson } from '../storage/localStore'
-import { subscriptionBadge, subscriptionCycle } from '../lib/subscription'
+import { isExpired, subscriptionBadge, subscriptionCycle } from '../lib/subscription'
 
 const props = withDefaults(
   defineProps<{
@@ -67,6 +67,8 @@ const subBadge = computed(() => {
     cls: BADGE_CLASS[badge.kind],
   }
 })
+/** Past the end of a cancelled subscription: greyed out, and the store no longer polls it. */
+const expired = computed(() => isExpired(props.account, props.now))
 const usedBy = computed(() => usedByLines(props.account))
 
 /** The unfolded cards, remembered per account in this browser. */
@@ -132,6 +134,7 @@ const statusOpen = ref(false)
 
 /** Error, fallback or limit hint for the notice line; the most urgent one wins. */
 const notice = computed(() => {
+  if (expired.value) return { text: t('dashboard.expiredNotice'), cls: 'text-slate-500' }
   if (props.state?.lastError) {
     const time = props.state.lastFetchedAt ? d(new Date(props.state.lastFetchedAt), 'time') : '–'
     return { text: t('dashboard.attemptFailed', { time, error: props.state.lastError }), cls: 'text-red-600 dark:text-red-400' }
@@ -164,6 +167,8 @@ const bindingWindow = computed(() => {
 <template>
   <article
     class="relative rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
+    :class="expired ? 'opacity-60 grayscale' : ''"
+    :data-expired="expired || undefined"
     :style="{ borderLeft: `4px solid ${account.color}`, borderRight: `4px solid ${statusColor}` }"
   >
     <div
@@ -265,7 +270,7 @@ const bindingWindow = computed(() => {
       <button
         type="button"
         class="mr-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-        :disabled="state?.status === 'fetching' || state?.status === 'disabled'"
+        :disabled="expired || state?.status === 'fetching' || state?.status === 'disabled'"
         :aria-label="t('dashboard.refreshAccount')"
         :title="t('dashboard.refreshAccount')"
         @click="emit('refresh')"
@@ -275,9 +280,9 @@ const bindingWindow = computed(() => {
           <path d="M16.5 3.5v5h-5M3.5 16.5v-5h5" />
         </svg>
       </button>
-      <StatusDot :status="state?.status" />
-      <span class="ml-1.5" :class="state?.status === 'limited' ? 'font-bold text-red-600' : 'text-slate-500'">
-        {{ t(`dashboard.state.${state?.status ?? 'idle'}`) }}
+      <StatusDot :status="expired ? 'idle' : state?.status" />
+      <span class="ml-1.5" :class="!expired && state?.status === 'limited' ? 'font-bold text-red-600' : 'text-slate-500'">
+        {{ expired ? t('dashboard.state.expired') : t(`dashboard.state.${state?.status ?? 'idle'}`) }}
       </span>
       <InfoTip :text="t('help.state')" />
     </p>

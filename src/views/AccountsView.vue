@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccountForm from '../components/AccountForm.vue'
 import { useAccountsStore, type Account, type NewAccount } from '../stores/accounts'
 import { useUsageStore } from '../stores/usage'
 import { useSettingsStore } from '../stores/settings'
+import { expiredLast, isExpired } from '../lib/subscription'
 
 const { t } = useI18n()
 const store = useAccountsStore()
@@ -15,6 +16,19 @@ const editingId = ref<string | null>(null)
 const confirmingId = ref<string | null>(null)
 /** Every token starts with the same prefix; the end is what tells two apart and shows a typo. */
 const TOKEN_TAIL = 8
+
+const now = ref(Date.now())
+let tick: ReturnType<typeof setInterval> | null = null
+onMounted(() => {
+  tick = setInterval(() => {
+    now.value = Date.now()
+  }, 60_000)
+})
+onUnmounted(() => {
+  if (tick) clearInterval(tick)
+})
+/** Expired subscriptions last, as everywhere else; the arrows move within this order. */
+const shown = computed(() => expiredLast(store.accounts, now.value))
 
 async function onAdd(value: Required<NewAccount>) {
   await store.addAccount(value)
@@ -48,7 +62,13 @@ async function onDelete(account: Account) {
     <p v-if="store.accounts.length === 0 && !adding" class="text-slate-500">{{ t('accounts.empty') }}</p>
 
     <ul class="space-y-2">
-      <li v-for="(account, index) in store.accounts" :key="account.id" class="rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-3">
+      <li
+        v-for="(account, index) in shown"
+        :key="account.id"
+        class="rounded-lg border bg-white dark:border-slate-700 dark:bg-slate-900 p-3"
+        :class="isExpired(account, now) && editingId !== account.id ? 'opacity-60 grayscale' : ''"
+        :data-expired="isExpired(account, now) || undefined"
+      >
         <AccountForm
           v-if="editingId === account.id"
           :account="account"
@@ -68,20 +88,23 @@ async function onDelete(account: Account) {
           <button type="button" class="min-w-0 flex-1 truncate text-left font-bold hover:underline" :title="t('accounts.edit')" @click="editingId = account.id">
             {{ account.name }}
           </button>
+          <span v-if="isExpired(account, now)" class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] leading-4 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            {{ t('dashboard.subscriptionBadge.expired') }}
+          </span>
           <span class="mr-1 font-mono text-xs text-slate-400">…{{ account.token.slice(-TOKEN_TAIL) }}</span>
           <button
             class="btn-icon"
             :disabled="index === 0"
             :title="t('accounts.up')"
-            @click="store.moveAccount(account.id, -1)"
+            @click="store.moveAccount(account.id, -1, shown)"
           >
             ↑
           </button>
           <button
             class="btn-icon"
-            :disabled="index === store.accounts.length - 1"
+            :disabled="index === shown.length - 1"
             :title="t('accounts.down')"
-            @click="store.moveAccount(account.id, 1)"
+            @click="store.moveAccount(account.id, 1, shown)"
           >
             ↓
           </button>

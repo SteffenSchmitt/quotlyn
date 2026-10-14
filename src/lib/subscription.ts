@@ -124,3 +124,14 @@ export function subscriptionBadge(cycle: SubscriptionCycle, nowMs: number): Subs
   if (cycle.state === 'active' && days <= RENEWS_SOON_DAYS) return { kind: 'renews', days }
   return null
 }
+
+/** A cancelled subscription past its end: Quotlyn stops asking for its usage and shows it last, greyed out. */
+export function isExpired(sub: SubscriptionInput, nowMs: number): boolean {
+  return subscriptionCycle(sub, nowMs).state === 'expired'
+}
+
+/** The same list with expired subscriptions moved to the end; the order within both parts stays. */
+export function expiredLast<T extends SubscriptionInput>(list: readonly T[], nowMs: number): T[] {
+  const expired = list.filter((a) => isExpired(a, nowMs))
+  return expired.length ? [...list.filter((a) => !expired.includes(a)), ...expired] : [...list]
+}

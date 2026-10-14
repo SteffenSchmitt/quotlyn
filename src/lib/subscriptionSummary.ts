@@ -1,6 +1,6 @@
 import type { UsageSnapshot } from '../storage/historyDb'
 import { costPerPercent, cycleUsage, type CycleUsage } from './cycleUsage'
-import { subscriptionCycle, type Plan, type SubscriptionCycle, type SubscriptionInput } from './subscription'
+import { expiredLast, subscriptionCycle, type Plan, type SubscriptionCycle, type SubscriptionInput } from './subscription'
 
 /** The part of an account the overview needs. */
 export interface SummaryAccount extends SubscriptionInput {
@@ -60,7 +60,8 @@ export function summarizeSubscriptions(
   nowMs: number,
   { includeCancelled = false }: SummaryOptions = {},
 ): SubscriptionSummary {
-  const rows = accounts.filter(hasSubscription).map((a): SummaryRow => {
+  // Expired subscriptions last, like on every other page.
+  const rows = expiredLast(accounts.filter(hasSubscription), nowMs).map((a): SummaryRow => {
     const snaps = history[a.id] ?? []
     const cycle = subscriptionCycle(a, nowMs)
     let current = EMPTY

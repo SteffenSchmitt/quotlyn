@@ -19,7 +19,7 @@ import {
   type TimelineBar,
   type TimelineSort,
 } from '../lib/timelineBars'
-import { subscriptionCycle, type SubscriptionCycle } from '../lib/subscription'
+import { expiredLast, isExpired, subscriptionCycle, type SubscriptionCycle } from '../lib/subscription'
 import { useWindowLabels } from '../lib/windowLabels'
 import { useAccountsStore } from '../stores/accounts'
 import { billingFor } from '../lib/accountMeta'
@@ -84,10 +84,13 @@ function subscriptionText(c: SubscriptionCycle): string {
   return t('timeline.subscriptionLabel.expired', { date })
 }
 
+/** Expired subscriptions: rows last, bars and names in grey. */
+const expiredIds = computed(() => new Set(accounts.accounts.filter((a) => isExpired(a, now.value)).map((a) => a.id)))
+
 const model = computed(() => {
   const byId = new Map(accounts.accounts.map((a) => [a.id, a]))
   const built = timelineBars(
-    accounts.accounts.map((a) => ({ id: a.id, name: a.name, billing: billingFor(a, 'elsewhere') })),
+    expiredLast(accounts.accounts, now.value).map((a) => ({ id: a.id, name: a.name, billing: billingFor(a, 'elsewhere') })),
     usage.latest,
     now.value,
     (name, key) => `${name}\u0001${rowLabel(key)}`,
@@ -97,7 +100,7 @@ const model = computed(() => {
       return a && settings.settings.timelineShowSubscription ? subscriptionCycle(a, now.value) : null
     },
   )
-  return sortBars(built.rows, built.bars, settings.settings.timelineSort)
+  return sortBars(built.rows, built.bars, settings.settings.timelineSort, expiredIds.value)
 })
 const allKeys = computed(() => [...new Set(model.value.bars.map((b) => b.windowKey).filter((k) => k !== SUBSCRIPTION_KEY))])
 function planOf(bar: TimelineBar): string {
@@ -110,8 +113,9 @@ const hasData = computed(() => model.value.bars.length > 0)
 const option = computed(() => {
   const th = theme.value
   const { rows, bars } = model.value
+  const expired = (b: TimelineBar) => expiredIds.value.has(rows[b.row]?.accountId ?? '')
   const colorOf = (b: TimelineBar) =>
-    b.subscription ? subscriptionColor(b.subscription, th.dark) : windowColor(b.windowKey, allKeys.value, th.dark)
+    expired(b) ? SUBSCRIPTION_COLOR[th.dark ? 'dark' : 'light'] : b.subscription ? subscriptionColor(b.subscription, th.dark) : windowColor(b.windowKey, allKeys.value, th.dark)
   const endText = (b: TimelineBar) =>
     b.subscription ? subscriptionText(b.subscription) : barLabel(b.utilization, countdown(b), (k, p) => t(k, p ?? {}))
   // Every bar spans the full width: the bar is the window's capacity, the fill its utilization.
@@ -159,13 +163,17 @@ const option = computed(() => {
         margin: NAME_COL + WINDOW_COL,
         color: th.text,
         fontSize: 12,
-        formatter: (value: string) => {
+        formatter: (value: string, index: number) => {
           const [name = '', win = ''] = value.split('\u0001')
-          return `{name|${truncate(name)}}{win|${win}}`
+          return expiredIds.value.has(rows[index]?.accountId ?? '')
+            ? `{gone|${truncate(name)}}{goneWin|${win}}`
+            : `{name|${truncate(name)}}{win|${win}}`
         },
         rich: {
           name: { width: NAME_COL, align: 'left', color: th.text, fontSize: 12 },
           win: { width: WINDOW_COL, align: 'left', color: th.muted, fontSize: 12 },
+          gone: { width: NAME_COL, align: 'left', color: th.muted, fontSize: 12, opacity: 0.6 },
+          goneWin: { width: WINDOW_COL, align: 'left', color: th.muted, fontSize: 12, opacity: 0.6 },
         },
       },
     },
@@ -187,6 +195,7 @@ const option = computed(() => {
           const width = Math.max(2, x1 - x0)
           const fill = Math.max(0, Math.min(1, bar.utilization)) * width
           const color = colorOf(bar)
+          const gone = expired(bar)
           // Forecast time line under the bar: solid up to the expected exhaustion, faint for the rest;
           // solid all the way when the window lasts until the reset. Nothing without a forecast.
           const clockY = y + height / 2 + 2
@@ -234,9 +243,10 @@ const option = computed(() => {
                   fill: th.muted,
                   fontSize: 11,
                   verticalAlign: 'middle',
+                  opacity: gone ? 0.6 : 1,
                 },
               },
-              ...clock,
+              ...(gone ? [] : clock),
             ],
           }
         },

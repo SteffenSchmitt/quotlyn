@@ -20,7 +20,8 @@
       "error": "Fehler",
       "paused": "Pausiert (gedrosselt)",
       "disabled": "Token abgelehnt",
-      "limited": "Limit erreicht"
+      "limited": "Limit erreicht",
+      "expired": "Keine Abfragen mehr"
     },
     "cost": "Abfragekosten: {i} Eingabe- / {o} Ausgabe-Token",
     "raw": {
@@ -32,6 +33,7 @@
     "fallback": "Fable-Limit erreicht: Die Fable-Abfrage wurde abgelehnt ({status}). Sitzung und Woche stammen aus einer Haiku-Abfrage, das Fable-Fenster aus der abgelehnten Antwort.",
     "fallbackPartial": "Fable-Limit erreicht: Die Fable-Abfrage wurde abgelehnt ({status}). Die Werte stammen aus einer Haiku-Abfrage, das Fable-Fenster fehlt deshalb.",
     "probeModel": "Modell: {model}",
+    "expiredNotice": "Abo abgelaufen – Quotlyn fragt dieses Konto nicht mehr ab.",
     "limitedHint": "Die API lehnt Anfragen ab, bis sich das maßgebliche Fenster zurücksetzt. Die Zahlen unten sind trotzdem aktuell.",
     "sort": {
       "label": "Reihenfolge",

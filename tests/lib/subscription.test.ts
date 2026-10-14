@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { subscriptionBadge, subscriptionCycle, subscriptionEvents } from '../../src/lib/subscription'
+import { expiredLast, isExpired, subscriptionBadge, subscriptionCycle, subscriptionEvents } from '../../src/lib/subscription'
 
 /** Local calendar days, so the tests hold in any time zone. */
 const day = (y: number, m: number, d: number, h = 0) => new Date(y, m - 1, d, h).getTime()
@@ -84,5 +84,24 @@ describe('subscriptionBadge', () => {
 
   it('stays away without a subscription', () => {
     expect(subscriptionBadge(subscriptionCycle({ subscriptionDate: '', subscriptionCancelled: false }, now), now)).toBeNull()
+  })
+})
+
+describe('expired subscriptions', () => {
+  const now = day(2026, 10, 14, 9)
+  const sub = (id: string, subscriptionDate: string, subscriptionCancelled: boolean) => ({ id, subscriptionDate, subscriptionCancelled })
+
+  it('counts only a cancelled subscription past its end as expired', () => {
+    expect(isExpired(sub('a', '2026-10-01', true), now)).toBe(true)
+    expect(isExpired(sub('a', '2026-10-14', true), now)).toBe(true)
+    expect(isExpired(sub('a', '2026-10-15', true), now)).toBe(false)
+    expect(isExpired(sub('a', '2026-10-01', false), now)).toBe(false)
+    expect(isExpired(sub('a', '', true), now)).toBe(false)
+  })
+
+  it('moves expired ones to the end and keeps the order otherwise', () => {
+    const list = [sub('a', '2026-09-01', true), sub('b', '', false), sub('c', '2026-10-01', true), sub('d', '2026-11-01', true)]
+    expect(expiredLast(list, now).map((a) => a.id)).toEqual(['b', 'd', 'a', 'c'])
+    expect(expiredLast(list, day(2026, 8, 1)).map((a) => a.id)).toEqual(['a', 'b', 'c', 'd'])
   })
 })

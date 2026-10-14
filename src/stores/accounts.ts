@@ -240,8 +240,14 @@ export const useAccountsStore = defineStore('accounts', () => {
     return { imported: imported.length, total: list.value.length }
   }
 
-  async function moveAccount(id: string, direction: -1 | 1) {
-    const sorted = [...accounts.value]
+  /**
+   * Swaps an account with its neighbour. `shown` is the order on screen when it differs from the
+   * stored one (expired subscriptions are listed last); the stored order then follows the screen.
+   */
+  async function moveAccount(id: string, direction: -1 | 1, shown?: readonly { id: string }[]) {
+    const byId = new Map(accounts.value.map((a) => [a.id, a]))
+    const sorted = shown ? shown.flatMap((s) => byId.get(s.id) ?? []) : [...accounts.value]
+    for (const a of accounts.value) if (!sorted.includes(a)) sorted.push(a)
     const from = sorted.findIndex((a) => a.id === id)
     const to = from + direction
     if (from < 0 || to < 0 || to >= sorted.length) return

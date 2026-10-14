@@ -46,7 +46,7 @@ describe('summarizeSubscriptions', () => {
     expect(s.totalMonthly).toBe(216 + 18)
     expect(s.running).toBe(2)
     expect(s.cancelledMonthly).toBe(108)
-    expect(s.rows.map((r) => r.included)).toEqual([true, false, false, true])
+    expect(Object.fromEntries(s.rows.map((r) => [r.id, r.included]))).toEqual({ a: true, b: false, c: false, d: true })
   })
 
   it('counts cancelled subscriptions that still run when asked to, never expired ones', () => {
@@ -54,7 +54,7 @@ describe('summarizeSubscriptions', () => {
     expect(s.totalMonthly).toBe(216 + 108 + 18)
     expect(s.running).toBe(3)
     expect(s.cancelledMonthly).toBe(108)
-    expect(s.rows.map((r) => r.included)).toEqual([true, true, false, true])
+    expect(Object.fromEntries(s.rows.map((r) => [r.id, r.included]))).toEqual({ a: true, b: true, c: false, d: true })
   })
 
   it('leaves cancelled subscriptions out of the average unless asked to', () => {
@@ -71,6 +71,11 @@ describe('summarizeSubscriptions', () => {
       NOW,
     )
     expect(s.next).toMatchObject({ name: 'B', kind: 'end' })
+  })
+
+  it('lists expired subscriptions last', () => {
+    const s = summarizeSubscriptions([mixed[2]!, mixed[0]!, mixed[1]!], {}, NOW)
+    expect(s.rows.map((r) => r.id)).toEqual(['a', 'b', 'c'])
   })
 
   it('names the next renewal or end', () => {

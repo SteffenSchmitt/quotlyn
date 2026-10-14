@@ -124,6 +124,26 @@ describe('AccountsView', () => {
     expect(store.accounts.map((a) => a.name)).toEqual(['Beta', 'Alpha'])
   })
 
+  it('lists an expired subscription last, greyed out, and moves within that order', async () => {
+    const { store, w } = await mountView()
+    await store.addAccount({ name: 'Gone', color: '#000', token: 'sk-ant-oat01-g', subscriptionDate: '2020-01-01', subscriptionCancelled: true })
+    await store.addAccount({ name: 'Alpha', color: '#111', token: 'sk-ant-oat01-a' })
+    await store.addAccount({ name: 'Beta', color: '#222', token: 'sk-ant-oat01-b' })
+    await w.vm.$nextTick()
+
+    const items = () => w.findAll('li')
+    expect(items().map((li) => li.find('button').text())).toEqual(['Alpha', 'Beta', 'Gone'])
+    expect(items()[2]!.attributes('data-expired')).toBe('true')
+    expect(items()[2]!.text()).toContain(de.dashboard.subscriptionBadge.expired)
+    expect(items()[0]!.attributes('data-expired')).toBeUndefined()
+
+    // Beta up: swaps with Alpha on screen, not with the expired account stored before it.
+    await items()[1]!.findAll('button.btn-icon')[0]!.trigger('click')
+    await w.vm.$nextTick()
+    expect(store.accounts.map((a) => a.name)).toEqual(['Beta', 'Alpha', 'Gone'])
+    expect(items()[2]!.findAll('button.btn-icon')[1]!.attributes('disabled')).toBeDefined()
+  })
+
   it('shows only the end of a token, where tokens differ', async () => {
     const { store, w } = await mountView()
     await store.addAccount({ name: 'Alpha', color: '#000', token: 'sk-ant-oat01-hidden-middle-Xy7Kq2mP' })

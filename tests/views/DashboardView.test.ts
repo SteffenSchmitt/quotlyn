@@ -145,6 +145,18 @@ describe('DashboardView', () => {
     expect(names[0]).toContain('Beta')
   })
 
+  it('puts an expired subscription last and leaves it out of the recommendation', async () => {
+    const { accounts, w } = await setup(['Alpha', 'Beta'])
+    await accounts.updateAccount(accounts.accounts[0]!.id, { subscriptionDate: '2020-01-01', subscriptionCancelled: true })
+    await w.vm.$nextTick()
+
+    const names = w.findAll('article h3').map((h) => h.text().trim())
+    expect(names[0]).toContain('Beta')
+    expect(names[1]).toContain('Alpha')
+    expect(w.findAll('article')[1]!.attributes('data-expired')).toBe('true')
+    expect(w.text()).not.toContain(de.dashboard.recommend.title)
+  })
+
   it('names the account to use next once there is more than one', async () => {
     const { usage, w } = await setup(['Alpha', 'Beta'])
     const accounts = useAccountsStore().accounts

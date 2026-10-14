@@ -104,6 +104,22 @@ function localDay(inDays) {
   }, { snaps, shiftMs })
   console.log('seeded:', seeded)
 
+  // A made-up former account whose cancelled subscription ended nine days ago. Quotlyn never asks for it,
+  // so it needs no export data; it shows last and greyed out everywhere. Added after seeding, which maps
+  // export names onto the ids of the accounts that have polled.
+  await page.goto(base + '/accounts')
+  await page.click('text=Add account'); await page.waitForSelector('form')
+  await page.fill('form input[required]', 'Former contractor')
+  await page.$eval('form input[type=color]', (el, c) => { el.value = c; el.dispatchEvent(new Event('input', { bubbles: true })) }, COLORS[4])
+  await page.fill('form input[type=password]', 'sk-ant-oat01-9999')
+  await page.fill('form fieldset input', 'Fabrikam Inc · INV-6604')
+  await page.fill('[data-test="sub-date"]', localDay(-9))
+  await page.check('[data-test="sub-cancelled"]')
+  await page.selectOption('[data-test="sub-plan"]', 'max5x')
+  await page.fill('[data-test="sub-price"]', '100')
+  await page.click('form button[type=submit]')
+  await page.waitForSelector('form', { state: 'detached' })
+
   /** Page shot clipped to the content: header plus main, a little padding below the last element. */
   async function shot(name) {
     const height = await page.evaluate(() => {
@@ -129,7 +145,8 @@ function localDay(inDays) {
   await page.goto(base + '/')
   for (let i = 0; i < 30; i++) {
     await page.waitForTimeout(1000)
-    const text = await page.innerText('main')
+    // The expired card is never fetched, so only the live cards count.
+    const text = (await page.$$eval('article:not([data-expired])', (els) => els.map((el) => el.textContent).join(' ')))
     if (!text.includes('Not fetched yet') && !text.includes('Fetching')) break
   }
   await page.waitForTimeout(800)
@@ -144,6 +161,17 @@ function localDay(inDays) {
   await crop('article >> nth=0 >> header', 'feature-meta')
   await crop('article >> nth=1 >> header', 'feature-subscription-card')
   await crop('article >> nth=2 >> div.flex.items-center.gap-4', 'feature-rings')
+  {
+    // The expired card from its name down to its footer; it sits below the fold, and the grid stretches it
+    // to the height of its neighbour, so measure with a tall viewport and stop under the footer line.
+    await page.setViewportSize({ width: 1440, height: 2000 }); await page.waitForTimeout(300)
+    const card = await page.locator('article[data-expired]').boundingBox()
+    const foot = await page.locator('article[data-expired] > p.flex.mt-2').boundingBox()
+    if (card && foot) {
+      await page.screenshot({ path: `${out}/feature-expired.png`, clip: { x: card.x - 8, y: card.y - 8, width: card.width + 16, height: foot.y + foot.height - card.y + 24 } })
+    } else console.log('crop missing: expired card')
+    await page.setViewportSize({ width: 1440, height: 900 })
+  }
   await page.hover('article >> nth=2 >> [role="img"]'); await page.waitForTimeout(400)
   await crop('article >> nth=2', 'feature-status', 8)
   await page.mouse.move(0, 0)

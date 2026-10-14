@@ -105,8 +105,14 @@ export const TIMELINE_SORTS: TimelineSort[] = ['accounts', 'exhaustion', 'window
  * Reorders rows and bars: as configured, by soonest forecast exhaustion (then highest utilization),
  * or grouped by window with accounts in order inside each group. Bars get their new row index.
  * Subscription rows are no limit that runs out, so both sorts put them last.
+ * Rows of the accounts in `last` (expired subscriptions) follow after all others, sorted the same way.
  */
-export function sortBars(rows: TimelineRow[], bars: TimelineBar[], sort: TimelineSort): { rows: TimelineRow[]; bars: TimelineBar[] } {
+export function sortBars(
+  rows: TimelineRow[],
+  bars: TimelineBar[],
+  sort: TimelineSort,
+  last: ReadonlySet<string> = new Set(),
+): { rows: TimelineRow[]; bars: TimelineBar[] } {
   const order = bars.map((_, i) => i)
   const isSub = (i: number) => (bars[i]!.windowKey === SUBSCRIPTION_KEY ? 1 : 0)
   if (sort === 'exhaustion') {
@@ -121,6 +127,11 @@ export function sortBars(rows: TimelineRow[], bars: TimelineBar[], sort: Timelin
   } else if (sort === 'window') {
     const keys = [...new Set(bars.map((b) => b.windowKey))].sort((a, b) => Number(a === SUBSCRIPTION_KEY) - Number(b === SUBSCRIPTION_KEY))
     order.sort((x, y) => keys.indexOf(bars[x]!.windowKey) - keys.indexOf(bars[y]!.windowKey) || x - y)
+  }
+  if (last.size) {
+    const isLast = (i: number) => (last.has(rows[bars[i]!.row]!.accountId) ? 1 : 0)
+    // Array.prototype.sort is stable, so the order from above holds inside both parts.
+    order.sort((x, y) => isLast(x) - isLast(y))
   }
   return {
     rows: order.map((i) => rows[bars[i]!.row]!),

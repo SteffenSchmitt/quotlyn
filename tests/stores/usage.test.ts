@@ -135,6 +135,24 @@ describe('reading results', () => {
     expect(usage.refreshing).toBe(false)
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
+
+  it('never asks for an account whose subscription has expired', async () => {
+    const { accounts, usage } = await setup()
+    const gone = await accounts.addAccount({
+      name: 'Gone',
+      color: '#111',
+      token: 'sk-ant-oat01-gone',
+      subscriptionDate: '2020-01-01',
+      subscriptionCancelled: true,
+    })
+    fetchMock.mockResolvedValue(ok())
+    await usage.start()
+    await usage.refreshNow()
+    await usage.refreshAccount(gone.id)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledWith('sk-ant-oat01-a')
+    expect(usage.latest[gone.id]).toBeUndefined()
+  })
 })
 
 describe('notifications', () => {
