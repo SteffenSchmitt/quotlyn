@@ -63,7 +63,7 @@
     "@vue/tsconfig": "^0.9.1",
     "concurrently": "^10.0.6",
     "fake-indexeddb": "^6.2.5",
-    "happy-dom": "^20.14.6",
+    "happy-dom": "^21.0.3",
     "playwright-core": "^1.64.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
