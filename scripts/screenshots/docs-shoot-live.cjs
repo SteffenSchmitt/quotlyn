@@ -59,8 +59,9 @@ function localDay(inDays) {
     await page.selectOption('form fieldset select', meta.visibility)
     await page.fill('form fieldset textarea', meta.usedBy)
     const sub = SUBS[i % SUBS.length]
-    await page.fill('[data-test="sub-date"]', localDay(sub.inDays))
+    // Tick first, then the end day: ticking moves a day already past to the next renewal.
     if (sub.cancelled) await page.check('[data-test="sub-cancelled"]')
+    await page.fill('[data-test="sub-date"]', localDay(sub.inDays))
     await page.selectOption('[data-test="sub-plan"]', sub.plan)
     await page.fill('[data-test="sub-price"]', sub.price)
     await page.click('form button[type=submit]')
@@ -113,8 +114,8 @@ function localDay(inDays) {
   await page.$eval('form input[type=color]', (el, c) => { el.value = c; el.dispatchEvent(new Event('input', { bubbles: true })) }, COLORS[4])
   await page.fill('form input[type=password]', 'sk-ant-oat01-9999')
   await page.fill('form fieldset input', 'Fabrikam Inc · INV-6604')
-  await page.fill('[data-test="sub-date"]', localDay(-9))
   await page.check('[data-test="sub-cancelled"]')
+  await page.fill('[data-test="sub-date"]', localDay(-9))
   await page.selectOption('[data-test="sub-plan"]', 'max5x')
   await page.fill('[data-test="sub-price"]', '100')
   await page.click('form button[type=submit]')
