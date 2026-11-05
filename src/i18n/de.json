@@ -89,11 +89,11 @@
     },
     "subscriptionBadge": {
       "renews": "verlängert heute | verlängert morgen | verlängert in {n} Tagen",
-      "ends": "endet heute | endet morgen | endet in {n} Tagen",
+      "ends": "läuft ab am {date}",
       "expired": "Abo abgelaufen",
       "tip": {
         "renews": "Abo verlängert sich am {date}",
-        "ends": "Abo ist gekündigt und endet am {date}",
+        "ends": "Abo ist gekündigt und läuft heute ab | Abo ist gekündigt und läuft morgen ab | Abo ist gekündigt und läuft in {n} Tagen ab",
         "expired": "Abo ist am {date} ausgelaufen"
       }
     }
@@ -332,7 +332,7 @@
     "billing": "Wem die Nutzung in Rechnung gestellt wird. Steht auf der Card unter dem Namen und im Tooltip von Timeline und Verlauf.",
     "billingVisibility": "„überall anzeigen“ zeigt den Wert vollständig, „maskiert“ nur Anfang und Ende, „im Dashboard ausblenden“ lässt ihn auf den Cards weg – Timeline und Verlauf zeigen ihn weiterhin.",
     "usedBy": "Wer oder was auf diesem Account arbeitet, eine Angabe pro Zeile. Steht ausklappbar im Fuß der Card.",
-    "subscriptionDate": "Nicht gekündigt: irgendein Verlängerungstag, Quotlyn rechnet monatlich weiter (der 31. wird in kürzeren Monaten zum Monatsletzten). Gekündigt: der Tag, an dem das Abo endet, so wie Anthropic ihn nach der Kündigung anzeigt.",
+    "subscriptionDate": "Nicht gekündigt: irgendein Verlängerungstag, Quotlyn rechnet monatlich weiter (der 31. wird in kürzeren Monaten zum Monatsletzten). Gekündigt: der Tag, an dem das Abo endet, so wie Anthropic ihn nach der Kündigung anzeigt. Beim Ankreuzen rückt ein vergangener Tag auf die nächste Verlängerung vor.",
     "subscriptionPrice": "Was das Abo im Monat kostet, in der Währung aus den Einstellungen. Daraus berechnet „Abos“ die Gesamtkosten und den Preis je genutztem Prozentpunkt des Wochenlimits.",
     "subscriptionSettings": "Die Währung gilt für alle Preise. Die Benachrichtigung kommt einmal pro Account und Termin, so viele Tage vor einer Verlängerung oder dem Ende eines gekündigten Abos; 0 schaltet sie ab.",
     "subscriptions": "Ø Wochenlimit: Jede Woche zählt mit ihrem höchsten Wert des Fensters „7 d alle Modelle“, die Wochen des Abrechnungsmonats werden gemittelt; die laufende Woche zählt mit ihrem bisherigen Wert. Preis je %: Monatspreis geteilt durch diesen Durchschnitt, also was ein Prozentpunkt Wochenlimit gekostet hat. Die Auswertung reicht so weit zurück wie der gespeicherte Verlauf. Gekündigte Abos, die noch laufen, zählen nur mit, wenn „Gekündigte Abos einbeziehen“ an ist; sonst stehen sie ausgegraut in der Tabelle und ihr Preis unter den Kosten."

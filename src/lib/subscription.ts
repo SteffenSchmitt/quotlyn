@@ -90,6 +90,21 @@ export function subscriptionCycle(sub: SubscriptionInput, nowMs: number): Subscr
   return cycleOf(monthsFrom(anchor, n), monthsFrom(anchor, n + 1), nowMs, 'active')
 }
 
+function isoDay(ms: number): string {
+  const d = new Date(ms)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/**
+ * The end day to suggest when a subscription gets cancelled. A running subscription may hold any
+ * renewal day, often one long past; read as an end it would expire at once. A day still ahead stays.
+ */
+export function endDayOnCancel(iso: string, nowMs: number): string {
+  const anchor = parseDay(iso)
+  if (!anchor || monthsFrom(anchor, 0) > nowMs) return iso
+  return isoDay(subscriptionCycle({ subscriptionDate: iso, subscriptionCancelled: false }, nowMs).endMs)
+}
+
 export interface SubscriptionEvent {
   atMs: number
   kind: 'renewal' | 'end'

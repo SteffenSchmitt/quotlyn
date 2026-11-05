@@ -176,12 +176,12 @@ that as *Limit reached* with the current numbers rather than as an error.
 </picture></td>
     <td><picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/feature-subscription-card.png">
-  <img src="docs/screenshots/light/feature-subscription-card.png" alt="Card header with a badge saying the subscription ends in twelve days">
+  <img src="docs/screenshots/light/feature-subscription-card.png" alt="Card header with an outlined badge saying when the cancelled subscription runs out">
 </picture></td>
   </tr>
   <tr>
     <td valign="top"><b>What the subscriptions cost.</b> Monthly total of what keeps running, the next renewal or end, and per account how much of the weekly limit a billing month used and what one percentage point of it cost.</td>
-    <td valign="top"><b>Renewal and end in sight.</b> A badge on the card before a renewal and while a cancelled subscription runs out, a subscription row in the timeline and a line in the history.</td>
+    <td valign="top"><b>Renewal and end in sight.</b> A badge on the card before a renewal and, with its end date, while a cancelled subscription runs out; the card stays live until then, a subscription row in the timeline and a line in the history.</td>
   </tr>
   <tr>
     <td><picture>
@@ -254,9 +254,9 @@ window lasts. The forecast can be switched off.
 
 Give an account its renewal day, plan and monthly price, and Quotlyn keeps track of the billing cycle:
 
-- **Renewal or end.** Any renewal day is carried on month by month (the 31st becomes the last day of shorter months). Tick *Cancelled* and the date is the end instead; afterwards the subscription shows as expired.
+- **Renewal or end.** Any renewal day is carried on month by month (the 31st becomes the last day of shorter months). Tick *Cancelled* and the date is the end instead: a renewal day already past moves to the next renewal, so the month you paid for keeps running. Until that day the account stays on the dashboard as usual and is polled; afterwards the subscription shows as expired.
 - **Timeline and history.** The timeline gets a subscription row per account, filled with the share of the billing month that has passed. The history marks renewals as solid lines in the account colour and the end in red. Both have a switch to hide them.
-- **On the card.** A badge next to the name when a renewal is less than a week away, while a cancelled subscription runs out, and once it has expired.
+- **On the card.** A badge next to the name when a renewal is less than a week away, a quiet outlined *runs out on* with the end date while a cancelled subscription is still running, and one once it has expired.
 - **Expired.** Once a cancelled subscription has passed its end, Quotlyn stops asking Anthropic for that account's usage. Its card, list entry, timeline rows and history line move to the end and are greyed out; the recorded history stays.
 - **Notification.** Once per account and date, a set number of days before a renewal or the end (three by default, 0 turns it off).
 - **Subscriptions page.** Monthly total of what keeps running (a switch counts cancelled subscriptions in until they end), the next date, and per account the average weekly limit used in this and the previous billing month (every week counts with its peak of the all-models window) and the price per percentage point of it. Prices in euros or US dollars.

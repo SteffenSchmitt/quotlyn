@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount, RouterLinkStub } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import de from '../../src/i18n/de.json'
@@ -96,7 +96,34 @@ describe('AccountForm', () => {
     expect(w.find('[data-test="sub-date-label"]').text()).toContain(de.accounts.subscription.ends)
   })
 
+  describe('cancelling', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 10, 5, 10))
+    })
+    afterEach(() => vi.useRealTimers())
+
+    it('moves a past renewal day to the next renewal, so the account is not expired at once', async () => {
+      const w = mountForm({ account })
+      await w.find('[data-test="sub-cancelled"]').setValue(true)
+      expect((w.find('[data-test="sub-date"]').element as HTMLInputElement).value).toBe('2026-11-14')
+    })
+
+    it('keeps an end day that is still ahead', async () => {
+      const w = mountForm({ account: { ...account, subscriptionDate: '2026-11-20' } })
+      await w.find('[data-test="sub-cancelled"]').setValue(true)
+      expect((w.find('[data-test="sub-date"]').element as HTMLInputElement).value).toBe('2026-11-20')
+    })
+
+    it('leaves the date of an already cancelled subscription as it was', () => {
+      const w = mountForm({ account: { ...account, subscriptionDate: '2026-09-01', subscriptionCancelled: true } })
+      expect((w.find('[data-test="sub-date"]').element as HTMLInputElement).value).toBe('2026-09-01')
+    })
+  })
+
   it('emits the subscription, reading a price with a decimal comma', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 9, 20, 10))
     const w = mountForm({ account })
     await w.find('[data-test="sub-date"]').setValue('2026-11-02')
     await w.find('[data-test="sub-cancelled"]').setValue(true)
@@ -109,6 +136,7 @@ describe('AccountForm', () => {
       plan: 'max5x',
       monthlyPrice: 108.5,
     })
+    vi.useRealTimers()
   })
 
   it('leaves the price unset when the field is empty or not a number', async () => {

@@ -89,11 +89,11 @@
     },
     "subscriptionBadge": {
       "renews": "renews today | renews tomorrow | renews in {n} days",
-      "ends": "ends today | ends tomorrow | ends in {n} days",
+      "ends": "runs out on {date}",
       "expired": "Subscription expired",
       "tip": {
         "renews": "Subscription renews on {date}",
-        "ends": "Subscription is cancelled and ends on {date}",
+        "ends": "Subscription is cancelled and runs out today | Subscription is cancelled and runs out tomorrow | Subscription is cancelled and runs out in {n} days",
         "expired": "Subscription ran out on {date}"
       }
     }
@@ -332,7 +332,7 @@
     "billing": "Who the usage is billed to. Shown on the card below the name and in the timeline and history tooltips.",
     "billingVisibility": "\"show everywhere\" prints the value in full, \"masked\" only its start and end, \"hide on the dashboard\" leaves it off the cards while timeline and history keep showing it.",
     "usedBy": "Who or what works on this account, one entry per line. Sits collapsed in the card's footer.",
-    "subscriptionDate": "Not cancelled: any renewal day, Quotlyn carries it on month by month (the 31st becomes the last day of shorter months). Cancelled: the day the subscription ends, as Anthropic shows it after cancelling.",
+    "subscriptionDate": "Not cancelled: any renewal day, Quotlyn carries it on month by month (the 31st becomes the last day of shorter months). Cancelled: the day the subscription ends, as Anthropic shows it after cancelling. Ticking it moves a day already past to the next renewal.",
     "subscriptionPrice": "What the subscription costs per month, in the currency from the settings. “Subscriptions” uses it for the total and the price per percentage point of the weekly limit used.",
     "subscriptionSettings": "The currency applies to all prices. The notification comes once per account and date, this many days before a renewal or the end of a cancelled subscription; 0 turns it off.",
     "subscriptions": "Avg weekly limit: every week counts with its highest reading of the “7 d all models” window, the weeks of the billing month are averaged; the running week counts with its value so far. Price per %: monthly price divided by that average, so what one percentage point of the weekly limit cost. The evaluation reaches back as far as the stored history. Cancelled subscriptions that still run only count with “Include cancelled subscriptions” on; otherwise they stay greyed out in the table and their price is named under the cost."

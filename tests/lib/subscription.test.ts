@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expiredLast, isExpired, subscriptionBadge, subscriptionCycle, subscriptionEvents } from '../../src/lib/subscription'
+import { endDayOnCancel, expiredLast, isExpired, subscriptionBadge, subscriptionCycle, subscriptionEvents } from '../../src/lib/subscription'
 
 /** Local calendar days, so the tests hold in any time zone. */
 const day = (y: number, m: number, d: number, h = 0) => new Date(y, m - 1, d, h).getTime()
@@ -103,5 +103,26 @@ describe('expired subscriptions', () => {
     const list = [sub('a', '2026-09-01', true), sub('b', '', false), sub('c', '2026-10-01', true), sub('d', '2026-11-01', true)]
     expect(expiredLast(list, now).map((a) => a.id)).toEqual(['b', 'd', 'a', 'c'])
     expect(expiredLast(list, day(2026, 8, 1)).map((a) => a.id)).toEqual(['a', 'b', 'c', 'd'])
+  })
+})
+
+describe('endDayOnCancel', () => {
+  const now = day(2026, 11, 5, 10)
+
+  it('turns a past renewal day into the next renewal, so cancelling keeps the paid month', () => {
+    expect(endDayOnCancel('2026-10-14', now)).toBe('2026-11-14')
+    expect(endDayOnCancel('2026-03-01', now)).toBe('2026-12-01')
+    expect(endDayOnCancel('2026-01-31', day(2026, 2, 10))).toBe('2026-02-28')
+  })
+
+  it('keeps a day that is still ahead, and leaves empty or malformed input alone', () => {
+    expect(endDayOnCancel('2026-11-20', now)).toBe('2026-11-20')
+    expect(endDayOnCancel('', now)).toBe('')
+    expect(endDayOnCancel('14.10.2026', now)).toBe('14.10.2026')
+  })
+
+  it('never yields a day that is already expired', () => {
+    const end = endDayOnCancel('2026-10-05', now)
+    expect(isExpired({ subscriptionDate: end, subscriptionCancelled: true }, now)).toBe(false)
   })
 })

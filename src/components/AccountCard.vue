@@ -52,7 +52,7 @@ const billing = computed(() => billingFor(props.account, 'dashboard'))
 
 const BADGE_CLASS = {
   renews: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
-  ends: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+  ends: 'border border-amber-300/70 text-amber-700 dark:border-amber-700/60 dark:text-amber-300/90',
   expired: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
 } as const
 /** Renewal within the week, a cancelled subscription, or one that has run out. */
@@ -62,8 +62,11 @@ const subBadge = computed(() => {
   if (!badge) return null
   const date = d(new Date(cycle.endMs), 'date')
   return {
-    text: badge.kind === 'expired' ? t('dashboard.subscriptionBadge.expired') : t(`dashboard.subscriptionBadge.${badge.kind}`, { n: badge.days }, badge.days),
-    tip: t(`dashboard.subscriptionBadge.tip.${badge.kind}`, { date }),
+    text:
+      badge.kind === 'renews'
+        ? t('dashboard.subscriptionBadge.renews', { n: badge.days }, badge.days)
+        : t(`dashboard.subscriptionBadge.${badge.kind}`, { date }),
+    tip: t(`dashboard.subscriptionBadge.tip.${badge.kind}`, { date, n: badge.days }, badge.days),
     cls: BADGE_CLASS[badge.kind],
   }
 })

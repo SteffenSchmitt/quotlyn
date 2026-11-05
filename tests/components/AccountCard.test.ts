@@ -57,7 +57,7 @@ function forecast(over: Partial<Forecast> = {}): Forecast {
 }
 
 function mountCard(props: Partial<InstanceType<typeof AccountCard>['$props']> = {}) {
-  const i18n = createI18n({ legacy: false, locale: 'de', messages: { de } })
+  const i18n = createI18n({ legacy: false, locale: 'de', messages: { de }, datetimeFormats: { de: { date: { year: 'numeric', month: '2-digit', day: '2-digit' }, time: { hour: '2-digit', minute: '2-digit' } } } })
   return mount(AccountCard, {
     props: { account, parsed: parsed(), state: state(), thresholds: { warn: 0.8, crit: 0.95 }, now: NOW, ...props },
     global: { plugins: [i18n], stubs: { UsageRings: true, RawDataView: true } },
@@ -128,7 +128,7 @@ describe('AccountCard', () => {
   })
 
   it('shows a cancelled subscription and an expired one, but no renewal far away', () => {
-    expect(mountCard({ account: { ...account, subscriptionDate: '2026-10-01', subscriptionCancelled: true } }).find('[data-test="sub-badge"]').text()).toContain('endet in')
+    expect(mountCard({ account: { ...account, subscriptionDate: '2026-10-01', subscriptionCancelled: true } }).find('[data-test="sub-badge"]').text()).toBe('läuft ab am 01.10.2026')
     expect(mountCard({ account: { ...account, subscriptionDate: '2026-09-01', subscriptionCancelled: true } }).find('[data-test="sub-badge"]').text()).toBe(de.dashboard.subscriptionBadge.expired)
     expect(mountCard({ account: { ...account, subscriptionDate: '2026-10-15' } }).find('[data-test="sub-badge"]').exists()).toBe(false)
     expect(mountCard().find('[data-test="sub-badge"]').exists()).toBe(false)

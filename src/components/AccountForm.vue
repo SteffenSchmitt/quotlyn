@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import InfoTip from './InfoTip.vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchUsage } from '../api/usageClient'
 import type { Account, NewAccount } from '../stores/accounts'
 import { PRIMARY_WINDOWS, type PrimaryWindow } from '../lib/usageView'
 import { BILLING_VISIBILITIES, type BillingVisibility } from '../lib/accountMeta'
-import { PLANS, type Currency, type Plan } from '../lib/subscription'
+import { endDayOnCancel, PLANS, type Currency, type Plan } from '../lib/subscription'
 
 const props = withDefaults(defineProps<{ account?: Account; currency?: Currency }>(), { currency: 'EUR' })
 const emit = defineEmits<{
@@ -25,6 +25,10 @@ const billingVisibility = ref<BillingVisibility>(props.account?.billingVisibilit
 const usedBy = ref(props.account?.usedBy ?? '')
 const subscriptionDate = ref(props.account?.subscriptionDate ?? '')
 const subscriptionCancelled = ref(props.account?.subscriptionCancelled ?? false)
+// The date turns from "a renewal day" into "the end day" here; carry it to the next renewal if it is past.
+watch(subscriptionCancelled, (cancelled) => {
+  if (cancelled) subscriptionDate.value = endDayOnCancel(subscriptionDate.value, Date.now())
+})
 const plan = ref<Plan>(props.account?.plan ?? '')
 const price = ref(props.account?.monthlyPrice != null ? String(props.account.monthlyPrice) : '')
 
